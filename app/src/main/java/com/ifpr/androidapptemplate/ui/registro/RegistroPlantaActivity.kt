@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ActivityRegistroPlantaBinding
 import java.io.File
 import java.text.SimpleDateFormat
@@ -112,18 +113,22 @@ class RegistroPlantaActivity : AppCompatActivity() {
         // Category selection with tooltips
         binding.cardSaudavel.setOnClickListener {
             viewModel.selectCategory(PlantHealthCategory.HEALTHY)
+            showCategorySelectionFeedback(getString(R.string.healthy_category_selected))
         }
         
         binding.cardDoente.setOnClickListener {
             viewModel.selectCategory(PlantHealthCategory.SICK)
+            showCategorySelectionFeedback(getString(R.string.sick_category_selected))
         }
         
-        // Tooltips for category explanation
+        // Tooltips for category explanation with animation feedback
         binding.iconSaudavel.setOnClickListener {
+            animateIconClick(binding.iconSaudavel)
             showHealthTooltip(true)
         }
         
         binding.iconDoente.setOnClickListener {
+            animateIconClick(binding.iconDoente)
             showHealthTooltip(false)
         }
         
@@ -177,30 +182,87 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
 
     private fun updateCategorySelection(category: PlantHealthCategory?) {
-        // Reset both cards
-        binding.cardSaudavel.strokeColor = getColor(android.R.color.transparent)
-        binding.cardDoente.strokeColor = getColor(android.R.color.transparent)
+        // Reset both cards with animation
+        animateCardSelection(binding.cardSaudavel, false)
+        animateCardSelection(binding.cardDoente, false)
         
-        // Highlight selected card
+        // Highlight selected card with animation
         when (category) {
             PlantHealthCategory.HEALTHY -> {
+                animateCardSelection(binding.cardSaudavel, true)
                 binding.cardSaudavel.strokeColor = getColor(com.ifpr.androidapptemplate.R.color.vgroup_green)
+                binding.cardSaudavel.strokeWidth = 4
             }
             PlantHealthCategory.SICK -> {
+                animateCardSelection(binding.cardDoente, true)
                 binding.cardDoente.strokeColor = getColor(com.ifpr.androidapptemplate.R.color.vgroup_green)
+                binding.cardDoente.strokeWidth = 4
             }
-            null -> { /* No selection */ }
+            null -> {
+                binding.cardSaudavel.strokeColor = getColor(android.R.color.transparent)
+                binding.cardDoente.strokeColor = getColor(android.R.color.transparent)
+                binding.cardSaudavel.strokeWidth = 0
+                binding.cardDoente.strokeWidth = 0
+            }
         }
+    }
+    
+    private fun animateCardSelection(card: com.google.android.material.card.MaterialCardView, isSelected: Boolean) {
+        val scaleValue = if (isSelected) 1.05f else 1.0f
+        val elevationValue = if (isSelected) 8f else 2f
+        
+        card.animate()
+            .scaleX(scaleValue)
+            .scaleY(scaleValue)
+            .setDuration(200)
+            .start()
+            
+        card.cardElevation = elevationValue
+    }
+    
+    private fun animateIconClick(icon: android.widget.ImageView) {
+        icon.animate()
+            .scaleX(0.8f)
+            .scaleY(0.8f)
+            .setDuration(100)
+            .withEndAction {
+                icon.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(100)
+                    .start()
+            }
+            .start()
+    }
+    
+    private fun showCategorySelectionFeedback(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showHealthTooltip(isHealthy: Boolean) {
-        val message = if (isHealthy) {
-            "Planta Saudável: Apresenta folhas verdes, sem manchas, pragas ou sinais de doença. Crescimento normal e vigoroso."
-        } else {
-            "Planta Doente: Apresenta sinais de doença como folhas amareladas, manchas, pragas, murcha ou crescimento anormal."
+        val title = getString(if (isHealthy) R.string.plant_healthy_title else R.string.plant_sick_title)
+        val message = getString(if (isHealthy) R.string.plant_healthy_description else R.string.plant_sick_description)
+        
+        // Create and show custom tooltip dialog
+        showCustomTooltip(title, message, isHealthy)
+    }
+    
+    private fun showCustomTooltip(title: String, message: String, isHealthy: Boolean) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this, com.google.android.material.R.style.ThemeOverlay_Material3_Dialog)
+        builder.setTitle(title)
+        builder.setMessage(message)
+        builder.setIcon(if (isHealthy) com.ifpr.androidapptemplate.R.drawable.ic_saudavel_24dp else com.ifpr.androidapptemplate.R.drawable.ic_doente_24dp)
+        builder.setPositiveButton(getString(R.string.understood)) { dialog, _ ->
+            dialog.dismiss()
         }
         
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        val dialog = builder.create()
+        dialog.show()
+        
+        // Customize dialog appearance
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.setTextColor(
+            getColor(com.ifpr.androidapptemplate.R.color.vgroup_green)
+        )
     }
 
     private fun saveRegistration() {

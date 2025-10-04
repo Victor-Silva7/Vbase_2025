@@ -201,6 +201,17 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recycler_view_images" />
+            
+        <TextView
+            android:id="@+id/text_categoria_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/category_tooltip_hint"
+            android:textColor="@color/vgroup_text_secondary"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_categoria_title" />
 
         <LinearLayout
             android:id="@+id/layout_categoria"
@@ -211,7 +222,7 @@
             android:weightSum="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_categoria_title">
+            app:layout_constraintTop_toBottomOf="@id/text_categoria_subtitle">
 
             <!-- Saudável -->
             <com.google.android.material.card.MaterialCardView
@@ -243,8 +254,16 @@
                         android:src="@drawable/ic_saudavel_24dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/ripple_circle_green"
                         android:padding="4dp" />
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="ℹ️"
+                        android:textSize="10sp"
+                        android:alpha="0.7" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -287,8 +306,16 @@
                         android:src="@drawable/ic_doente_24dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/ripple_circle_green"
                         android:padding="4dp" />
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="ℹ️"
+                        android:textSize="10sp"
+                        android:alpha="0.7" />
 
                     <TextView
                         android:layout_width="wrap_content"

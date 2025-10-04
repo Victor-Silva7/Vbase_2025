@@ -3,4 +3,27 @@
     <string name="title_home">Registro</string>
     <string name="title_dashboard">Postagens</string>
     <string name="title_notifications">Usuário</string>
+    
+    <!-- Plant Health Tooltips -->
+    <string name="plant_healthy_title">Planta Saudável</string>
+    <string name="plant_healthy_description">• Folhas verdes e vigorosas
+• Sem manchas ou descoloração
+• Ausência de pragas visíveis
+• Crescimento normal e saudável
+• Estrutura firme e bem formada</string>
+    
+    <string name="plant_sick_title">Planta Doente</string>
+    <string name="plant_sick_description">• Folhas amareladas ou manchadas
+• Presença de pragas ou doenças
+• Murcha ou deformações
+• Crescimento anormal ou atrofiado
+• Sinais de apodrecimento</string>
+    
+    <!-- Category Selection -->
+    <string name="category_tooltip_hint">Toque no ícone para ver explicação ℹ️</string>
+    <string name="healthy_category_selected">Categoria: Planta Saudável selecionada</string>
+    <string name="sick_category_selected">Categoria: Planta Doente selecionada</string>
+    
+    <!-- Dialog -->
+    <string name="understood">Entendi</string>
 </resources>
