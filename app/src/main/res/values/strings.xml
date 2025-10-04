@@ -57,4 +57,35 @@
     
     <!-- Category validation -->
     <string name="error_category_required">Selecione uma categoria (Saudável ou Doente)</string>
+    <string name="error_category_required_insect">Selecione uma categoria (Benéfico, Neutro ou Praga)</string>
+    
+    <!-- Nome validation for insects -->
+    <string name="error_nome_required_insect">O nome do inseto é obrigatório</string>
+    
+    <!-- Insect Tooltips -->
+    <string name="insect_beneficial_title">Inseto Benéfico</string>
+    <string name="insect_beneficial_description">• Polinizadores (abelhas, borboletas)
+• Predadores naturais de pragas
+• Controladores biológicos
+• Decompostôes de matéria orgânica
+• Contribuem para o equilíbrio ecológico</string>
+    
+    <string name="insect_neutral_title">Inseto Neutro</string>
+    <string name="insect_neutral_description">• Não causam danos significativos
+• Não são considerados benéficos
+• Vivem sem interagir diretamente com plantas
+• Parte do ecossistema natural
+• Não requerem controle</string>
+    
+    <string name="insect_pest_title">Inseto Praga</string>
+    <string name="insect_pest_description">• Causam danos às plantas
+• Sugam seiva ou comem folhas
+• Transmitem doenças
+• Reduzem produtividade
+• Requerem monitoramento e controle</string>
+    
+    <!-- Category Selection for Insects -->
+    <string name="beneficial_category_selected">Categoria: Inseto Benéfico selecionado</string>
+    <string name="neutral_category_selected">Categoria: Inseto Neutro selecionado</string>
+    <string name="pest_category_selected">Categoria: Inseto Praga selecionado</string>
 </resources>

@@ -41,6 +41,12 @@
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AndroidAppTemplate" />
         
+        <!-- Add RegistroInsetoActivity -->
+        <activity 
+            android:name=".ui.registro.RegistroInsetoActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AndroidAppTemplate" />
+        
         <!-- FileProvider for camera images -->
         <provider
             android:name="androidx.core.content.FileProvider"
