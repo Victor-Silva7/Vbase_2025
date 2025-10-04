@@ -33,9 +33,27 @@ class MeusRegistrosViewModel : ViewModel() {
     private val _searchQuery = MutableLiveData<String>()
     val searchQuery: LiveData<String> = _searchQuery
 
+    private val _isSearching = MutableLiveData<Boolean>()
+    val isSearching: LiveData<Boolean> = _isSearching
+
+    private val _searchResults = MutableLiveData<SearchResults>()
+    val searchResults: LiveData<SearchResults> = _searchResults
+
+    // Search job for debouncing
+    private var searchJob: Job? = null
+    private val searchDebounceDelay = 300L // milliseconds
+
     // Expose repository LiveData for plants and insects
     val userPlants: LiveData<List<Planta>> = repository.userPlants
     val userInsects: LiveData<List<Inseto>> = repository.userInsects
+
+    // Filtered data for search results
+    val filteredPlants: LiveData<List<Planta>> = repository.filteredPlants
+    val filteredInsects: LiveData<List<Inseto>> = repository.filteredInsects
+
+    // Combined registrations for unified display
+    private val _combinedRegistrations = MutableLiveData<List<RegistrationItem>>()
+    val combinedRegistrations: LiveData<List<RegistrationItem>> = _combinedRegistrations
 
     init {
         // Start listening to real-time updates
@@ -43,8 +61,10 @@ class MeusRegistrosViewModel : ViewModel() {
         repository.startListeningToUserInsects()
         
         // Observe changes in data to update statistics
-        userPlants.observeForever { updateStatistics() }
-        userInsects.observeForever { updateStatistics() }
+        userPlants.observeForever { updateStatistics(); updateCombinedRegistrations() }
+        userInsects.observeForever { updateStatistics(); updateCombinedRegistrations() }
+        filteredPlants.observeForever { updateCombinedRegistrations() }
+        filteredInsects.observeForever { updateCombinedRegistrations() }
     }
 
     /**
@@ -190,6 +210,31 @@ class MeusRegistrosViewModel : ViewModel() {
                 _errorMessage.postValue("Erro inesperado: ${e.message}")
             }
         }
+    }
+
+    /**
+     * Atualiza a lista combinada de registros
+     */
+    private fun updateCombinedRegistrations() {
+        val plants = userPlants.value ?: emptyList()
+        val insects = userInsects.value ?: emptyList()
+        
+        val combinedList = mutableListOf<RegistrationItem>()
+        
+        // Add plants
+        plants.forEach { planta ->
+            combinedList.add(RegistrationItem.PlantItem(planta))
+        }
+        
+        // Add insects
+        insects.forEach { inseto ->
+            combinedList.add(RegistrationItem.InsectItem(inseto))
+        }
+        
+        // Sort by timestamp (most recent first)
+        combinedList.sortByDescending { it.commonTimestamp }
+        
+        _combinedRegistrations.postValue(combinedList)
     }
 
     /**

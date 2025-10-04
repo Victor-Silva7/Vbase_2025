@@ -410,10 +410,10 @@ class RegistroRepository private constructor() {
                 insetosNeutro = insetos.count { it.categoria == InsectCategory.NEUTRAL },
                 insetosPraga = insetos.count { it.categoria == InsectCategory.PEST },
                 totalImagens = (plantas.sumOf { it.imagens.size } + insetos.sumOf { it.imagens.size }),
-                ultimoRegistro = maxOfOrNull(
-                    plantas.maxOfOrNull { it.timestamp } ?: 0L,
-                    insetos.maxOfOrNull { it.timestamp } ?: 0L
-                ) ?: 0L
+                ultimoRegistro = maxOf(
+                    plantas.maxByOrNull { it.timestamp }?.timestamp ?: 0L,
+                    insetos.maxByOrNull { it.timestamp }?.timestamp ?: 0L
+                )
             )
             
             Result.success(stats)

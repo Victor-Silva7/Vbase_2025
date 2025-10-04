@@ -6,6 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ItemRegistroCardBinding
 import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
@@ -77,18 +81,11 @@ class RegistrosAdapter(
                 binding.layoutImageCount.visibility = View.GONE
             }
 
-            // Set click listeners
-            binding.root.setOnClickListener {
-                onItemClick(item)
-            }
-
-            binding.btnEdit.setOnClickListener {
-                onEditClick(item)
-            }
-
-            binding.btnShare.setOnClickListener {
-                onShareClick(item)
-            }
+            // Set click listeners with animations
+            setupClickListeners(item)
+            
+            // Apply enter animation
+            animateCardEntry()
         }
 
         /**
@@ -161,14 +158,23 @@ class RegistrosAdapter(
         }
 
         /**
-         * Carrega a imagem do registro
+         * Carrega a imagem do registro com Glide
          */
         private fun loadRegistrationImage(item: RegistrationItem) {
             val firstImage = item.commonImages.firstOrNull()
+            val context = binding.root.context
 
-            if (firstImage != null) {
-                // For now, just use placeholder until Glide is properly configured
-                binding.ivRegistrationImage.setImageResource(R.drawable.ic_image_placeholder)
+            if (firstImage != null && firstImage.isNotBlank()) {
+                // Load image with Glide
+                Glide.with(context)
+                    .load(firstImage)
+                    .apply(
+                        RequestOptions()
+                            .transform(CenterCrop(), RoundedCorners(24))
+                            .placeholder(R.drawable.ic_image_placeholder)
+                            .error(R.drawable.ic_image_error)
+                    )
+                    .into(binding.ivRegistrationImage)
             } else {
                 // Set placeholder based on type
                 val placeholderRes = when (item.commonType) {
@@ -176,8 +182,87 @@ class RegistrosAdapter(
                     "INSETO" -> R.drawable.ic_inseto_24dp
                     else -> R.drawable.ic_image_placeholder
                 }
-                binding.ivRegistrationImage.setImageResource(placeholderRes)
+                
+                // Use Glide even for placeholders for consistent loading
+                Glide.with(context)
+                    .load(placeholderRes)
+                    .apply(
+                        RequestOptions()
+                            .transform(CenterCrop())
+                    )
+                    .into(binding.ivRegistrationImage)
             }
+        }
+        
+        /**
+         * Configura listeners de clique com animações
+         */
+        private fun setupClickListeners(item: RegistrationItem) {
+            binding.root.setOnClickListener {
+                animateCardPress {
+                    onItemClick(item)
+                }
+            }
+
+            binding.btnEdit.setOnClickListener {
+                animateButtonPress(it) {
+                    onEditClick(item)
+                }
+            }
+
+            binding.btnShare.setOnClickListener {
+                animateButtonPress(it) {
+                    onShareClick(item)
+                }
+            }
+        }
+        
+        /**
+         * Anima entrada do card
+         */
+        private fun animateCardEntry() {
+            val context = binding.root.context
+            val animation = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.card_fade_in)
+            binding.root.startAnimation(animation)
+        }
+        
+        /**
+         * Anima pressão do card
+         */
+        private fun animateCardPress(action: () -> Unit) {
+            val context = binding.root.context
+            val pressDown = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.card_press_down)
+            val pressUp = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.card_press_up)
+            
+            pressDown.setAnimationListener(object : android.view.animation.Animation.AnimationListener {
+                override fun onAnimationStart(animation: android.view.animation.Animation?) {}
+                override fun onAnimationEnd(animation: android.view.animation.Animation?) {
+                    binding.root.startAnimation(pressUp)
+                    action()
+                }
+                override fun onAnimationRepeat(animation: android.view.animation.Animation?) {}
+            })
+            
+            binding.root.startAnimation(pressDown)
+        }
+        
+        /**
+         * Anima pressão de botão
+         */
+        private fun animateButtonPress(view: View, action: () -> Unit) {
+            view.animate()
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(100)
+                .withEndAction {
+                    view.animate()
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(100)
+                        .withEndAction { action() }
+                        .start()
+                }
+                .start()
         }
     }
 

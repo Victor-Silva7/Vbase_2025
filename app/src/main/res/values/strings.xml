@@ -54,4 +54,12 @@
     <string name="filter_plants">Plantas</string>
     <string name="filter_insects">Insetos</string>
     
+    <!-- Detail View -->
+    <string name="back_button">Voltar</string>
+    <string name="share_registration">Compartilhar registro</string>
+    <string name="location">Localização</string>
+    <string name="registration_date">Data do registro</string>
+    <string name="observations">Observações</string>
+    <string name="delete">Excluir</string>
+    
 </resources>
