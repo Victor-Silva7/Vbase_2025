@@ -22,4 +22,10 @@
         android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+        
+    <fragment
+        android:id="@+id/navigation_public_search"
+        android:name="com.ifpr.androidapptemplate.ui.search.PublicSearchFragment"
+        android:label="@string/title_public_search"
+        tools:layout="@layout/fragment_public_search" />
 </navigation>
