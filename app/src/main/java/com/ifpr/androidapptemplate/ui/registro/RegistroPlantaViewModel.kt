@@ -7,6 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.model.Planta
+import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import java.io.File
 import java.text.SimpleDateFormat
@@ -163,27 +165,30 @@ class RegistroPlantaViewModel : ViewModel() {
             return
         }
         
-        // Create plant registration object
-        val plantRegistration = PlantRegistration(
-            id = generateId(),
+        // Create plant registration object using new data model
+        val plantRegistration = Planta(
+            id = Planta.generateId(),
             nome = nome.trim(),
             data = data,
+            dataTimestamp = convertDateToTimestamp(data),
             local = local.trim(),
             categoria = _selectedCategory.value!!,
             observacao = observacao.trim(),
-            imagens = _selectedImages.value?.toList() ?: emptyList(),
-            userId = getCurrentUserId(), // Would get from Firebase Auth
-            timestamp = System.currentTimeMillis()
+            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            userId = getCurrentUserId(),
+            userName = getCurrentUserName(),
+            timestamp = System.currentTimeMillis(),
+            tipo = "PLANTA"
         )
         
         // TODO: Save to Firebase
         saveToFirebase(plantRegistration)
     }
 
-    private fun saveToFirebase(registration: PlantRegistration) {
+    private fun saveToFirebase(registration: Planta) {
         try {
             val plantId = registration.id
-            val imageUris = registration.imagens
+            val imageUris = registration.imagens.map { Uri.parse(it) }
             val context = appContext ?: throw IllegalStateException("Context not set")
             
             // Use enhanced ImageUploadManager for better compression and progress tracking
@@ -194,7 +199,8 @@ class RegistroPlantaViewModel : ViewModel() {
                     imageUris = imageUris,
                     onSuccess = { downloadUrls ->
                         // Save registration with image URLs
-                        saveRegistrationToDatabase(registration, downloadUrls)
+                        val updatedRegistration = registration.copy(imagens = downloadUrls)
+                        saveRegistrationToDatabase(updatedRegistration)
                     },
                     onFailure = { exception ->
                         _isLoading.value = false
@@ -203,7 +209,7 @@ class RegistroPlantaViewModel : ViewModel() {
                 )
             } else {
                 // Save registration without images
-                saveRegistrationToDatabase(registration, emptyList())
+                saveRegistrationToDatabase(registration)
             }
             
         } catch (e: Exception) {
@@ -212,19 +218,8 @@ class RegistroPlantaViewModel : ViewModel() {
         }
     }
     
-    private fun saveRegistrationToDatabase(registration: PlantRegistration, imageUrls: List<String>) {
-        val plantData = hashMapOf(
-            "id" to registration.id,
-            "nome" to registration.nome,
-            "data" to registration.data,
-            "local" to registration.local,
-            "categoria" to registration.categoria.name,
-            "observacao" to registration.observacao,
-            "imagens" to imageUrls,
-            "userId" to registration.userId,
-            "timestamp" to registration.timestamp,
-            "tipo" to "PLANTA"
-        )
+    private fun saveRegistrationToDatabase(registration: Planta) {
+        val plantData = registration.toFirebaseMap()
         
         // Save to both user's personal collection and public collection
         val userPlantsRef = database.reference.child(FirebaseConfig.DatabasePaths.userPlantas(registration.userId))
@@ -258,29 +253,26 @@ class RegistroPlantaViewModel : ViewModel() {
         currentPhotoUri = null
     }
 
-    private fun generateId(): String {
-        return "plant_${System.currentTimeMillis()}_${(1000..9999).random()}"
-    }
-
     private fun getCurrentUserId(): String {
         // TODO: Get from Firebase Auth
         return "user_placeholder"
+    }
+    
+    private fun getCurrentUserName(): String {
+        // TODO: Get from Firebase Auth
+        return "Usuario Anonimo"
+    }
+    
+    private fun convertDateToTimestamp(dateString: String): Long {
+        return try {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            formatter.parse(dateString)?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
     }
 
     fun clearError() {
         _errorMessage.value = ""
     }
 }
-
-// Data class for plant registration
-data class PlantRegistration(
-    val id: String,
-    val nome: String,
-    val data: String,
-    val local: String,
-    val categoria: PlantHealthCategory,
-    val observacao: String,
-    val imagens: List<Uri>,
-    val userId: String,
-    val timestamp: Long
-)
