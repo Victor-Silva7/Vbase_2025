@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,6 +36,7 @@ class RegistroPlantaViewModel : ViewModel() {
     // Firebase services
     private val database = FirebaseConfig.getDatabase()
     private val storageManager = FirebaseConfig.getStorageManager()
+    private val imageUploadManager = ImageUploadManager.getInstance()
     
     // Maximum number of images allowed
     private val maxImages = 5
@@ -182,10 +184,12 @@ class RegistroPlantaViewModel : ViewModel() {
         try {
             val plantId = registration.id
             val imageUris = registration.imagens
+            val context = appContext ?: throw IllegalStateException("Context not set")
             
-            // Upload images first, then save registration data
+            // Use enhanced ImageUploadManager for better compression and progress tracking
             if (imageUris.isNotEmpty()) {
-                storageManager.uploadPlantImages(
+                imageUploadManager.uploadPlantImages(
+                    context = context,
                     plantId = plantId,
                     imageUris = imageUris,
                     onSuccess = { downloadUrls ->
@@ -195,10 +199,6 @@ class RegistroPlantaViewModel : ViewModel() {
                     onFailure = { exception ->
                         _isLoading.value = false
                         _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
-                    },
-                    onProgress = { progress ->
-                        // Could update UI with upload progress
-                        // For now, just log progress
                     }
                 )
             } else {

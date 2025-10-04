@@ -194,7 +194,7 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
     
     private fun setupImageRecyclerView() {
-        imageAdapter = SelectedImageAdapter { imageUri ->
+        imageAdapter = SelectedImageAdapter(this) { imageUri ->
             viewModel.removeImage(imageUri)
         }
         

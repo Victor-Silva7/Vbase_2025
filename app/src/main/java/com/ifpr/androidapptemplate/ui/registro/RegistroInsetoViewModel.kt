@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,6 +37,7 @@ class RegistroInsetoViewModel : ViewModel() {
     // Firebase references
     private val database = FirebaseConfig.getDatabase()
     private val storageManager = FirebaseConfig.getStorageManager()
+    private val imageUploadManager = ImageUploadManager.getInstance()
     
     fun setContext(context: Context) {
         this.context = context
@@ -154,8 +156,10 @@ class RegistroInsetoViewModel : ViewModel() {
         )
         
         // Upload images first, then save registration
+        val images = _selectedImages.value ?: mutableListOf()
         if (images.isNotEmpty()) {
-            storageManager.uploadInsectImages(
+            imageUploadManager.uploadInsectImages(
+                context = context,
                 insectId = registroId,
                 imageUris = images,
                 onSuccess = { downloadUrls ->
@@ -165,9 +169,6 @@ class RegistroInsetoViewModel : ViewModel() {
                 onFailure = { exception ->
                     _isLoading.value = false
                     _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
-                },
-                onProgress = { progress ->
-                    // Could update UI with upload progress
                 }
             )
         } else {
