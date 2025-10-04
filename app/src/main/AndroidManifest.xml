@@ -2,6 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions for camera and storage -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+    
+    <!-- Camera feature (optional) -->
+    <uses-feature 
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,6 +34,23 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
+        
+        <!-- Add RegistroPlantaActivity -->
+        <activity 
+            android:name=".ui.registro.RegistroPlantaActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AndroidAppTemplate" />
+        
+        <!-- FileProvider for camera images -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

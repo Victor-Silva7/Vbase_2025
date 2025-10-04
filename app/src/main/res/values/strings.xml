@@ -26,4 +26,14 @@
     
     <!-- Dialog -->
     <string name="understood">Entendi</string>
+    
+    <!-- Permission messages -->
+    <string name="camera_permission_needed">Permissão de câmera necessária para capturar fotos</string>
+    <string name="storage_permission_needed">Permissão de armazenamento necessária para selecionar imagens</string>
+    
+    <!-- Image messages -->
+    <string name="max_images_reached">Máximo de 5 imagens permitidas</string>
+    <string name="image_added">Imagem adicionada</string>
+    <string name="image_removed">Imagem removida</string>
+    <string name="duplicate_image">Esta imagem já foi adicionada</string>
 </resources>

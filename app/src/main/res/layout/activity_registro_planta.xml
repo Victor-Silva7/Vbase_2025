@@ -128,17 +128,37 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Imagens Section -->
-        <TextView
-            android:id="@+id/text_imagens_title"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layout_images_header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Inserir Imagens"
-            android:textColor="@color/vgroup_green"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/input_layout_local" />
+            app:layout_constraintTop_toBottomOf="@id/input_layout_local">
+            
+            <TextView
+                android:id="@+id/text_imagens_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Inserir Imagens"
+                android:textColor="@color/vgroup_green"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+                
+            <TextView
+                android:id="@+id/text_image_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0/5"
+                android:textColor="@color/vgroup_text_secondary"
+                android:textSize="14sp"
+                android:background="@drawable/counter_background"
+                android:padding="8dp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_image_buttons"
@@ -149,7 +169,7 @@
             android:weightSum="2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_imagens_title">
+            app:layout_constraintTop_toBottomOf="@id/layout_images_header">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_camera"

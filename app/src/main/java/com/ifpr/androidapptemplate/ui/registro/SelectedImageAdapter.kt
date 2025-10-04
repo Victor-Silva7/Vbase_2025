@@ -38,10 +38,26 @@ class SelectedImageAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(imageUri: Uri) {
-            binding.imageView.setImageURI(imageUri)
+            // Load image with better error handling
+            try {
+                binding.imageView.setImageURI(imageUri)
+                binding.loadingOverlay.visibility = android.view.View.GONE
+            } catch (e: Exception) {
+                // Show placeholder or error image
+                binding.imageView.setImageResource(android.R.drawable.ic_menu_gallery)
+                binding.loadingOverlay.visibility = android.view.View.GONE
+            }
             
             binding.buttonRemove.setOnClickListener {
-                onRemoveClick(imageUri)
+                // Add animation feedback
+                binding.root.animate()
+                    .scaleX(0.8f)
+                    .scaleY(0.8f)
+                    .setDuration(150)
+                    .withEndAction {
+                        onRemoveClick(imageUri)
+                    }
+                    .start()
             }
         }
     }

@@ -1,13 +1,17 @@
 package com.ifpr.androidapptemplate.ui.registro
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +29,10 @@ class RegistroPlantaActivity : AppCompatActivity() {
     
     private var selectedDate: Calendar = Calendar.getInstance()
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    
+    // Permission request codes
+    private val CAMERA_PERMISSION_REQUEST = 100
+    private val STORAGE_PERMISSION_REQUEST = 101
     
     // Activity Result Launchers
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -46,6 +54,7 @@ class RegistroPlantaActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         viewModel = ViewModelProvider(this)[RegistroPlantaViewModel::class.java]
+        viewModel.setContext(this)
         
         setupUI()
         setupObservers()
@@ -72,6 +81,17 @@ class RegistroPlantaActivity : AppCompatActivity() {
             imageAdapter.updateImages(images)
             binding.recyclerViewImages.visibility = if (images.isNotEmpty()) 
                 android.view.View.VISIBLE else android.view.View.GONE
+            
+            // Update image counter
+            binding.textImageCounter.text = "${images.size}/5"
+            
+            // Update counter colors based on limit
+            val color = when {
+                images.size == 5 -> getColor(com.ifpr.androidapptemplate.R.color.vgroup_green)
+                images.size >= 3 -> getColor(android.R.color.holo_orange_light)
+                else -> getColor(com.ifpr.androidapptemplate.R.color.vgroup_text_secondary)
+            }
+            binding.textImageCounter.setTextColor(color)
         }
         
         viewModel.isLoading.observe(this) { isLoading ->
@@ -166,19 +186,27 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-        val photoFile = viewModel.createImageFile()
-        if (photoFile != null) {
-            val photoURI = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                photoFile
-            )
-            cameraLauncher.launch(photoURI)
+        if (checkCameraPermission()) {
+            val photoFile = viewModel.createImageFile()
+            if (photoFile != null) {
+                val photoURI = FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    photoFile
+                )
+                cameraLauncher.launch(photoURI)
+            }
+        } else {
+            requestCameraPermission()
         }
     }
 
     private fun selectFromGallery() {
-        galleryLauncher.launch("image/*")
+        if (checkStoragePermission()) {
+            galleryLauncher.launch("image/*")
+        } else {
+            requestStoragePermission()
+        }
     }
 
     private fun updateCategorySelection(category: PlantHealthCategory?) {
@@ -237,6 +265,60 @@ class RegistroPlantaActivity : AppCompatActivity() {
     
     private fun showCategorySelectionFeedback(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+    
+    // Permission handling functions
+    private fun checkCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+    
+    private fun checkStoragePermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this, Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+    
+    private fun requestCameraPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.CAMERA),
+            CAMERA_PERMISSION_REQUEST
+        )
+    }
+    
+    private fun requestStoragePermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+            STORAGE_PERMISSION_REQUEST
+        )
+    }
+    
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePhoto()
+                } else {
+                    Toast.makeText(this, getString(R.string.camera_permission_needed), Toast.LENGTH_SHORT).show()
+                }
+            }
+            STORAGE_PERMISSION_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    selectFromGallery()
+                } else {
+                    Toast.makeText(this, getString(R.string.storage_permission_needed), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun showHealthTooltip(isHealthy: Boolean) {

@@ -1,5 +1,6 @@
 package com.ifpr.androidapptemplate.ui.registro
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,6 +27,11 @@ class RegistroPlantaViewModel : ViewModel() {
     val errorMessage: LiveData<String> = _errorMessage
 
     private var currentPhotoPath: String? = null
+    private var currentPhotoUri: Uri? = null
+    private var appContext: Context? = null
+    
+    // Maximum number of images allowed
+    private val maxImages = 5
 
     init {
         _selectedImages.value = mutableListOf()
@@ -37,17 +43,21 @@ class RegistroPlantaViewModel : ViewModel() {
     fun selectCategory(category: PlantHealthCategory) {
         _selectedCategory.value = category
     }
+    
+    fun setContext(context: Context) {
+        appContext = context.applicationContext
+    }
 
     fun addImageFromCamera() {
-        currentPhotoPath?.let { path ->
-            val imageUri = Uri.fromFile(File(path))
-            addImageToList(imageUri)
+        currentPhotoUri?.let { uri ->
+            addImageToList(uri)
+            currentPhotoUri = null
+            currentPhotoPath = null
         }
     }
 
     fun addImagesFromGallery(uris: List<Uri>) {
         val currentList = _selectedImages.value ?: mutableListOf()
-        val maxImages = 5 // Limit to 5 images
         
         val availableSlots = maxImages - currentList.size
         if (availableSlots <= 0) {
@@ -61,38 +71,67 @@ class RegistroPlantaViewModel : ViewModel() {
         
         if (uris.size > availableSlots) {
             _errorMessage.value = "Adicionadas ${imagesToAdd.size} imagens. Limite de $maxImages atingido."
+        } else {
+            // Clear any previous error and show success message
+            _errorMessage.value = "${imagesToAdd.size} imagem(ns) adicionada(s)"
+            // Clear the message after a short delay
+            clearErrorAfterDelay()
         }
+    }
+    
+    private fun clearErrorAfterDelay() {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            _errorMessage.value = ""
+        }, 2000)
     }
 
     private fun addImageToList(uri: Uri) {
         val currentList = _selectedImages.value ?: mutableListOf()
-        val maxImages = 5
         
         if (currentList.size >= maxImages) {
             _errorMessage.value = "Máximo de $maxImages imagens permitidas"
             return
         }
         
+        // Check if image already exists
+        if (currentList.contains(uri)) {
+            _errorMessage.value = "Esta imagem já foi adicionada"
+            return
+        }
+        
         currentList.add(uri)
         _selectedImages.value = currentList
+        
+        // Show success feedback
+        _errorMessage.value = "Imagem adicionada (${currentList.size}/$maxImages)"
+        clearErrorAfterDelay()
     }
 
     fun removeImage(uri: Uri) {
         val currentList = _selectedImages.value ?: mutableListOf()
-        currentList.remove(uri)
-        _selectedImages.value = currentList
+        if (currentList.remove(uri)) {
+            _selectedImages.value = currentList
+            _errorMessage.value = "Imagem removida (${currentList.size}/$maxImages)"
+            clearErrorAfterDelay()
+        }
     }
 
     fun createImageFile(): File? {
         return try {
+            val context = appContext ?: return null
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
             val imageFileName = "PLANT_${timeStamp}_"
             
-            // This would need proper external storage directory in real implementation
-            val storageDir = File("/tmp") // Placeholder - would use proper directory
+            // Use external files directory for pictures
+            val storageDir = File(context.getExternalFilesDir(null), "Pictures")
+            if (!storageDir.exists()) {
+                storageDir.mkdirs()
+            }
+            
             val imageFile = File.createTempFile(imageFileName, ".jpg", storageDir)
             
             currentPhotoPath = imageFile.absolutePath
+            currentPhotoUri = Uri.fromFile(imageFile)
             imageFile
         } catch (e: Exception) {
             _errorMessage.value = "Erro ao criar arquivo de imagem: ${e.message}"
