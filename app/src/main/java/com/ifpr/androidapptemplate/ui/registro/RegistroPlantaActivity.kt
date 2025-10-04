@@ -66,7 +66,7 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Auto-capitalize first character for name and location
+        // Auto-capitalize words (title case) for name, location and observations
         binding.editTextNome.addTextChangedListener(CapitalizeTextWatcher())
         binding.editTextLocal.addTextChangedListener(CapitalizeTextWatcher())
         binding.editTextObservacao.addTextChangedListener(CapitalizeTextWatcher())
@@ -552,17 +552,4 @@ class RegistroPlantaActivity : AppCompatActivity() {
 // Enum for plant health categories
 enum class PlantHealthCategory {
     HEALTHY, SICK
-}
-
-// Text watcher for auto-capitalization
-class CapitalizeTextWatcher : android.text.TextWatcher {
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-    
-    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    
-    override fun afterTextChanged(s: android.text.Editable?) {
-        if (s != null && s.isNotEmpty() && s[0].isLowerCase()) {
-            s.replace(0, 1, s[0].uppercaseChar().toString())
-        }
-    }
 }
