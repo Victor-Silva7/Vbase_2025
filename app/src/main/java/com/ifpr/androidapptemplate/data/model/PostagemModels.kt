@@ -3,6 +3,89 @@ package com.ifpr.androidapptemplate.data.model
 import java.util.*
 
 /**
+ * Classes para gerenciamento de paginação
+ */
+data class PaginatedResult<T>(
+    val data: List<T> = emptyList(),
+    val currentPage: Int = 1,
+    val totalPages: Int = 1,
+    val totalItems: Int = 0,
+    val hasNextPage: Boolean = false,
+    val hasPreviousPage: Boolean = false,
+    val pageSize: Int = 10,
+    val isLoading: Boolean = false,
+    val error: String? = null
+) {
+    fun isFirstPage(): Boolean = currentPage == 1
+    fun isLastPage(): Boolean = currentPage >= totalPages
+    
+    companion object {
+        fun <T> loading(currentPage: Int = 1): PaginatedResult<T> {
+            return PaginatedResult(
+                currentPage = currentPage,
+                isLoading = true
+            )
+        }
+        
+        fun <T> error(error: String, currentPage: Int = 1): PaginatedResult<T> {
+            return PaginatedResult(
+                currentPage = currentPage,
+                error = error,
+                isLoading = false
+            )
+        }
+        
+        fun <T> success(
+            data: List<T>,
+            currentPage: Int,
+            totalItems: Int,
+            pageSize: Int = 10
+        ): PaginatedResult<T> {
+            val totalPages = if (totalItems == 0) 1 else (totalItems + pageSize - 1) / pageSize
+            return PaginatedResult(
+                data = data,
+                currentPage = currentPage,
+                totalPages = totalPages,
+                totalItems = totalItems,
+                hasNextPage = currentPage < totalPages,
+                hasPreviousPage = currentPage > 1,
+                pageSize = pageSize,
+                isLoading = false
+            )
+        }
+    }
+}
+
+/**
+ * Estado de carregamento para scroll infinito
+ */
+sealed class LoadingState {
+    object Idle : LoadingState()
+    object Loading : LoadingState()
+    object LoadingMore : LoadingState()
+    data class Error(val message: String) : LoadingState()
+    data class Success(val hasMore: Boolean) : LoadingState()
+}
+
+/**
+ * Configuração de paginação
+ */
+data class PaginationConfig(
+    val pageSize: Int = 10,
+    val initialLoadSize: Int = 20,
+    val prefetchDistance: Int = 5,
+    val enablePlaceholders: Boolean = false
+)
+
+/**
+ * Item de loading para o adapter
+ */
+data class LoadingItem(
+    val id: String = "loading_${System.currentTimeMillis()}",
+    val isVisible: Boolean = true
+)
+
+/**
  * Modelo de dados para postagens no feed
  * Inclui informações completas do usuário e do registro
  */
@@ -218,122 +301,294 @@ enum class TipoInseto {
 }
 
 /**
- * Dados mock para demonstração
+ * Dados mock para demonstração com suporte a paginação
  */
 object PostagemMockData {
-    fun gerarPostagensMock(): List<PostagemFeed> {
-        return listOf(
-            PostagemFeed(
-                id = "post_001",
-                tipo = TipoPostagem.PLANTA,
-                usuario = UsuarioPostagem(
-                    id = "user_001",
-                    nome = "Maria Silva",
-                    nomeExibicao = "Maria Silva",
-                    avatarUrl = "https://example.com/avatar1.jpg",
-                    isVerificado = true,
-                    nivel = NivelUsuario.ESPECIALISTA,
-                    localizacao = "São Paulo, SP",
-                    totalRegistros = 45,
-                    totalCurtidas = 1200
-                ),
-                titulo = "Rosa do meu jardim floresceu!",
-                descricao = "Depois de 3 meses cuidando com muito carinho, minha rosa finalmente deu sua primeira florada. As pétalas estão com uma cor incrível!",
-                imageUrl = "https://example.com/rosa1.jpg",
-                localizacao = "Jardim Botânico - SP",
-                dataPostagem = System.currentTimeMillis() - 3600000, // 1 hora atrás
-                detalhesPlanta = DetalhesPlanta(
-                    nomeComum = "Rosa",
-                    nomeCientifico = "Rosa gallica",
-                    familia = "Rosaceae",
-                    altura = "80cm",
-                    status = StatusPlanta.FLORACAO,
-                    estagio = EstagioPlanta.ADULTO
-                ),
-                interacoes = InteracoesPostagem(
-                    curtidas = 23,
-                    comentarios = 5,
-                    compartilhamentos = 2,
-                    visualizacoes = 156
-                ),
-                isVerificado = true,
-                tags = listOf("rosa", "floração", "jardim")
-            ),
-            
-            PostagemFeed(
-                id = "post_002",
-                tipo = TipoPostagem.INSETO,
-                usuario = UsuarioPostagem(
-                    id = "user_002",
-                    nome = "João Santos",
-                    nomeExibicao = "João Santos",
-                    avatarUrl = "https://example.com/avatar2.jpg",
-                    isVerificado = false,
-                    nivel = NivelUsuario.INTERMEDIARIO,
-                    localizacao = "Rio de Janeiro, RJ",
-                    totalRegistros = 12,
-                    totalCurtidas = 340
-                ),
-                titulo = "Joaninha encontrada na horta",
-                descricao = "Encontrei essa joaninha na minha horta hoje de manhã. Ela estava ajudando a controlar os pulgões das minhas plantas de tomate. Natureza trabalhando!",
-                imageUrl = "https://example.com/joaninha1.jpg",
-                localizacao = "Horta Urbana - RJ",
-                dataPostagem = System.currentTimeMillis() - 7200000, // 2 horas atrás
-                detalhesInseto = DetalhesInseto(
-                    nomeComum = "Joaninha",
-                    nomeCientifico = "Coccinella septempunctata",
-                    familia = "Coccinellidae",
-                    tamanho = "7mm",
-                    tipo = TipoInseto.BENEFICO,
-                    habitat = "Folhas de plantas",
-                    comportamento = "Predador de pulgões"
-                ),
-                interacoes = InteracoesPostagem(
-                    curtidas = 18,
-                    comentarios = 3,
-                    compartilhamentos = 1,
-                    visualizacoes = 89
-                ),
-                isVerificado = false,
-                tags = listOf("joaninha", "controle-biologico", "horta")
-            ),
-            
-            PostagemFeed(
-                id = "post_003",
-                tipo = TipoPostagem.PLANTA,
-                usuario = UsuarioPostagem(
-                    id = "user_003",
-                    nome = "Ana Costa",
-                    nomeExibicao = "Ana Costa",
-                    avatarUrl = "https://example.com/avatar3.jpg",
-                    isVerificado = true,
-                    nivel = NivelUsuario.AVANCADO,
-                    localizacao = "Belo Horizonte, MG",
-                    totalRegistros = 28,
-                    totalCurtidas = 756
-                ),
-                titulo = "Manjericão crescendo muito bem",
-                descricao = "Meu manjericão está crescendo super bem na varanda. As folhas estão grandes e perfumadas. Vou fazer um pesto delicioso com elas!",
-                imageUrl = "https://example.com/manjericao1.jpg",
-                localizacao = "Varanda do apartamento",
-                dataPostagem = System.currentTimeMillis() - 21600000, // 6 horas atrás
-                detalhesPlanta = DetalhesPlanta(
-                    nomeComum = "Manjericão",
-                    nomeCientifico = "Ocimum basilicum",
-                    familia = "Lamiaceae",
-                    altura = "25cm",
-                    status = StatusPlanta.SAUDAVEL,
-                    estagio = EstagioPlanta.JOVEM
-                ),
-                interacoes = InteracoesPostagem(
-                    curtidas = 31,
-                    comentarios = 8,
-                    compartilhamentos = 4,
-                    visualizacoes = 203
-                ),
-                isVerificado = true,
-                tags = listOf("manjericão", "ervas", "culinária")
-            )
+    
+    private val usuarios = listOf(
+        UsuarioPostagem(
+            id = "user_001",
+            nome = "Maria Silva",
+            nomeExibicao = "Maria Silva",
+            avatarUrl = "https://example.com/avatar1.jpg",
+            isVerificado = true,
+            nivel = NivelUsuario.ESPECIALISTA,
+            localizacao = "São Paulo, SP",
+            totalRegistros = 45,
+            totalCurtidas = 1200
+        ),
+        UsuarioPostagem(
+            id = "user_002",
+            nome = "João Santos",
+            nomeExibicao = "João Santos",
+            avatarUrl = "https://example.com/avatar2.jpg",
+            isVerificado = false,
+            nivel = NivelUsuario.INTERMEDIARIO,
+            localizacao = "Rio de Janeiro, RJ",
+            totalRegistros = 12,
+            totalCurtidas = 340
+        ),
+        UsuarioPostagem(
+            id = "user_003",
+            nome = "Ana Costa",
+            nomeExibicao = "Ana Costa",
+            avatarUrl = "https://example.com/avatar3.jpg",
+            isVerificado = true,
+            nivel = NivelUsuario.AVANCADO,
+            localizacao = "Belo Horizonte, MG",
+            totalRegistros = 28,
+            totalCurtidas = 756
+        ),
+        UsuarioPostagem(
+            id = "user_004",
+            nome = "Carlos Oliveira",
+            nomeExibicao = "Carlos Oliveira",
+            avatarUrl = "https://example.com/avatar4.jpg",
+            isVerificado = false,
+            nivel = NivelUsuario.INICIANTE,
+            localizacao = "Curitiba, PR",
+            totalRegistros = 8,
+            totalCurtidas = 125
+        ),
+        UsuarioPostagem(
+            id = "user_005",
+            nome = "Lúcia Fernandes",
+            nomeExibicao = "Lúcia Fernandes",
+            avatarUrl = "https://example.com/avatar5.jpg",
+            isVerificado = true,
+            nivel = NivelUsuario.ESPECIALISTA,
+            localizacao = "Porto Alegre, RS",
+            totalRegistros = 67,
+            totalCurtidas = 2340
         )
+    )
+    
+    private val plantasExemplo = listOf(
+        "Rosa", "Manjericão", "Tomate", "Alface", "Cenoura", "Orquídea", "Girassol", 
+        "Hortelã", "Alecrim", "Lavanda", "Cacto", "Samambaia", "Violeta", "Petúnia",
+        "Begônia", "Azaleia", "Lírio", "Cravo", "Tulipa", "Margarida"
+    )
+    
+    private val insetosExemplo = listOf(
+        "Joaninha", "Borboleta", "Abelha", "Formiga", "Besouro", "Libelula", "Gafanhoto",
+        "Cigarra", "Grilo", "Libélula", "Vespa", "Louva-deus", "Pulgão", "Lagarta",
+        "Mosca", "Mosquito", "Barata", "Cupim", "Aranha", "Escorpião"
+    )
+    
+    fun gerarPostagensPaginadas(page: Int, pageSize: Int = 10): PaginatedResult<PostagemFeed> {
+        val todasPostagens = gerarTodasPostagens()
+        val totalItems = todasPostagens.size
+        val startIndex = (page - 1) * pageSize
+        val endIndex = minOf(startIndex + pageSize, totalItems)
+        
+        if (startIndex >= totalItems) {
+            return PaginatedResult.success(
+                data = emptyList(),
+                currentPage = page,
+                totalItems = totalItems,
+                pageSize = pageSize
+            )
+        }
+        
+        val pageData = todasPostagens.subList(startIndex, endIndex)
+        
+        return PaginatedResult.success(
+            data = pageData,
+            currentPage = page,
+            totalItems = totalItems,
+            pageSize = pageSize
+        )
+    }
+    
+    fun gerarPostagensMock(): List<PostagemFeed> {
+        return gerarTodasPostagens().take(10) // Retorna apenas primeiras 10 para compatibilidade
+    }
+    
+    private fun gerarTodasPostagens(): List<PostagemFeed> {
+        val postagens = mutableListOf<PostagemFeed>()
+        val random = Random(42) // Seed fixo para resultados consistentes
+        
+        // Gera 50 postagens mock para demonstração de paginação
+        for (i in 1..50) {
+            val isPlanta = random.nextBoolean()
+            val usuario = usuarios[random.nextInt(usuarios.size)]
+            val tempoAleatorio = System.currentTimeMillis() - random.nextLong(0, 7 * 24 * 60 * 60 * 1000) // Últimos 7 dias
+            
+            if (isPlanta) {
+                val planta = plantasExemplo[random.nextInt(plantasExemplo.size)]
+                postagens.add(
+                    PostagemFeed(
+                        id = "post_plant_${i.toString().padStart(3, '0')}",
+                        tipo = TipoPostagem.PLANTA,
+                        usuario = usuario,
+                        titulo = "${planta} do meu jardim!",
+                        descricao = gerarDescricaoPlanta(planta, random),
+                        imageUrl = "https://example.com/${planta.lowercase()}_${random.nextInt(5) + 1}.jpg",
+                        localizacao = gerarLocalizacao(random),
+                        dataPostagem = tempoAleatorio,
+                        detalhesPlanta = DetalhesPlanta(
+                            nomeComum = planta,
+                            nomeCientifico = gerarNomeCientifico(planta),
+                            familia = gerarFamiliaPlanta(random),
+                            altura = "${random.nextInt(200) + 10}cm",
+                            status = StatusPlanta.values()[random.nextInt(StatusPlanta.values().size)],
+                            estagio = EstagioPlanta.values()[random.nextInt(EstagioPlanta.values().size)]
+                        ),
+                        interacoes = InteracoesPostagem(
+                            curtidas = random.nextInt(100),
+                            comentarios = random.nextInt(20),
+                            compartilhamentos = random.nextInt(10),
+                            visualizacoes = random.nextInt(500) + 50,
+                            curtidoPeloUsuario = random.nextBoolean(),
+                            salvosPeloUsuario = random.nextBoolean()
+                        ),
+                        isVerificado = random.nextBoolean(),
+                        tags = gerarTagsPlanta(planta, random)
+                    )
+                )
+            } else {
+                val inseto = insetosExemplo[random.nextInt(insetosExemplo.size)]
+                postagens.add(
+                    PostagemFeed(
+                        id = "post_insect_${i.toString().padStart(3, '0')}",
+                        tipo = TipoPostagem.INSETO,
+                        usuario = usuario,
+                        titulo = "${inseto} encontrado!",
+                        descricao = gerarDescricaoInseto(inseto, random),
+                        imageUrl = "https://example.com/${inseto.lowercase()}_${random.nextInt(5) + 1}.jpg",
+                        localizacao = gerarLocalizacao(random),
+                        dataPostagem = tempoAleatorio,
+                        detalhesInseto = DetalhesInseto(
+                            nomeComum = inseto,
+                            nomeCientifico = gerarNomeCientificoInseto(inseto),
+                            familia = gerarFamiliaInseto(random),
+                            tamanho = "${random.nextInt(50) + 2}mm",
+                            tipo = TipoInseto.values()[random.nextInt(TipoInseto.values().size)],
+                            habitat = gerarHabitat(random),
+                            comportamento = gerarComportamento(random)
+                        ),
+                        interacoes = InteracoesPostagem(
+                            curtidas = random.nextInt(80),
+                            comentarios = random.nextInt(15),
+                            compartilhamentos = random.nextInt(8),
+                            visualizacoes = random.nextInt(300) + 30,
+                            curtidoPeloUsuario = random.nextBoolean(),
+                            salvosPeloUsuario = random.nextBoolean()
+                        ),
+                        isVerificado = random.nextBoolean(),
+                        tags = gerarTagsInseto(inseto, random)
+                    )
+                )
+            }
+        }
+        
+        // Ordena por data (mais recentes primeiro)
+        return postagens.sortedByDescending { it.dataPostagem }
+    }
+    
+    private fun gerarDescricaoPlanta(planta: String, random: Random): String {
+        val descricoes = listOf(
+            "Esta ${planta.lowercase()} está crescendo muito bem em meu jardim!",
+            "Minha ${planta.lowercase()} floresceu hoje, que alegria!",
+            "Cuidando com muito carinho desta ${planta.lowercase()}.",
+            "Primeira vez cultivando ${planta.lowercase()}, estou aprendendo muito!",
+            "${planta} sempre foi minha favorita, olhem como está bonita!"
+        )
+        return descricoes[random.nextInt(descricoes.size)]
+    }
+    
+    private fun gerarDescricaoInseto(inseto: String, random: Random): String {
+        val descricoes = listOf(
+            "Encontrei este ${inseto.lowercase()} no meu jardim hoje.",
+            "Que espécie interessante! Este ${inseto.lowercase()} chamou minha atenção.",
+            "${inseto} visitando as flores da horta.",
+            "Registro deste ${inseto.lowercase()} para nosso catálogo.",
+            "Observando o comportamento deste ${inseto.lowercase()}."
+        )
+        return descricoes[random.nextInt(descricoes.size)]
+    }
+    
+    private fun gerarLocalizacao(random: Random): String {
+        val locais = listOf(
+            "Jardim Botânico - SP", "Horta Urbana - RJ", "Parque Ibirapuera - SP",
+            "Jardim de Casa - MG", "Varanda do Apartamento", "Quintal - PR",
+            "Fazenda Orgânica - RS", "Estufa - SC", "Praça Central - BA"
+        )
+        return locais[random.nextInt(locais.size)]
+    }
+    
+    private fun gerarNomeCientifico(planta: String): String {
+        val cientificos = mapOf(
+            "Rosa" to "Rosa gallica",
+            "Manjericão" to "Ocimum basilicum",
+            "Tomate" to "Solanum lycopersicum",
+            "Orquídea" to "Orchidaceae sp.",
+            "Girassol" to "Helianthus annuus"
+        )
+        return cientificos[planta] ?: "${planta.lowercase()} sp."
+    }
+    
+    private fun gerarNomeCientificoInseto(inseto: String): String {
+        val cientificos = mapOf(
+            "Joaninha" to "Coccinella septempunctata",
+            "Borboleta" to "Lepidoptera sp.",
+            "Abelha" to "Apis mellifera",
+            "Libélula" to "Libellula sp."
+        )
+        return cientificos[inseto] ?: "${inseto.lowercase()} sp."
+    }
+    
+    private fun gerarFamiliaPlanta(random: Random): String {
+        val familias = listOf(
+            "Rosaceae", "Lamiaceae", "Solanaceae", "Asteraceae", "Orchidaceae",
+            "Fabaceae", "Brassicaceae", "Apiaceae", "Malvaceae", "Rubiaceae"
+        )
+        return familias[random.nextInt(familias.size)]
+    }
+    
+    private fun gerarFamiliaInseto(random: Random): String {
+        val familias = listOf(
+            "Coccinellidae", "Lepidoptera", "Apidae", "Formicidae", "Libellulidae",
+            "Scarabaeidae", "Acrididae", "Cicadidae", "Mantidae", "Aphididae"
+        )
+        return familias[random.nextInt(familias.size)]
+    }
+    
+    private fun gerarHabitat(random: Random): String {
+        val habitats = listOf(
+            "Folhas de plantas", "Flores", "Solo húmido", "Troncos de árvores",
+            "Água parada", "Vegetação densa", "Cascas de árvores"
+        )
+        return habitats[random.nextInt(habitats.size)]
+    }
+    
+    private fun gerarComportamento(random: Random): String {
+        val comportamentos = listOf(
+            "Predador de pulgões", "Polinizador", "Decompositor", "Herbívoro",
+            "Parasita", "Construtor de ninhos", "Coletor de néctar"
+        )
+        return comportamentos[random.nextInt(comportamentos.size)]
+    }
+    
+    private fun gerarTagsPlanta(planta: String, random: Random): List<String> {
+        val tagsComuns = listOf("jardim", "cultivo", "orgânico", "sustentável")
+        val tagsEspecificas = when {
+            planta.lowercase().contains("rosa") -> listOf("flores", "romance", "perfume")
+            planta.lowercase().contains("manjericão") -> listOf("ervas", "culinária", "aromática")
+            planta.lowercase().contains("tomate") -> listOf("horta", "fruto", "vermelho")
+            else -> listOf("planta", "verde", "natureza")
+        }
+        return (tagsComuns + tagsEspecificas).shuffled(random).take(3)
+    }
+    
+    private fun gerarTagsInseto(inseto: String, random: Random): List<String> {
+        val tagsComuns = listOf("inseto", "natureza", "biodiversidade")
+        val tagsEspecificas = when {
+            inseto.lowercase().contains("joaninha") -> listOf("controle-biológico", "benéfico")
+            inseto.lowercase().contains("borboleta") -> listOf("polinizador", "colorido")
+            inseto.lowercase().contains("abelha") -> listOf("mel", "polinização")
+            else -> listOf("pequeno", "observação")
+        }
+        return (tagsComuns + tagsEspecificas).shuffled(random).take(3)
     }
 }

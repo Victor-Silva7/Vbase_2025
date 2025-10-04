@@ -14,11 +14,12 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ItemPostagemCardBinding
+import com.ifpr.androidapptemplate.databinding.ItemLoadingPaginationBinding
 import com.ifpr.androidapptemplate.data.model.*
 
 /**
- * Adapter para cards de postagem com informações completas do usuário
- * Suporta plantas e insetos com diferentes layouts adaptativos
+ * Adapter para cards de postagem com suporte a scroll infinito
+ * Suporta plantas e insetos com diferentes layouts adaptativos e item de loading
  */
 class PostagemCardAdapter(
     private val onCardClick: (PostagemFeed) -> Unit,
@@ -26,20 +27,97 @@ class PostagemCardAdapter(
     private val onLikeClick: (PostagemFeed) -> Unit,
     private val onCommentClick: (PostagemFeed) -> Unit,
     private val onShareClick: (PostagemFeed) -> Unit,
-    private val onBookmarkClick: (PostagemFeed) -> Unit
-) : ListAdapter<PostagemFeed, PostagemCardAdapter.PostagemViewHolder>(PostagemDiffCallback()) {
+    private val onBookmarkClick: (PostagemFeed) -> Unit,
+    private val onLoadMore: () -> Unit
+) : ListAdapter<Any, RecyclerView.ViewHolder>(AdapterDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostagemViewHolder {
-        val binding = ItemPostagemCardBinding.inflate(
-            LayoutInflater.from(parent.context), 
-            parent, 
-            false
-        )
-        return PostagemViewHolder(binding)
+    companion object {
+        private const val VIEW_TYPE_POSTAGEM = 0
+        private const val VIEW_TYPE_LOADING = 1
+    }
+    
+    private var isLoadingVisible = false
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is PostagemFeed -> VIEW_TYPE_POSTAGEM
+            is LoadingItem -> VIEW_TYPE_LOADING
+            else -> VIEW_TYPE_POSTAGEM
+        }
     }
 
-    override fun onBindViewHolder(holder: PostagemViewHolder, position: Int) {
-        holder.bind(getItem(position))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            VIEW_TYPE_POSTAGEM -> {
+                val binding = ItemPostagemCardBinding.inflate(
+                    LayoutInflater.from(parent.context), 
+                    parent, 
+                    false
+                )
+                PostagemViewHolder(binding)
+            }
+            VIEW_TYPE_LOADING -> {
+                val binding = ItemLoadingPaginationBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                LoadingViewHolder(binding)
+            }
+            else -> throw IllegalArgumentException("Invalid view type: $viewType")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is PostagemViewHolder -> {
+                val postagem = getItem(position) as PostagemFeed
+                holder.bind(postagem)
+                
+                // Trigger load more quando próximo do final
+                if (position >= itemCount - 3 && !isLoadingVisible) {
+                    onLoadMore()
+                }
+            }
+            is LoadingViewHolder -> {
+                // Loading item não precisa de binding específico
+            }
+        }
+    }
+    
+    /**
+     * Adiciona item de loading ao final da lista
+     */
+    fun showLoading() {
+        if (!isLoadingVisible) {
+            isLoadingVisible = true
+            val currentList = currentList.toMutableList()
+            currentList.add(LoadingItem())
+            submitList(currentList)
+        }
+    }
+    
+    /**
+     * Remove item de loading da lista
+     */
+    fun hideLoading() {
+        if (isLoadingVisible) {
+            isLoadingVisible = false
+            val currentList = currentList.toMutableList()
+            currentList.removeAll { it is LoadingItem }
+            submitList(currentList)
+        }
+    }
+    
+    /**
+     * Atualiza lista com novas postagens (preserva loading se necessário)
+     */
+    fun updatePostagens(postagens: List<PostagemFeed>) {
+        val newList = postagens.toMutableList<Any>()
+        if (isLoadingVisible) {
+            newList.add(LoadingItem())
+        }
+        submitList(newList)
     }
 
     inner class PostagemViewHolder(
@@ -285,14 +363,31 @@ class PostagemCardAdapter(
             }
         }
     }
+    
+    /**
+     * ViewHolder para item de loading
+     */
+    inner class LoadingViewHolder(
+        private val binding: ItemLoadingPaginationBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+        // Loading item é estático, não precisa de binding
+    }
 
-    class PostagemDiffCallback : DiffUtil.ItemCallback<PostagemFeed>() {
-        override fun areItemsTheSame(oldItem: PostagemFeed, newItem: PostagemFeed): Boolean {
-            return oldItem.id == newItem.id
+    class AdapterDiffCallback : DiffUtil.ItemCallback<Any>() {
+        override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return when {
+                oldItem is PostagemFeed && newItem is PostagemFeed -> oldItem.id == newItem.id
+                oldItem is LoadingItem && newItem is LoadingItem -> oldItem.id == newItem.id
+                else -> false
+            }
         }
 
-        override fun areContentsTheSame(oldItem: PostagemFeed, newItem: PostagemFeed): Boolean {
-            return oldItem == newItem
+        override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return when {
+                oldItem is PostagemFeed && newItem is PostagemFeed -> oldItem == newItem
+                oldItem is LoadingItem && newItem is LoadingItem -> oldItem == newItem
+                else -> false
+            }
         }
     }
 }

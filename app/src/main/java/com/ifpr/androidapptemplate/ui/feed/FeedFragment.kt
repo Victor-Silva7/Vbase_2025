@@ -7,22 +7,28 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ifpr.androidapptemplate.databinding.FragmentFeedBinding
 import com.ifpr.androidapptemplate.data.model.*
+import com.ifpr.androidapptemplate.data.repository.TipoFiltro
+import kotlinx.coroutines.*
 
 /**
- * Fragment do feed de postagens com cards de usuário
- * Exibe postagens de plantas e insetos da comunidade
+ * Fragment do feed de postagens com suporte a scroll infinito
+ * Exibe postagens de plantas e insetos da comunidade com paginação
  */
 class FeedFragment : Fragment() {
     
     private var _binding: FragmentFeedBinding? = null
     private val binding get() = _binding!!
     
+    private val viewModel: FeedViewModel by viewModels()
     private lateinit var postagemAdapter: PostagemCardAdapter
-    private var todasPostagens = listOf<PostagemFeed>()
-    private var filtroAtual = TipoFiltro.TODAS
+    
+    // Debounce para busca
+    private var searchJob: Job? = null
+    private val searchDebounceDelay = 500L
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +45,7 @@ class FeedFragment : Fragment() {
         setupRecyclerView()
         setupSearchAndFilters()
         setupSwipeRefresh()
-        loadPostagens()
+        observeViewModel()
     }
     
     private fun setupRecyclerView() {
@@ -53,8 +59,8 @@ class FeedFragment : Fragment() {
                 Toast.makeText(requireContext(), "Perfil: ${usuario.nomeExibicao}", Toast.LENGTH_SHORT).show()
             },
             onLikeClick = { postagem ->
-                // Implementar curtir/descurtir
-                handleLikeClick(postagem)
+                // Usar ViewModel para gerenciar curtidas
+                viewModel.toggleLike(postagem)
             },
             onCommentClick = { postagem ->
                 // Abrir comentários
@@ -65,25 +71,35 @@ class FeedFragment : Fragment() {
                 handleShareClick(postagem)
             },
             onBookmarkClick = { postagem ->
-                // Salvar/remover dos salvos
-                handleBookmarkClick(postagem)
+                // Usar ViewModel para gerenciar salvamentos
+                viewModel.toggleBookmark(postagem)
+            },
+            onLoadMore = {
+                // Trigger para carregar mais páginas
+                viewModel.loadNextPage()
             }
         )
         
         binding.recyclerViewFeed.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = postagemAdapter
-            // Adiciona espaçamento entre itens
-            addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(requireContext(), 
-                androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
+            // Remove DividerItemDecoration para melhor performance com muitos itens
         }
     }
     
     private fun setupSearchAndFilters() {
-        // Busca em tempo real
+        // Busca com debounce
         binding.etSearchPosts.addTextChangedListener { text ->
             val query = text.toString().trim()
-            filtrarPostagens(query)
+            
+            // Cancela busca anterior
+            searchJob?.cancel()
+            
+            // Nova busca com debounce
+            searchJob = CoroutineScope(Dispatchers.Main).launch {
+                delay(searchDebounceDelay)
+                viewModel.applySearch(query)
+            }
             
             // Mostrar/esconder botão limpar
             binding.ivClearSearch.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
@@ -96,18 +112,18 @@ class FeedFragment : Fragment() {
         
         // Filtros por categoria
         binding.chipGroupCategories.setOnCheckedChangeListener { _, checkedId ->
-            filtroAtual = when (checkedId) {
+            val filtro = when (checkedId) {
                 binding.chipPlantPosts.id -> TipoFiltro.PLANTAS
                 binding.chipInsectPosts.id -> TipoFiltro.INSETOS
                 else -> TipoFiltro.TODAS
             }
-            filtrarPostagens(binding.etSearchPosts.text.toString().trim())
+            viewModel.applyFilter(filtro)
         }
     }
     
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-            refreshPostagens()
+            viewModel.refreshFeed()
         }
         
         // Cores do refresh
@@ -117,9 +133,116 @@ class FeedFragment : Fragment() {
         )
         
         // Botões de refresh nos estados vazios
-        binding.btnRefreshFeed.setOnClickListener { refreshPostagens() }
-        binding.btnRetry.setOnClickListener { refreshPostagens() }
+        binding.btnRefreshFeed.setOnClickListener { viewModel.refreshFeed() }
+        binding.btnRetry.setOnClickListener { viewModel.refreshFeed() }
     }
+    
+    private fun observeViewModel() {
+        // Estado de carregamento
+        viewModel.loadingState.observe(viewLifecycleOwner) { state ->
+            handleLoadingState(state)
+        }
+        
+        // Postagens atuais
+        viewModel.currentPosts.observe(viewLifecycleOwner) { postagens ->
+            postagemAdapter.updatePostagens(postagens)
+            updateUIState(postagens)
+        }
+        
+        // Estado de refresh
+        viewModel.isRefreshing.observe(viewLifecycleOwner) { isRefreshing ->
+            binding.swipeRefreshLayout.isRefreshing = isRefreshing
+        }
+        
+        // Mensagens de erro
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            message?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.clearError()
+            }
+        }
+    }
+    
+    private fun handleLoadingState(state: LoadingState) {
+        when (state) {
+            is LoadingState.Idle -> {
+                binding.progressBar.visibility = View.GONE
+                postagemAdapter.hideLoading()
+            }
+            is LoadingState.Loading -> {
+                binding.progressBar.visibility = View.VISIBLE
+                postagemAdapter.hideLoading()
+            }
+            is LoadingState.LoadingMore -> {
+                binding.progressBar.visibility = View.GONE
+                postagemAdapter.showLoading()
+            }
+            is LoadingState.Success -> {
+                binding.progressBar.visibility = View.GONE
+                postagemAdapter.hideLoading()
+            }
+            is LoadingState.Error -> {
+                binding.progressBar.visibility = View.GONE
+                postagemAdapter.hideLoading()
+                showErrorState()
+            }
+        }
+    }
+    
+    private fun updateUIState(postagens: List<PostagemFeed>) {
+        if (postagens.isEmpty()) {
+            showEmptyState()
+        } else {
+            showFeedContent()
+        }
+    }
+    
+    private fun showFeedContent() {
+        binding.recyclerViewFeed.visibility = View.VISIBLE
+        binding.layoutEmptyState.visibility = View.GONE
+        binding.layoutErrorState.visibility = View.GONE
+    }
+    
+    private fun showEmptyState() {
+        binding.recyclerViewFeed.visibility = View.GONE
+        binding.layoutEmptyState.visibility = View.VISIBLE
+        binding.layoutErrorState.visibility = View.GONE
+        
+        // Personaliza mensagem baseada na busca
+        val query = binding.etSearchPosts.text.toString().trim()
+        if (query.isNotEmpty()) {
+            binding.tvEmptyTitle.text = "Nenhum resultado encontrado"
+            binding.tvEmptyMessage.text = "Tente ajustar os termos de busca ou filtros"
+        } else {
+            binding.tvEmptyTitle.text = "Nenhuma postagem ainda"
+            binding.tvEmptyMessage.text = "Seja o primeiro a compartilhar suas descobertas!"
+        }
+    }
+    
+    private fun showErrorState() {
+        binding.recyclerViewFeed.visibility = View.GONE
+        binding.layoutEmptyState.visibility = View.GONE
+        binding.layoutErrorState.visibility = View.VISIBLE
+    }
+    
+    private fun handleShareClick(postagem: PostagemFeed) {
+        // Implementa compartilhamento
+        val compartilharIntent = android.content.Intent().apply {
+            action = android.content.Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(android.content.Intent.EXTRA_TEXT, 
+                "Confira esta postagem: ${postagem.titulo}\n\nPor: ${postagem.usuario.nomeExibicao}\n\n${postagem.descricao}")
+        }
+        
+        startActivity(android.content.Intent.createChooser(compartilharIntent, "Compartilhar postagem"))
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchJob?.cancel()
+        _binding = null
+    }
+}
     
     private fun loadPostagens() {
         showLoading(true)
