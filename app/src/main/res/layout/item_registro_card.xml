@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Image container -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <!-- Main image -->
+            <ImageView
+                android:id="@+id/ivRegistrationImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_image_placeholder"
+                android:contentDescription="@string/registration_image" />
+
+            <!-- Gradient overlay -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/gradient_overlay" />
+
+            <!-- Category badge -->
+            <LinearLayout
+                android:id="@+id/layoutCategoryBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:background="@drawable/category_badge_background"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/ivCategoryIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_saudavel_24dp"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="@string/category_icon" />
+
+                <TextView
+                    android:id="@+id/tvCategoryText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/healthy"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <!-- Image count indicator -->
+            <LinearLayout
+                android:id="@+id/layoutImageCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="12dp"
+                android:background="@drawable/image_count_background"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_image_multiple"
+                    android:layout_marginEnd="4dp"
+                    android:contentDescription="@string/multiple_images" />
+
+                <TextView
+                    android:id="@+id/tvImageCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- Content area -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Title and type -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvRegistrationName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rosa do Jardim"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="Rosa do Jardim Principal" />
+
+                    <TextView
+                        android:id="@+id/tvScientificName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rosa damascena"
+                        android:textSize="14sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:visibility="gone"
+                        tools:text="Rosa damascena" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ivTypeIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_planta_24dp"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="@string/registration_type" />
+
+            </LinearLayout>
+
+            <!-- Location and date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_location_24dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@string/location_icon" />
+
+                <TextView
+                    android:id="@+id/tvLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Jardim Principal"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="Jardim Principal da Casa" />
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_calendar"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@string/date_icon" />
+
+                <TextView
+                    android:id="@+id/tvRegistrationDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="15/10/2024"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="15/10/2024" />
+
+            </LinearLayout>
+
+            <!-- Observation (if available) -->
+            <TextView
+                android:id="@+id/tvObservation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Planta em excelente estado de saúde, flores desabrochando..."
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="8dp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:lineSpacingExtra="2dp"
+                android:visibility="gone"
+                tools:text="Planta em excelente estado de saúde, flores desabrochando perfeitamente." />
+
+            <!-- Action buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="end">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/edit"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    app:iconTint="@color/primary_green"
+                    android:textColor="@color/primary_green" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnShare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/share"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="8dp"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    app:iconTint="@color/primary_green"
+                    android:textColor="@color/primary_green" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

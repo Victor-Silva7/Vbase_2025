@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light"
+    tools:context=".ui.registro.MeusRegistrosFragment">
+
+    <!-- Header with title and search -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/primary_green"
+        android:elevation="4dp"
+        android:paddingBottom="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/meus_registros_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:padding="16dp" />
+
+        <!-- Search Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="16dp"
+            android:background="@android:color/white"
+            android:elevation="2dp"
+            android:padding="8dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_search_24dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/search_icon" />
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/search_registrations_hint"
+                android:background="@null"
+                android:textSize="16sp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1" />
+
+            <ImageView
+                android:id="@+id/ivClearSearch"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_close"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/clear_search" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Statistics Summary -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvTotalPlantas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_green" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/plantas"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider_color"
+            android:layout_marginHorizontal="16dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvTotalInsetos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_green" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/insetos"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider_color"
+            android:layout_marginHorizontal="16dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvTotalRegistros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary_green" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/total"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Tab Layout -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/primary_green"
+        app:tabSelectedTextColor="@color/primary_green"
+        app:tabTextColor="@color/text_secondary"
+        app:tabIndicatorHeight="3dp" />
+
+    <!-- ViewPager2 for tab content -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddRegistration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_registro_24dp"
+        android:contentDescription="@string/add_registration"
+        app:backgroundTint="@color/primary_green"
+        app:tint="@android:color/white" />
+
+</LinearLayout>

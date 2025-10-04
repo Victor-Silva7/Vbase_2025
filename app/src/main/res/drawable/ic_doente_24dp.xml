@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Sick plant with wilted leaves -->
+    <path
+        android:pathData="M12,22L12,8"
+        android:strokeColor="#f44336"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"/>
+    
+    <!-- Wilted/drooping leaves -->
+    <path
+        android:pathData="M12,8C10.5,9 7,11 7,14C7,15 8,16 12,14"
+        android:fillColor="#f44336"
+        android:alpha="0.7"/>
+    
+    <path
+        android:pathData="M12,8C13.5,9 17,11 17,14C17,15 16,16 12,14"
+        android:fillColor="#f44336"
+        android:alpha="0.7"/>
+    
+    <!-- Disease indicator (X mark) -->
+    <path
+        android:pathData="M12,2C13.1,2 14,2.9 14,4C14,5.1 13.1,6 12,6C10.9,6 10,5.1 10,4C10,2.9 10.9,2 12,2Z"
+        android:fillColor="#f44336"/>
+    
+    <path
+        android:pathData="M10.5,3L13.5,5M13.5,3L10.5,5"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1"
+        android:strokeLineCap="round"/>
+        
+</vector>

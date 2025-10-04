@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Pest insect with warning indicator -->
+    <path
+        android:pathData="M12,8c-2,0 -4,1 -4,3v2c0,2 2,3 4,3s4,-1 4,-3v-2C16,9 14,8 12,8z"
+        android:fillColor="#ff5722"/>
+    
+    <!-- Head -->
+    <path
+        android:pathData="M12,6m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"
+        android:fillColor="#ff5722"/>
+    
+    <!-- Warning indicator -->
+    <path
+        android:pathData="M12,2C13.1,2 14,2.9 14,4C14,5.1 13.1,6 12,6C10.9,6 10,5.1 10,4C10,2.9 10.9,2 12,2Z"
+        android:fillColor="#f44336"/>
+    
+    <path
+        android:pathData="M11.5,2.5H12.5V4.5H11.5V2.5ZM11.5,4.8H12.5V5.5H11.5V4.8Z"
+        android:fillColor="@android:color/white"/>
+        
+</vector>

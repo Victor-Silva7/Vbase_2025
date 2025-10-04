@@ -1,6 +1,57 @@
 <resources>
-    <string name="app_name">AndroidAppTemplate</string>
+    <string name="app_name">V Group - Manejo Verde</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    
+    <!-- Meus Registros -->
+    <string name="meus_registros_title">Meus Registros</string>
+    <string name="search_registrations_hint">Buscar registros...</string>
+    <string name="search_icon">Ícone de busca</string>
+    <string name="clear_search">Limpar busca</string>
+    <string name="plantas">Plantas</string>
+    <string name="insetos">Insetos</string>
+    <string name="total">Total</string>
+    <string name="add_registration">Adicionar registro</string>
+    
+    <!-- Registration Card -->
+    <string name="registration_image">Imagem do registro</string>
+    <string name="category_icon">Ícone da categoria</string>
+    <string name="multiple_images">Múltiplas imagens</string>
+    <string name="registration_type">Tipo de registro</string>
+    <string name="location_icon">Ícone de localização</string>
+    <string name="date_icon">Ícone de data</string>
+    <string name="edit">Editar</string>
+    <string name="share">Compartilhar</string>
+    
+    <!-- Categories -->
+    <string name="healthy">Saudável</string>
+    <string name="sick">Doente</string>
+    <string name="beneficial">Benéfico</string>
+    <string name="neutral">Neutro</string>
+    <string name="pest">Praga</string>
+    
+    <!-- Empty States -->
+    <string name="empty_state_icon">Ícone de estado vazio</string>
+    <string name="no_plants_registered">Nenhuma planta registrada</string>
+    <string name="no_plants_message">Você ainda não registrou nenhuma planta.\nComece explorando e documentando a natureza ao seu redor!</string>
+    <string name="no_insects_registered">Nenhum inseto registrado</string>
+    <string name="no_insects_message">Você ainda não registrou nenhum inseto.\nDescubra e registre a vida microscópica em seu ambiente!</string>
+    <string name="add_first_registration">Fazer primeiro registro</string>
+    
+    <!-- Error States -->
+    <string name="error_icon">Ícone de erro</string>
+    <string name="error_loading_registrations">Erro ao carregar registros</string>
+    <string name="check_connection_try_again">Verifique sua conexão e tente novamente</string>
+    <string name="try_again">Tentar novamente</string>
+    
+    <!-- Tabs -->
+    <string name="tab_plants">Plantas</string>
+    <string name="tab_insects">Insetos</string>
+    
+    <!-- Filter -->
+    <string name="filter_all">Todos</string>
+    <string name="filter_plants">Plantas</string>
+    <string name="filter_insects">Insetos</string>
+    
 </resources>
