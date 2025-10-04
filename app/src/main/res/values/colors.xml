@@ -7,30 +7,4 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
-    <!-- V Group - Manejo Verde Colors -->
-    <color name="vgroup_green">#029e5a</color>
-    <color name="vgroup_dark_gray">#1a1a1a</color>
-    
-    <!-- Primary Colors -->
-    <color name="colorPrimary">@color/vgroup_green</color>
-    <color name="colorPrimaryVariant">@color/vgroup_green</color>
-    <color name="colorOnPrimary">@color/white</color>
-    
-    <!-- Secondary Colors -->
-    <color name="colorSecondary">@color/vgroup_green</color>
-    <color name="colorSecondaryVariant">@color/vgroup_green</color>
-    <color name="colorOnSecondary">@color/white</color>
-    
-    <!-- Background Colors -->
-    <color name="colorBackground">@color/vgroup_dark_gray</color>
-    <color name="colorSurface">@color/vgroup_dark_gray</color>
-    <color name="colorOnBackground">@color/white</color>
-    <color name="colorOnSurface">@color/white</color>
-    
-    <!-- Additional UI Colors -->
-    <color name="vgroup_green_light">#33029e5a</color>
-    <color name="vgroup_green_dark">#01663a</color>
-    <color name="vgroup_gray_light">#2d2d2d</color>
-    <color name="vgroup_text_secondary">#b3b3b3</color>
 </resources>
