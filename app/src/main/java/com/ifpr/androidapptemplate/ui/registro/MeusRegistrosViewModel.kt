@@ -15,6 +15,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
 /**
+ * Enum para filtros de categoria
+ */
+enum class FiltroCategoria {
+    TODOS,      // Exibir plantas e insetos
+    PLANTAS,    // Exibir apenas plantas
+    INSETOS     // Exibir apenas insetos
+}
+
+/**
  * ViewModel para gerenciar os dados da tela de registros pessoais
  */
 class MeusRegistrosViewModel : ViewModel() {
@@ -55,6 +64,14 @@ class MeusRegistrosViewModel : ViewModel() {
     private val _combinedRegistrations = MutableLiveData<List<RegistrationItem>>()
     val combinedRegistrations: LiveData<List<RegistrationItem>> = _combinedRegistrations
 
+    // Filter by category
+    private val _currentFilter = MutableLiveData<FiltroCategoria>(FiltroCategoria.TODOS)
+    val currentFilter: LiveData<FiltroCategoria> = _currentFilter
+
+    // Filtered combined registrations based on category filter
+    private val _filteredCombinedRegistrations = MutableLiveData<List<RegistrationItem>>()
+    val filteredCombinedRegistrations: LiveData<List<RegistrationItem>> = _filteredCombinedRegistrations
+
     init {
         // Start listening to real-time updates
         repository.startListeningToUserPlants()
@@ -65,6 +82,9 @@ class MeusRegistrosViewModel : ViewModel() {
         userInsects.observeForever { updateStatistics(); updateCombinedRegistrations() }
         filteredPlants.observeForever { updateCombinedRegistrations() }
         filteredInsects.observeForever { updateCombinedRegistrations() }
+        
+        // Observe filter changes to update combined list
+        _currentFilter.observeForever { updateCombinedRegistrations() }
     }
 
     /**
@@ -218,23 +238,41 @@ class MeusRegistrosViewModel : ViewModel() {
     private fun updateCombinedRegistrations() {
         val plants = userPlants.value ?: emptyList()
         val insects = userInsects.value ?: emptyList()
+        val currentFilter = _currentFilter.value ?: FiltroCategoria.TODOS
         
         val combinedList = mutableListOf<RegistrationItem>()
         
-        // Add plants
-        plants.forEach { planta ->
-            combinedList.add(RegistrationItem.PlantItem(planta))
-        }
-        
-        // Add insects
-        insects.forEach { inseto ->
-            combinedList.add(RegistrationItem.InsectItem(inseto))
+        // Add based on current filter
+        when (currentFilter) {
+            FiltroCategoria.TODOS -> {
+                // Add plants
+                plants.forEach { planta ->
+                    combinedList.add(RegistrationItem.PlantItem(planta))
+                }
+                // Add insects
+                insects.forEach { inseto ->
+                    combinedList.add(RegistrationItem.InsectItem(inseto))
+                }
+            }
+            FiltroCategoria.PLANTAS -> {
+                // Add only plants
+                plants.forEach { planta ->
+                    combinedList.add(RegistrationItem.PlantItem(planta))
+                }
+            }
+            FiltroCategoria.INSETOS -> {
+                // Add only insects
+                insects.forEach { inseto ->
+                    combinedList.add(RegistrationItem.InsectItem(inseto))
+                }
+            }
         }
         
         // Sort by timestamp (most recent first)
         combinedList.sortByDescending { it.commonTimestamp }
         
         _combinedRegistrations.postValue(combinedList)
+        _filteredCombinedRegistrations.postValue(combinedList)
     }
 
     /**
@@ -249,6 +287,24 @@ class MeusRegistrosViewModel : ViewModel() {
      */
     fun clearError() {
         _errorMessage.value = ""
+    }
+
+    /**
+     * Aplica filtro de categoria
+     */
+    fun applyFilter(filter: FiltroCategoria) {
+        _currentFilter.value = filter
+        updateCombinedRegistrations()
+    }
+
+    /**
+     * Obter contagem por filtro
+     */
+    fun getFilterCounts(): Triple<Int, Int, Int> {
+        val plants = userPlants.value?.size ?: 0
+        val insects = userInsects.value?.size ?: 0
+        val total = plants + insects
+        return Triple(total, plants, insects)
     }
 
     override fun onCleared() {
