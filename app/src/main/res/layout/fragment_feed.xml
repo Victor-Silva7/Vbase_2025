@@ -151,7 +151,7 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:padding="8dp"
-                tools:listitem="@layout/item_post_feed" />
+                tools:listitem="@layout/item_postagem_card" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

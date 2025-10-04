@@ -6,12 +6,13 @@
     
     <!-- Feed de Postagens -->
     <string name="title_feed">Feed</string>
-    <string name="feed_title">Postagens da Comunidade</string>
+    <string name="feed_title">Feed da Comunidade</string>
     <string name="search_posts_hint">Buscar postagens...</string>
-    <string name="no_posts_title">Nenhuma postagem encontrada</string>
-    <string name="no_posts_message">Ainda não há postagens da comunidade.\nSeja o primeiro a compartilhar!</string>
+    <string name="no_posts_title">Nenhuma postagem ainda</string>
+    <string name="no_posts_message">Seja o primeiro a compartilhar suas descobertas!</string>
     <string name="loading_posts">Carregando postagens...</string>
-    <string name="refresh_feed">Atualizar feed</string>
+    <string name="refresh_feed">Atualizar Feed</string>
+    <string name="feed_updated">Feed atualizado!</string>
     
     <!-- Interações das Postagens -->
     <string name="like_post">Curtir</string>
@@ -21,6 +22,11 @@
     <string name="likes_count">%d curtidas</string>
     <string name="comments_count">%d comentários</string>
     <string name="shares_count">%d compartilhamentos</string>
+    <string name="post_liked">Curtido!</string>
+    <string name="post_unliked">Descurtido</string>
+    <string name="post_saved">Salvo nos favoritos!</string>
+    <string name="post_unsaved">Removido dos favoritos</string>
+    <string name="share_post_title">Compartilhar postagem</string>
     
     <!-- Informações do Usuário -->
     <string name="posted_by">Postado por</string>
@@ -28,50 +34,14 @@
     <string name="verified_user">Usuário verificado</string>
     
     <!-- Categorias -->
-    <string name="category_plant">Planta</string>
-    <string name="category_insect">Inseto</string>
+    <string name="category_plant">Plantas</string>
+    <string name="category_insect">Insetos</string>
     <string name="category_observation">Observação</string>
     
     <!-- Ações -->
     <string name="view_full_post">Ver postagem completa</string>
     <string name="report_post">Denunciar postagem</string>
     <string name="follow_user">Seguir usuário</string>
-    
-    <!-- Busca de Registros Públicos -->
-    <string name="title_search">Buscar</string>
-    <string name="search_public_records">Buscar Registros Públicos</string>
-    <string name="search_all_hint">Buscar plantas, insetos, usuários...</string>
-    <string name="search_results_title">Resultados da Busca</string>
-    <string name="search_no_results">Nenhum resultado encontrado</string>
-    <string name="search_no_results_message">Tente usar outras palavras-chave ou explore as categorias.</string>
-    <string name="search_loading">Buscando...</string>
-    <string name="recent_searches">Buscas recentes</string>
-    <string name="popular_searches">Buscas populares</string>
-    <string name="clear_search_history">Limpar histórico</string>
-    <string name="search_suggestions">Sugestões</string>
-    
-    <!-- Filtros de Busca -->
-    <string name="filter_by_type">Filtrar por tipo</string>
-    <string name="filter_by_location">Filtrar por localização</string>
-    <string name="filter_by_date">Filtrar por data</string>
-    <string name="filter_by_user">Filtrar por usuário</string>
-    <string name="all_types">Todos os tipos</string>
-    <string name="all_locations">Todas as localizações</string>
-    <string name="all_dates">Todas as datas</string>
-    <string name="last_week">Última semana</string>
-    <string name="last_month">Último mês</string>
-    <string name="last_year">Último ano</string>
-    <string name="apply_filters">Aplicar filtros</string>
-    <string name="clear_filters">Limpar filtros</string>
-    
-    <!-- Resultados -->
-    <string name="results_count">%d resultados encontrados</string>
-    <string name="plants_found">%d plantas</string>
-    <string name="insects_found">%d insetos</string>
-    <string name="users_found">%d usuários</string>
-    <string name="sort_by_relevance">Ordenar por relevância</string>
-    <string name="sort_by_date">Ordenar por data</string>
-    <string name="sort_by_popularity">Ordenar por popularidade</string>
     
     <!-- Public Search Strings -->
     <string name="title_public_search">Busca Pública</string>
@@ -107,4 +77,39 @@
     <string name="sort_date_oldest">Mais antigos</string>
     <string name="sort_alphabetical">A-Z</string>
     <string name="sort_popularity">Popularidade</string>
+    
+    <!-- Busca Geral -->
+    <string name="title_search">Buscar</string>
+    <string name="search_public_records">Buscar Registros Públicos</string>
+    <string name="search_all_hint">Buscar plantas, insetos, usuários...</string>
+    <string name="search_no_results">Nenhum resultado encontrado</string>
+    <string name="search_loading">Buscando...</string>
+    <string name="recent_searches">Buscas recentes</string>
+    <string name="popular_searches">Buscas populares</string>
+    <string name="clear_search_history">Limpar histórico</string>
+    <string name="search_suggestions">Sugestões</string>
+    
+    <!-- Filtros de Busca -->
+    <string name="filter_by_type">Filtrar por tipo</string>
+    <string name="filter_by_location">Filtrar por localização</string>
+    <string name="filter_by_date">Filtrar por data</string>
+    <string name="filter_by_user">Filtrar por usuário</string>
+    <string name="all_types">Todos os tipos</string>
+    <string name="all_locations">Todas as localizações</string>
+    <string name="all_dates">Todas as datas</string>
+    <string name="last_week">Última semana</string>
+    <string name="last_month">Último mês</string>
+    <string name="last_year">Último ano</string>
+    <string name="apply_filters">Aplicar filtros</string>
+    <string name="clear_filters">Limpar filtros</string>
+    
+    <!-- Resultados -->
+    <string name="results_count">%d resultados encontrados</string>
+    <string name="plants_found">%d plantas</string>
+    <string name="insects_found">%d insetos</string>
+    <string name="users_found">%d usuários</string>
+    <string name="sort_by_relevance">Ordenar por relevância</string>
+    <string name="sort_by_date">Ordenar por data</string>
+    <string name="sort_by_popularity">Ordenar por popularidade</string>
+    
 </resources>
