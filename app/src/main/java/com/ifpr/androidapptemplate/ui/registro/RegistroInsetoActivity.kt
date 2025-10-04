@@ -94,6 +94,15 @@ class RegistroInsetoActivity : AppCompatActivity() {
             }
         })
         
+        // Observacao validation for insects
+        binding.editTextObservacao.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                validateObservacaoForCategory(s.toString())
+            }
+        })
+        
         // Focus change listeners for better UX
         binding.editTextNome.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
@@ -104,6 +113,38 @@ class RegistroInsetoActivity : AppCompatActivity() {
         binding.editTextLocal.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 validateLocal(binding.editTextLocal.text.toString())
+            }
+        }
+        
+        binding.editTextObservacao.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                validateObservacaoForCategory(binding.editTextObservacao.text.toString())
+            }
+        }
+    }
+    
+    private fun validateObservacaoForCategory(observacao: String) {
+        val category = viewModel.selectedCategory.value ?: return
+        val trimmedObservacao = observacao.trim()
+        
+        when (category) {
+            InsectCategory.PEST -> {
+                if (trimmedObservacao.length < 10) {
+                    binding.inputLayoutObservacao.error = getString(R.string.error_observacao_required_pest)
+                } else {
+                    binding.inputLayoutObservacao.error = null
+                }
+            }
+            InsectCategory.BENEFICIAL -> {
+                if (trimmedObservacao.length < 5) {
+                    binding.inputLayoutObservacao.error = getString(R.string.error_observacao_suggested_beneficial)
+                } else {
+                    binding.inputLayoutObservacao.error = null
+                }
+            }
+            InsectCategory.NEUTRAL -> {
+                // Less strict for neutral insects
+                binding.inputLayoutObservacao.error = null
             }
         }
     }
@@ -170,16 +211,22 @@ class RegistroInsetoActivity : AppCompatActivity() {
         binding.cardBenefico.setOnClickListener {
             viewModel.selectCategory(InsectCategory.BENEFICIAL)
             showCategorySelectionFeedback(getString(R.string.beneficial_category_selected))
+            // Re-validate observation when category changes
+            validateObservacaoForCategory(binding.editTextObservacao.text.toString())
         }
         
         binding.cardNeutro.setOnClickListener {
             viewModel.selectCategory(InsectCategory.NEUTRAL)
             showCategorySelectionFeedback(getString(R.string.neutral_category_selected))
+            // Re-validate observation when category changes
+            validateObservacaoForCategory(binding.editTextObservacao.text.toString())
         }
         
         binding.cardPraga.setOnClickListener {
             viewModel.selectCategory(InsectCategory.PEST)
             showCategorySelectionFeedback(getString(R.string.pest_category_selected))
+            // Re-validate observation when category changes
+            validateObservacaoForCategory(binding.editTextObservacao.text.toString())
         }
         
         // Tooltips for category explanation with animation feedback
@@ -423,7 +470,56 @@ class RegistroInsetoActivity : AppCompatActivity() {
         val observacao = binding.editTextObservacao.text.toString().trim()
         
         if (validateForm(nome, data, local)) {
+            // Show validation summary for insects
+            showValidationSummary(nome, data, local, observacao)
             viewModel.saveRegistration(nome, data, local, observacao)
+        } else {
+            // Provide helpful guidance on what needs to be fixed
+            showValidationGuidance()
+        }
+    }
+    
+    private fun showValidationSummary(nome: String, data: String, local: String, observacao: String) {
+        val category = viewModel.selectedCategory.value
+        val images = viewModel.selectedImages.value?.size ?: 0
+        
+        val summary = when (category) {
+            InsectCategory.BENEFICIAL -> "Registrando inseto benéfico: $nome"
+            InsectCategory.NEUTRAL -> "Registrando inseto neutro: $nome"
+            InsectCategory.PEST -> "Registrando inseto praga: $nome"
+            null -> "Registrando inseto: $nome"
+        }
+        
+        Toast.makeText(this, summary, Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun showValidationGuidance() {
+        val errors = mutableListOf<String>()
+        
+        if (binding.inputLayoutNome.error != null) {
+            errors.add("• Verifique o nome do inseto")
+        }
+        if (binding.inputLayoutData.error != null) {
+            errors.add("• Verifique a data")
+        }
+        if (binding.inputLayoutLocal.error != null) {
+            errors.add("• Verifique o local")
+        }
+        if (viewModel.selectedCategory.value == null) {
+            errors.add("• Selecione a categoria do inseto")
+        }
+        if (binding.inputLayoutObservacao.error != null) {
+            errors.add("• Complete a observação")
+        }
+        
+        val images = viewModel.selectedImages.value?.size ?: 0
+        if (images == 0) {
+            errors.add("• Adicione pelo menos 1 imagem")
+        }
+        
+        if (errors.isNotEmpty()) {
+            val message = "Por favor, corrija:\n" + errors.joinToString("\n")
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -450,7 +546,46 @@ class RegistroInsetoActivity : AppCompatActivity() {
             isValid = false
         }
         
+        // Validate images for insects
+        if (!validateInsectImages()) {
+            isValid = false
+        }
+        
         return isValid
+    }
+    
+    private fun validateInsectImages(): Boolean {
+        val images = viewModel.selectedImages.value ?: mutableListOf()
+        val category = viewModel.selectedCategory.value
+        
+        when {
+            images.isEmpty() -> {
+                showImageValidationError(getString(R.string.error_images_required_insect))
+                return false
+            }
+            category == InsectCategory.PEST && images.size < 2 -> {
+                showImageValidationError(getString(R.string.error_images_minimum_pest))
+                return false
+            }
+            category == InsectCategory.BENEFICIAL && images.size < 1 -> {
+                showImageValidationError(getString(R.string.error_images_minimum_beneficial))
+                return false
+            }
+            else -> {
+                return true
+            }
+        }
+    }
+    
+    private fun showImageValidationError(message: String) {
+        // Highlight image section with error indication
+        binding.textImagensTitle.setTextColor(getColor(android.R.color.holo_red_light))
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        
+        // Clear error after 3 seconds
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            binding.textImagensTitle.setTextColor(getColor(com.ifpr.androidapptemplate.R.color.vgroup_green))
+        }, 3000)
     }
     
     private fun validateNome(nome: String): Boolean {
@@ -462,21 +597,49 @@ class RegistroInsetoActivity : AppCompatActivity() {
                 return false
             }
             trimmedNome.length < 2 -> {
-                binding.inputLayoutNome.error = getString(R.string.error_nome_too_short)
+                binding.inputLayoutNome.error = getString(R.string.error_nome_too_short_insect)
                 return false
             }
             trimmedNome.length > 50 -> {
-                binding.inputLayoutNome.error = getString(R.string.error_nome_too_long)
+                binding.inputLayoutNome.error = getString(R.string.error_nome_too_long_insect)
                 return false
             }
-            !trimmedNome.matches(Regex("^[a-zA-ZÀ-ſ\\s]+$")) -> {
-                binding.inputLayoutNome.error = getString(R.string.error_nome_invalid_chars)
+            !isValidInsectName(trimmedNome) -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_invalid_chars_insect)
+                return false
+            }
+            !hasValidInsectPattern(trimmedNome) -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_pattern_insect)
                 return false
             }
             else -> {
                 binding.inputLayoutNome.error = null
                 return true
             }
+        }
+    }
+    
+    private fun isValidInsectName(nome: String): Boolean {
+        // Allow letters, spaces, hyphens, and parentheses (common in insect names)
+        return nome.matches(Regex("^[a-zA-ZÀ-ſ\\s\\-()]+$"))
+    }
+    
+    private fun hasValidInsectPattern(nome: String): Boolean {
+        // Check for common insect naming patterns
+        val words = nome.split(" ").filter { it.isNotEmpty() }
+        
+        // Must have at least one word
+        if (words.isEmpty()) return false
+        
+        // Check for suspicious patterns that don't match insect names
+        val suspiciousPatterns = listOf(
+            Regex("^\\d+"), // Starting with numbers
+            Regex("[!@#$%^&*+=<>?/|\\\\]"), // Special characters
+            Regex("(.)\\1{4,}") // Same character repeated 5+ times
+        )
+        
+        return !suspiciousPatterns.any { pattern -> 
+            nome.contains(pattern)
         }
     }
     
@@ -529,13 +692,38 @@ class RegistroInsetoActivity : AppCompatActivity() {
     }
     
     private fun validateCategory(): Boolean {
-        return if (viewModel.selectedCategory.value == null) {
+        val category = viewModel.selectedCategory.value
+        return if (category == null) {
             showCategoryError()
             false
         } else {
-            clearCategoryError()
-            true
+            // Additional validation based on category type
+            if (!validateCategorySpecificRules(category)) {
+                false
+            } else {
+                clearCategoryError()
+                true
+            }
         }
+    }
+    
+    private fun validateCategorySpecificRules(category: InsectCategory): Boolean {
+        val observacao = binding.editTextObservacao.text.toString().trim()
+        
+        // For pest insects, observation is more important
+        if (category == InsectCategory.PEST && observacao.length < 10) {
+            binding.inputLayoutObservacao.error = getString(R.string.error_observacao_required_pest)
+            return false
+        }
+        
+        // For beneficial insects, encourage detailed observation
+        if (category == InsectCategory.BENEFICIAL && observacao.length < 5) {
+            binding.inputLayoutObservacao.error = getString(R.string.error_observacao_suggested_beneficial)
+            // Don't return false, just show warning
+        }
+        
+        binding.inputLayoutObservacao.error = null
+        return true
     }
     
     private fun isValidDateFormat(date: String): Boolean {

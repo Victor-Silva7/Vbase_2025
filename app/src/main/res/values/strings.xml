@@ -61,6 +61,19 @@
     
     <!-- Nome validation for insects -->
     <string name="error_nome_required_insect">O nome do inseto é obrigatório</string>
+    <string name="error_nome_too_short_insect">O nome do inseto deve ter pelo menos 2 caracteres</string>
+    <string name="error_nome_too_long_insect">O nome do inseto deve ter no máximo 50 caracteres</string>
+    <string name="error_nome_invalid_chars_insect">Use apenas letras, espaços, hífens e parênteses para o nome do inseto</string>
+    <string name="error_nome_pattern_insect">Nome de inseto inválido. Evite números e caracteres especiais</string>
+    
+    <!-- Observacao validation for insects -->
+    <string name="error_observacao_required_pest">Para insetos praga, descreva os danos observados (mínimo 10 caracteres)</string>
+    <string name="error_observacao_suggested_beneficial">Para insetos benéficos, descreva o comportamento observado</string>
+    
+    <!-- Image validation for insects -->
+    <string name="error_images_required_insect">Adicione pelo menos 1 imagem do inseto para identificação</string>
+    <string name="error_images_minimum_pest">Para insetos praga, adicione pelo menos 2 imagens (inseto e danos)</string>
+    <string name="error_images_minimum_beneficial">Para insetos benéficos, adicione pelo menos 1 imagem clara</string>
     
     <!-- Insect Tooltips -->
     <string name="insect_beneficial_title">Inseto Benéfico</string>
