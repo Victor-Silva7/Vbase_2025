@@ -16,6 +16,26 @@ class HomeViewModel : ViewModel() {
     }
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _plantCount = MutableLiveData<String>().apply {
+        value = "0"
+    }
+    val plantCount: LiveData<String> = _plantCount
+
+    private val _insectCount = MutableLiveData<String>().apply {
+        value = "0"
+    }
+    val insectCount: LiveData<String> = _insectCount
+
+    // Função para carregar estatísticas do usuário
+    fun loadUserStats() {
+        _isLoading.value = true
+        // TODO: Carregar estatísticas do Firebase
+        // Por enquanto, valores estáticos
+        _plantCount.value = "0"
+        _insectCount.value = "0"
+        _isLoading.value = false
+    }
+
     // Função para navegar para registro de planta
     fun navigateToPlantRegistration() {
         // TODO: Implementar navegação para registro de planta

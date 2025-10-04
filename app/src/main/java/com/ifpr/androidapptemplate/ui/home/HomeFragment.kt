@@ -37,19 +37,31 @@ class HomeFragment : Fragment() {
         viewModel.title.observe(viewLifecycleOwner) { title ->
             binding.textHome.text = title
         }
+        
+        // Observar estatísticas
+        viewModel.plantCount.observe(viewLifecycleOwner) { count ->
+            binding.textStatsPlantas.text = count
+        }
+        
+        viewModel.insectCount.observe(viewLifecycleOwner) { count ->
+            binding.textStatsInsetos.text = count
+        }
+        
+        // Carregar estatísticas ao iniciar
+        viewModel.loadUserStats()
     }
 
     private fun setupClickListeners() {
-        // Configurar cliques dos botões de registro
-        binding.buttonRegistroPlanta.setOnClickListener {
+        // Configurar cliques dos cards de registro
+        binding.cardRegistroPlanta.setOnClickListener {
             // TODO: Navegar para registro de planta
         }
         
-        binding.buttonRegistroInseto.setOnClickListener {
+        binding.cardRegistroInseto.setOnClickListener {
             // TODO: Navegar para registro de inseto
         }
         
-        binding.buttonSeusRegistros.setOnClickListener {
+        binding.cardSeusRegistros.setOnClickListener {
             // TODO: Navegar para lista de registros do usuário
         }
     }
