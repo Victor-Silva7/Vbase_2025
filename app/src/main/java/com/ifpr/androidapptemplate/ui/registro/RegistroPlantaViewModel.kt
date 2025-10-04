@@ -5,11 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Planta
 import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,6 +41,7 @@ class RegistroPlantaViewModel : ViewModel() {
     // Firebase services
     private val database = FirebaseConfig.getDatabase()
     private val storageManager = FirebaseConfig.getStorageManager()
+    private val databaseService = FirebaseConfig.getDatabaseService()
     private val imageUploadManager = ImageUploadManager.getInstance()
     
     // Maximum number of images allowed
@@ -219,31 +223,25 @@ class RegistroPlantaViewModel : ViewModel() {
     }
     
     private fun saveRegistrationToDatabase(registration: Planta) {
-        val plantData = registration.toFirebaseMap()
-        
-        // Save to both user's personal collection and public collection
-        val userPlantsRef = database.reference.child(FirebaseConfig.DatabasePaths.userPlantas(registration.userId))
-        val publicPlantsRef = database.reference.child(FirebaseConfig.DatabasePaths.PUBLIC_PLANTAS)
-        
-        // Save to user's collection
-        userPlantsRef.child(registration.id).setValue(plantData)
-            .addOnSuccessListener {
-                // Save to public collection (for community features)
-                publicPlantsRef.child(registration.id).setValue(plantData)
-                    .addOnSuccessListener {
-                        _isLoading.value = false
-                        _saveSuccess.value = true
-                        clearFormData()
-                    }
-                    .addOnFailureListener { exception ->
-                        _isLoading.value = false
-                        _errorMessage.value = "Erro ao salvar na coleção pública: ${exception.message}"
-                    }
-            }
-            .addOnFailureListener { exception ->
+        // Use coroutines for async database operations
+        viewModelScope.launch {
+            try {
+                val result = databaseService.savePlant(registration)
+                
+                result.onSuccess { plantId ->
+                    _isLoading.value = false
+                    _saveSuccess.value = true
+                    clearFormData()
+                }.onFailure { exception ->
+                    _isLoading.value = false
+                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                }
+                
+            } catch (e: Exception) {
                 _isLoading.value = false
-                _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                _errorMessage.value = "Erro inesperado: ${e.message}"
             }
+        }
     }
     
     private fun clearFormData() {

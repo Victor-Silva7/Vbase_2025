@@ -118,6 +118,14 @@ object FirebaseConfig {
     }
     
     /**
+     * Get Firebase Database Service instance
+     */
+    fun getDatabaseService(): FirebaseDatabaseService {
+        checkInitialization()
+        return FirebaseDatabaseService.getInstance()
+    }
+    
+    /**
      * Database structure for V Group
      */
     object DatabasePaths {

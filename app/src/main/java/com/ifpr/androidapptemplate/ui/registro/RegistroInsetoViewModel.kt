@@ -6,11 +6,14 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Inseto
 import com.ifpr.androidapptemplate.data.model.InsectCategory
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,6 +42,7 @@ class RegistroInsetoViewModel : ViewModel() {
     // Firebase references
     private val database = FirebaseConfig.getDatabase()
     private val storageManager = FirebaseConfig.getStorageManager()
+    private val databaseService = FirebaseConfig.getDatabaseService()
     private val imageUploadManager = ImageUploadManager.getInstance()
     
     fun setContext(context: Context) {
@@ -145,16 +149,18 @@ class RegistroInsetoViewModel : ViewModel() {
             return
         }
         
-        // Create insect registration object
-        val registro = hashMapOf(
-            "id" to registroId,
-            "nome" to nome,
-            "data" to data,
-            "local" to local,
-            "categoria" to category.name,
-            "observacao" to observacao,
-            "timestamp" to System.currentTimeMillis(),
-            "tipo" to "INSETO"
+        // Create insect registration object using new data model
+        val registro = Inseto(
+            id = Inseto.generateId(),
+            nome = nome,
+            data = data,
+            dataTimestamp = convertDateToTimestamp(data),
+            local = local,
+            categoria = category,
+            observacao = observacao,
+            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            timestamp = System.currentTimeMillis(),
+            tipo = "INSETO"
         )
         
         // Upload images first, then save registration
@@ -162,11 +168,12 @@ class RegistroInsetoViewModel : ViewModel() {
         if (images.isNotEmpty()) {
             imageUploadManager.uploadInsectImages(
                 context = context,
-                insectId = registroId,
+                insectId = registro.id,
                 imageUris = images,
                 onSuccess = { downloadUrls ->
                     // Save registration with image URLs
-                    saveRegistrationToDatabase(registro, downloadUrls)
+                    val updatedRegistro = registro.copy(imagens = downloadUrls)
+                    saveRegistrationToDatabase(updatedRegistro)
                 },
                 onFailure = { exception ->
                     _isLoading.value = false
@@ -175,41 +182,39 @@ class RegistroInsetoViewModel : ViewModel() {
             )
         } else {
             // Save registration without images
-            saveRegistrationToDatabase(registro, emptyList())
+            saveRegistrationToDatabase(registro)
         }
     }
     
-    private fun saveRegistrationToDatabase(registro: HashMap<String, Any>, imageUrls: List<String>) {
-        if (imageUrls.isNotEmpty()) {
-            registro["imagens"] = imageUrls
-        }
-        
-        val registroId = registro["id"] as String
-        val userId = "user_placeholder" // TODO: Get from Firebase Auth
-        
-        // Save to both user's personal collection and public collection
-        val userInsectsRef = database.reference.child(FirebaseConfig.DatabasePaths.userInsetos(userId))
-        val publicInsectsRef = database.reference.child(FirebaseConfig.DatabasePaths.PUBLIC_INSETOS)
-        
-        // Save to user's collection
-        userInsectsRef.child(registroId).setValue(registro)
-            .addOnSuccessListener {
-                // Save to public collection (for community features)
-                publicInsectsRef.child(registroId).setValue(registro)
-                    .addOnSuccessListener {
-                        _isLoading.value = false
-                        _saveSuccess.value = true
-                        clearForm()
-                    }
-                    .addOnFailureListener { exception ->
-                        _isLoading.value = false
-                        _errorMessage.value = "Erro ao salvar na coleção pública: ${exception.message}"
-                    }
-            }
-            .addOnFailureListener { exception ->
+    private fun saveRegistrationToDatabase(registration: Inseto) {
+        // Use coroutines for async database operations
+        viewModelScope.launch {
+            try {
+                val result = databaseService.saveInsect(registration)
+                
+                result.onSuccess { insectId ->
+                    _isLoading.value = false
+                    _saveSuccess.value = true
+                    clearForm()
+                }.onFailure { exception ->
+                    _isLoading.value = false
+                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                }
+                
+            } catch (e: Exception) {
                 _isLoading.value = false
-                _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                _errorMessage.value = "Erro inesperado: ${e.message}"
             }
+        }
+    }
+    
+    private fun convertDateToTimestamp(dateString: String): Long {
+        return try {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            formatter.parse(dateString)?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
     }
     
     private fun clearForm() {
