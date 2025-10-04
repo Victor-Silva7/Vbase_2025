@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">AndroidAppTemplate</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="app_name">V Group - Manejo Verde</string>
+    <string name="title_home">Registro</string>
+    <string name="title_dashboard">Postagens</string>
+    <string name="title_notifications">Usuário</string>
 </resources>
