@@ -1,5 +1,6 @@
 package com.ifpr.androidapptemplate.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ifpr.androidapptemplate.databinding.FragmentHomeBinding
+import com.ifpr.androidapptemplate.ui.registro.RegistroPlantaActivity
 
 class HomeFragment : Fragment() {
 
@@ -54,7 +56,8 @@ class HomeFragment : Fragment() {
     private fun setupClickListeners() {
         // Configurar cliques dos cards de registro
         binding.cardRegistroPlanta.setOnClickListener {
-            // TODO: Navegar para registro de planta
+            val intent = Intent(requireContext(), RegistroPlantaActivity::class.java)
+            startActivity(intent)
         }
         
         binding.cardRegistroInseto.setOnClickListener {

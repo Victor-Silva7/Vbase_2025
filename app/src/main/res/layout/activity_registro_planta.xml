@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/vgroup_dark_gray"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <ImageView
+            android:id="@+id/icon_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Registro de Planta"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/icon_back"
+            app:layout_constraintTop_toTopOf="@id/icon_back"
+            app:layout_constraintBottom_toBottomOf="@id/icon_back" />
+
+        <ImageView
+            android:id="@+id/icon_plant_header"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/ic_planta_24dp"
+            android:tint="@color/vgroup_green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_title" />
+
+        <!-- Nome Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_layout_nome"
+            style="@style/VGroupEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:hint="Nome da Planta"
+            app:boxStrokeColor="@color/vgroup_green"
+            app:hintTextColor="@color/vgroup_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/icon_plant_header">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_nome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:textColor="@color/white"
+                android:textColorHint="@color/vgroup_text_secondary"
+                android:maxLength="50" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Data Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_layout_data"
+            style="@style/VGroupEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Data do Registro"
+            app:boxStrokeColor="@color/vgroup_green"
+            app:hintTextColor="@color/vgroup_text_secondary"
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_calendar"
+            app:endIconTint="@color/vgroup_green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input_layout_nome">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
+                android:textColor="@color/white"
+                android:textColorHint="@color/vgroup_text_secondary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Local Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_layout_local"
+            style="@style/VGroupEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Local (Cidade)"
+            app:boxStrokeColor="@color/vgroup_green"
+            app:hintTextColor="@color/vgroup_text_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input_layout_data">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_local"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapWords"
+                android:textColor="@color/white"
+                android:textColorHint="@color/vgroup_text_secondary"
+                android:maxLength="30" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Imagens Section -->
+        <TextView
+            android:id="@+id/text_imagens_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Inserir Imagens"
+            android:textColor="@color/vgroup_green"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input_layout_local" />
+
+        <LinearLayout
+            android:id="@+id/layout_image_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_imagens_title">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_camera"
+                style="@style/VGroupButton.Outline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Câmera"
+                app:icon="@drawable/ic_camera_24dp"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_galeria"
+                style="@style/VGroupButton.Outline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Galeria"
+                app:icon="@drawable/ic_galeria_24dp"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+
+        <!-- Selected Images RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_images"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_image_buttons"
+            tools:visibility="visible"
+            tools:listitem="@layout/item_selected_image" />
+
+        <!-- Categoria Section -->
+        <TextView
+            android:id="@+id/text_categoria_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Categoria"
+            android:textColor="@color/vgroup_green"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_images" />
+
+        <LinearLayout
+            android:id="@+id/layout_categoria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_categoria_title">
+
+            <!-- Saudável -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_saudavel"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/vgroup_gray_light"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/transparent"
+                app:strokeWidth="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_saudavel"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_saudavel_24dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Saudável"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Doente -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_doente"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/vgroup_gray_light"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/transparent"
+                app:strokeWidth="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_doente"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_doente_24dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Doente"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Observação Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_layout_observacao"
+            style="@style/VGroupEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:hint="Observação"
+            app:boxStrokeColor="@color/vgroup_green"
+            app:hintTextColor="@color/vgroup_text_secondary"
+            app:counterEnabled="true"
+            app:counterMaxLength="300"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_categoria">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_observacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences|textMultiLine"
+                android:lines="4"
+                android:maxLines="6"
+                android:textColor="@color/white"
+                android:textColorHint="@color/vgroup_text_secondary"
+                android:maxLength="300"
+                android:gravity="top" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Salvar Button -->
+        <Button
+            android:id="@+id/button_salvar"
+            style="@style/VGroupButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="Salvar Registro"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input_layout_observacao" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
