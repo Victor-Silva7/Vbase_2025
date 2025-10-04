@@ -8,7 +8,11 @@ import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.data.repository.RegistrationStats
 import com.ifpr.androidapptemplate.data.model.Planta
 import com.ifpr.androidapptemplate.data.model.Inseto
+import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
+import com.ifpr.androidapptemplate.data.model.InsectCategory
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 /**
  * ViewModel para gerenciar os dados da tela de registros pessoais
@@ -68,30 +72,96 @@ class MeusRegistrosViewModel : ViewModel() {
     }
 
     /**
-     * Busca registros com base na query fornecida
+     * Busca registros com base na query fornecida com debouncing
      */
     fun searchRegistrations(query: String) {
         _searchQuery.value = query
         
+        // Cancel previous search job
+        searchJob?.cancel()
+        
         if (query.isEmpty()) {
-            // If query is empty, just reload normal data
-            loadRegistrations()
+            // Clear search and show all results
+            repository.clearPlantFilter()
+            repository.clearInsectFilter()
+            _isSearching.value = false
             return
         }
 
+        // Start new search with debouncing
+        searchJob = viewModelScope.launch {
+            _isSearching.value = true
+            delay(searchDebounceDelay)
+            
+            try {
+                // Apply real-time filtering
+                repository.filterPlants(query)
+                repository.filterInsects(query)
+                
+                // Perform full search for more comprehensive results
+                val plantsResult = repository.searchUserPlants(query = query)
+                val insectsResult = repository.searchUserInsects(query = query)
+                
+                val searchResults = SearchResults(
+                    plants = plantsResult.getOrElse { emptyList() },
+                    insects = insectsResult.getOrElse { emptyList() },
+                    query = query,
+                    totalResults = plantsResult.getOrElse { emptyList() }.size + 
+                                 insectsResult.getOrElse { emptyList() }.size
+                )
+                
+                _searchResults.value = searchResults
+                _isSearching.value = false
+                
+            } catch (e: Exception) {
+                _isSearching.value = false
+                _errorMessage.value = "Erro na busca: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Search plants by category
+     */
+    fun searchPlantsByCategory(category: PlantHealthCategory?) {
         viewModelScope.launch {
             try {
                 _isLoading.value = true
-
-                // Search both plants and insects
-                // Note: The actual filtering will be done in the list fragments
-                // This just triggers the search state
-                
+                val result = repository.searchUserPlants(category = category)
+                result.onSuccess { plantas ->
+                    _searchResults.value = _searchResults.value?.copy(
+                        plants = plantas
+                    ) ?: SearchResults(plants = plantas)
+                }.onFailure { exception ->
+                    _errorMessage.value = "Erro ao filtrar plantas: ${exception.message}"
+                }
                 _isLoading.value = false
-                
             } catch (e: Exception) {
                 _isLoading.value = false
-                _errorMessage.value = "Erro na busca: ${e.message}"
+                _errorMessage.value = "Erro inesperado: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Search insects by category
+     */
+    fun searchInsectsByCategory(category: InsectCategory?) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val result = repository.searchUserInsects(category = category)
+                result.onSuccess { insetos ->
+                    _searchResults.value = _searchResults.value?.copy(
+                        insects = insetos
+                    ) ?: SearchResults(insects = insetos)
+                }.onFailure { exception ->
+                    _errorMessage.value = "Erro ao filtrar insetos: ${exception.message}"
+                }
+                _isLoading.value = false
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _errorMessage.value = "Erro inesperado: ${e.message}"
             }
         }
     }
@@ -141,5 +211,21 @@ class MeusRegistrosViewModel : ViewModel() {
         // Stop listening to real-time updates
         repository.stopListeningToUserPlants()
         repository.stopListeningToUserInsects()
+        // Cancel any ongoing search
+        searchJob?.cancel()
     }
+}
+
+/**
+ * Data class for search results
+ */
+data class SearchResults(
+    val plants: List<Planta> = emptyList(),
+    val insects: List<Inseto> = emptyList(),
+    val query: String = "",
+    val totalResults: Int = 0
+) {
+    fun isEmpty(): Boolean = plants.isEmpty() && insects.isEmpty()
+    fun hasPlants(): Boolean = plants.isNotEmpty()
+    fun hasInsects(): Boolean = insects.isNotEmpty()
 }

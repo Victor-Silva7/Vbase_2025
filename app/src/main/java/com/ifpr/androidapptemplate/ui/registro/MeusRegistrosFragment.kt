@@ -67,9 +67,29 @@ class MeusRegistrosFragment : Fragment() {
      * Configura a funcionalidade de busca
      */
     private fun setupSearch() {
-        binding.etSearch.setOnEditorActionListener { _, _, _ ->
-            performSearch()
-            true
+        // Real-time search as user types
+        binding.etSearch.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s?.toString()?.trim() ?: ""
+                binding.ivClearSearch.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+                // Perform search with debouncing handled by ViewModel
+                viewModel.searchRegistrations(query)
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+        
+        // Search on keyboard enter
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                performSearch()
+                // Hide keyboard
+                val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
+                true
+            } else {
+                false
+            }
         }
         
         binding.ivClearSearch.setOnClickListener {
@@ -77,15 +97,6 @@ class MeusRegistrosFragment : Fragment() {
             binding.ivClearSearch.visibility = View.GONE
             viewModel.clearSearch()
         }
-        
-        // Show/hide clear button based on text input
-        binding.etSearch.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.ivClearSearch.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
-            }
-            override fun afterTextChanged(s: android.text.Editable?) {}
-        })
     }
 
     /**
@@ -128,6 +139,18 @@ class MeusRegistrosFragment : Fragment() {
         binding.tvTotalPlantas.text = stats.totalPlantas.toString()
         binding.tvTotalInsetos.text = stats.totalInsetos.toString()
         binding.tvTotalRegistros.text = stats.getTotalRegistros().toString()
+    }
+    
+    /**
+     * Atualiza estatísticas baseadas nos resultados da busca
+     */
+    private fun updateSearchResultsStats(searchResults: SearchResults) {
+        if (searchResults.query.isNotEmpty()) {
+            // Show search result counts
+            binding.tvTotalPlantas.text = searchResults.plants.size.toString()
+            binding.tvTotalInsetos.text = searchResults.insects.size.toString()
+            binding.tvTotalRegistros.text = searchResults.totalResults.toString()
+        }
     }
 
     /**

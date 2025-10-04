@@ -140,16 +140,30 @@ class RegistrosListFragment : Fragment() {
      * Observa mudanças no ViewModel
      */
     private fun observeViewModel() {
-        // Observe the appropriate data based on list type
+        // Observe the appropriate filtered data based on list type
         when (listType) {
             TYPE_PLANTS -> {
-                sharedViewModel.userPlants.observe(viewLifecycleOwner) { plantas ->
+                sharedViewModel.filteredPlants.observe(viewLifecycleOwner) { plantas ->
                     updatePlantsList(plantas)
+                }
+                // Also observe original data as fallback
+                sharedViewModel.userPlants.observe(viewLifecycleOwner) { plantas ->
+                    // Only update if no search is active
+                    if (sharedViewModel.searchQuery.value.isNullOrEmpty()) {
+                        updatePlantsList(plantas)
+                    }
                 }
             }
             TYPE_INSECTS -> {
-                sharedViewModel.userInsects.observe(viewLifecycleOwner) { insetos ->
+                sharedViewModel.filteredInsects.observe(viewLifecycleOwner) { insetos ->
                     updateInsectsList(insetos)
+                }
+                // Also observe original data as fallback
+                sharedViewModel.userInsects.observe(viewLifecycleOwner) { insetos ->
+                    // Only update if no search is active
+                    if (sharedViewModel.searchQuery.value.isNullOrEmpty()) {
+                        updateInsectsList(insetos)
+                    }
                 }
             }
         }
@@ -159,10 +173,18 @@ class RegistrosListFragment : Fragment() {
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.swipeRefreshLayout.isRefreshing = isLoading
         }
+        
+        // Observe searching state
+        sharedViewModel.isSearching.observe(viewLifecycleOwner) { isSearching ->
+            if (isSearching) {
+                binding.progressBar.visibility = View.VISIBLE
+            }
+        }
 
-        // Observe search query
+        // Observe search query changes
         sharedViewModel.searchQuery.observe(viewLifecycleOwner) { query ->
-            filterRegistrations(query)
+            // Update empty state message based on search
+            updateEmptyStateForSearch(query)
         }
     }
 
@@ -195,44 +217,27 @@ class RegistrosListFragment : Fragment() {
             hideEmptyState()
         }
     }
-
+    
     /**
-     * Filtra registros com base na query de busca
+     * Atualiza o estado vazio baseado na busca
      */
-    private fun filterRegistrations(query: String) {
-        if (query.isEmpty()) {
-            // Show all registrations
-            return
-        }
-
-        val currentList = registrosAdapter.currentList
-        val filteredList = currentList.filter { item ->
-            when (item) {
-                is RegistrationItem.PlantItem -> {
-                    val planta = item.planta
-                    planta.nome.contains(query, ignoreCase = true) ||
-                    planta.nomePopular.contains(query, ignoreCase = true) ||
-                    planta.nomeCientifico.contains(query, ignoreCase = true) ||
-                    planta.local.contains(query, ignoreCase = true)
-                }
-                is RegistrationItem.InsectItem -> {
-                    val inseto = item.inseto
-                    inseto.nome.contains(query, ignoreCase = true) ||
-                    inseto.nomePopular.contains(query, ignoreCase = true) ||
-                    inseto.nomeCientifico.contains(query, ignoreCase = true) ||
-                    inseto.local.contains(query, ignoreCase = true)
-                }
+    private fun updateEmptyStateForSearch(query: String) {
+        if (query.isNotEmpty()) {
+            // Update empty state for search
+            binding.tvEmptyTitle.text = "Nenhum resultado encontrado"
+            binding.tvEmptyMessage.text = "Não encontramos registros para \"$query\".\nTente uma busca diferente."
+            binding.btnAddFirst.text = "Nova busca"
+            binding.btnAddFirst.setOnClickListener {
+                // Clear search
+                sharedViewModel.clearSearch()
             }
-        }
-        
-        registrosAdapter.submitList(filteredList)
-        
-        if (filteredList.isEmpty()) {
-            showEmptyState()
         } else {
-            hideEmptyState()
+            // Reset to normal empty state
+            setupEmptyState()
         }
     }
+
+
 
     /**
      * Mostra o estado vazio
