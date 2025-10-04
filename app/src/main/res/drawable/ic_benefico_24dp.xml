@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Beneficial insect (ladybug style) -->
+    <path
+        android:pathData="M12,4m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"
+        android:fillColor="#029e5a"/>
+    
+    <!-- Plus sign for beneficial -->
+    <path
+        android:pathData="M12,8v8 M8,12h8"
+        android:strokeColor="#ffffff"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"/>
+        
+</vector>

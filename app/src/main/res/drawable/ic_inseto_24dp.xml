@@ -1,0 +1,39 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Insect body -->
+    <path
+        android:pathData="M12,8c-2,0 -4,1 -4,3v2c0,2 2,3 4,3s4,-1 4,-3v-2C16,9 14,8 12,8z"
+        android:fillColor="#029e5a"/>
+    
+    <!-- Insect head -->
+    <path
+        android:pathData="M12,6m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"
+        android:fillColor="#029e5a"/>
+    
+    <!-- Antennae -->
+    <path
+        android:pathData="M10,6L8,4 M14,6L16,4"
+        android:strokeColor="#029e5a"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+    
+    <!-- Wings -->
+    <path
+        android:pathData="M8,10c-2,-1 -4,0 -4,2s2,3 4,2 M16,10c2,-1 4,0 4,2s-2,3 -4,2"
+        android:strokeColor="#029e5a"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:fillColor="none"/>
+    
+    <!-- Legs -->
+    <path
+        android:pathData="M8,12L6,16 M10,13L8,18 M12,13L12,18 M14,13L16,18 M16,12L18,16"
+        android:strokeColor="#029e5a"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+        
+</vector>

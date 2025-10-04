@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Healthy leaf with heart -->
+    <path
+        android:pathData="M12,2C8,2 4,6 4,12c0,4 2,6 4,8c1,1 2,2 4,2s3,-1 4,-2c2,-2 4,-4 4,-8C20,6 16,2 12,2z"
+        android:fillColor="#029e5a"/>
+    
+    <!-- Heart shape for healthy -->
+    <path
+        android:pathData="M12,8.5c0,-1.5 1.5,-3 3,-2s2,2 1,3.5L12,14L8,10c-1,-1.5 -0.5,-2.5 1,-3.5S12,7 12,8.5z"
+        android:fillColor="#ffffff"/>
+        
+</vector>
