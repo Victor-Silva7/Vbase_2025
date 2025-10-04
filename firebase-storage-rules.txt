@@ -1,0 +1,120 @@
+// Firebase Storage Security Rules for V Group - Manejo Verde
+// These rules should be deployed to Firebase Console
+
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Rules for plant images
+    match /plantas/{plantId}/{imageId} {
+      // Allow authenticated users to read plant images
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to upload their own plant images
+      allow write: if request.auth != null 
+                   && request.auth.uid != null
+                   && isValidImageFile()
+                   && isValidImageSize()
+                   && resource == null; // Only allow new uploads, not overwrites
+      
+      // Allow users to delete their own plant images
+      allow delete: if request.auth != null 
+                    && request.auth.uid != null
+                    && isOwner(plantId);
+    }
+    
+    // Rules for insect images
+    match /insetos/{insectId}/{imageId} {
+      // Allow authenticated users to read insect images
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to upload their own insect images
+      allow write: if request.auth != null 
+                   && request.auth.uid != null
+                   && isValidImageFile()
+                   && isValidImageSize()
+                   && resource == null; // Only allow new uploads, not overwrites
+      
+      // Allow users to delete their own insect images
+      allow delete: if request.auth != null 
+                    && request.auth.uid != null
+                    && isOwner(insectId);
+    }
+    
+    // Rules for profile images
+    match /perfis/{userId}/{imageId} {
+      // Allow users to read any profile image
+      allow read: if request.auth != null;
+      
+      // Allow users to upload/update their own profile image
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && isValidImageFile()
+                   && isValidImageSize();
+      
+      // Allow users to delete their own profile image
+      allow delete: if request.auth != null 
+                    && request.auth.uid == userId;
+    }
+    
+    // Rules for post images
+    match /postagens/{postId}/{imageId} {
+      // Allow authenticated users to read post images
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to upload their own post images
+      allow write: if request.auth != null 
+                   && request.auth.uid != null
+                   && isValidImageFile()
+                   && isValidImageSize()
+                   && resource == null; // Only allow new uploads, not overwrites
+      
+      // Allow users to delete their own post images
+      allow delete: if request.auth != null 
+                    && request.auth.uid != null
+                    && isOwner(postId);
+    }
+    
+    // Rules for temporary images (used during upload process)
+    match /temp/{sessionId}/{imageId} {
+      // Allow authenticated users to upload temporary images
+      allow write: if request.auth != null 
+                   && isValidImageFile()
+                   && isValidImageSize();
+      
+      // Allow authenticated users to read their own temporary images
+      allow read: if request.auth != null;
+      
+      // Allow cleanup of temporary images (auto-delete after 24 hours)
+      allow delete: if request.auth != null;
+    }
+    
+    // Deny all other operations
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Helper functions
+function isValidImageFile() {
+  return request.resource.contentType != null
+         && request.resource.contentType.matches('image/.*')
+         && request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+}
+
+function isValidImageSize() {
+  // Maximum 10MB per image
+  return request.resource.size <= 10 * 1024 * 1024;
+}
+
+function isOwner(resourceId) {
+  // This would need to be implemented by checking against Firestore
+  // to verify if the current user owns the resource
+  // For now, we'll allow it if authenticated
+  return request.auth != null;
+}

@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
+import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +31,10 @@ class RegistroPlantaViewModel : ViewModel() {
     private var currentPhotoPath: String? = null
     private var currentPhotoUri: Uri? = null
     private var appContext: Context? = null
+    
+    // Firebase services
+    private val database = FirebaseConfig.getDatabase()
+    private val storageManager = FirebaseConfig.getStorageManager()
     
     // Maximum number of images allowed
     private val maxImages = 5
@@ -173,23 +179,83 @@ class RegistroPlantaViewModel : ViewModel() {
     }
 
     private fun saveToFirebase(registration: PlantRegistration) {
-        // Simulate Firebase save operation
         try {
-            // TODO: Implement actual Firebase save
-            // 1. Upload images to Firebase Storage
-            // 2. Save registration data to Realtime Database
-            // 3. Update user statistics
+            val plantId = registration.id
+            val imageUris = registration.imagens
             
-            // For now, simulate success after delay
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                _isLoading.value = false
-                _saveSuccess.value = true
-            }, 2000)
+            // Upload images first, then save registration data
+            if (imageUris.isNotEmpty()) {
+                storageManager.uploadPlantImages(
+                    plantId = plantId,
+                    imageUris = imageUris,
+                    onSuccess = { downloadUrls ->
+                        // Save registration with image URLs
+                        saveRegistrationToDatabase(registration, downloadUrls)
+                    },
+                    onFailure = { exception ->
+                        _isLoading.value = false
+                        _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                    },
+                    onProgress = { progress ->
+                        // Could update UI with upload progress
+                        // For now, just log progress
+                    }
+                )
+            } else {
+                // Save registration without images
+                saveRegistrationToDatabase(registration, emptyList())
+            }
             
         } catch (e: Exception) {
             _isLoading.value = false
             _errorMessage.value = "Erro ao salvar: ${e.message}"
         }
+    }
+    
+    private fun saveRegistrationToDatabase(registration: PlantRegistration, imageUrls: List<String>) {
+        val plantData = hashMapOf(
+            "id" to registration.id,
+            "nome" to registration.nome,
+            "data" to registration.data,
+            "local" to registration.local,
+            "categoria" to registration.categoria.name,
+            "observacao" to registration.observacao,
+            "imagens" to imageUrls,
+            "userId" to registration.userId,
+            "timestamp" to registration.timestamp,
+            "tipo" to "PLANTA"
+        )
+        
+        // Save to both user's personal collection and public collection
+        val userPlantsRef = database.reference.child(FirebaseConfig.DatabasePaths.userPlantas(registration.userId))
+        val publicPlantsRef = database.reference.child(FirebaseConfig.DatabasePaths.PUBLIC_PLANTAS)
+        
+        // Save to user's collection
+        userPlantsRef.child(registration.id).setValue(plantData)
+            .addOnSuccessListener {
+                // Save to public collection (for community features)
+                publicPlantsRef.child(registration.id).setValue(plantData)
+                    .addOnSuccessListener {
+                        _isLoading.value = false
+                        _saveSuccess.value = true
+                        clearFormData()
+                    }
+                    .addOnFailureListener { exception ->
+                        _isLoading.value = false
+                        _errorMessage.value = "Erro ao salvar na coleção pública: ${exception.message}"
+                    }
+            }
+            .addOnFailureListener { exception ->
+                _isLoading.value = false
+                _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+            }
+    }
+    
+    private fun clearFormData() {
+        _selectedCategory.value = null
+        _selectedImages.value = mutableListOf()
+        currentPhotoPath = null
+        currentPhotoUri = null
     }
 
     private fun generateId(): String {

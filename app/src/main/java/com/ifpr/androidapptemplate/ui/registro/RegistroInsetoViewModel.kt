@@ -6,8 +6,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
+import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,8 +34,8 @@ class RegistroInsetoViewModel : ViewModel() {
     private var currentPhotoPath: String? = null
     
     // Firebase references
-    private val database = FirebaseDatabase.getInstance()
-    private val storage = FirebaseStorage.getInstance()
+    private val database = FirebaseConfig.getDatabase()
+    private val storageManager = FirebaseConfig.getStorageManager()
     
     fun setContext(context: Context) {
         this.context = context
@@ -154,60 +154,59 @@ class RegistroInsetoViewModel : ViewModel() {
         )
         
         // Upload images first, then save registration
-        uploadImages(registroId) { imageUrls ->
-            if (imageUrls.isNotEmpty()) {
-                registro["imagens"] = imageUrls
-            }
-            
-            // Save to Firebase Realtime Database
-            database.reference.child("insetos").child(registroId)
-                .setValue(registro)
-                .addOnSuccessListener {
+        if (images.isNotEmpty()) {
+            storageManager.uploadInsectImages(
+                insectId = registroId,
+                imageUris = images,
+                onSuccess = { downloadUrls ->
+                    // Save registration with image URLs
+                    saveRegistrationToDatabase(registro, downloadUrls)
+                },
+                onFailure = { exception ->
                     _isLoading.value = false
-                    _saveSuccess.value = true
-                    clearForm()
+                    _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                },
+                onProgress = { progress ->
+                    // Could update UI with upload progress
                 }
-                .addOnFailureListener { exception ->
-                    _isLoading.value = false
-                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
-                }
+            )
+        } else {
+            // Save registration without images
+            saveRegistrationToDatabase(registro, emptyList())
         }
     }
     
-    private fun uploadImages(registroId: String, onComplete: (List<String>) -> Unit) {
-        val images = _selectedImages.value ?: mutableListOf()
-        
-        if (images.isEmpty()) {
-            onComplete(emptyList())
-            return
+    private fun saveRegistrationToDatabase(registro: HashMap<String, Any>, imageUrls: List<String>) {
+        if (imageUrls.isNotEmpty()) {
+            registro["imagens"] = imageUrls
         }
         
-        val uploadedUrls = mutableListOf<String>()
-        var uploadedCount = 0
+        val registroId = registro["id"] as String
+        val userId = "user_placeholder" // TODO: Get from Firebase Auth
         
-        images.forEach { uri ->
-            val imageRef = storage.reference.child("insetos/$registroId/${UUID.randomUUID()}.jpg")
-            
-            imageRef.putFile(uri)
-                .addOnSuccessListener { taskSnapshot ->
-                    imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                        uploadedUrls.add(downloadUri.toString())
-                        uploadedCount++
-                        
-                        if (uploadedCount == images.size) {
-                            onComplete(uploadedUrls)
-                        }
+        // Save to both user's personal collection and public collection
+        val userInsectsRef = database.reference.child(FirebaseConfig.DatabasePaths.userInsetos(userId))
+        val publicInsectsRef = database.reference.child(FirebaseConfig.DatabasePaths.PUBLIC_INSETOS)
+        
+        // Save to user's collection
+        userInsectsRef.child(registroId).setValue(registro)
+            .addOnSuccessListener {
+                // Save to public collection (for community features)
+                publicInsectsRef.child(registroId).setValue(registro)
+                    .addOnSuccessListener {
+                        _isLoading.value = false
+                        _saveSuccess.value = true
+                        clearForm()
                     }
-                }
-                .addOnFailureListener { exception ->
-                    uploadedCount++
-                    _errorMessage.value = "Erro ao fazer upload da imagem: ${exception.message}"
-                    
-                    if (uploadedCount == images.size) {
-                        onComplete(uploadedUrls)
+                    .addOnFailureListener { exception ->
+                        _isLoading.value = false
+                        _errorMessage.value = "Erro ao salvar na coleção pública: ${exception.message}"
                     }
-                }
-        }
+            }
+            .addOnFailureListener { exception ->
+                _isLoading.value = false
+                _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+            }
     }
     
     private fun clearForm() {
