@@ -70,6 +70,42 @@ class RegistroPlantaActivity : AppCompatActivity() {
         binding.editTextNome.addTextChangedListener(CapitalizeTextWatcher())
         binding.editTextLocal.addTextChangedListener(CapitalizeTextWatcher())
         binding.editTextObservacao.addTextChangedListener(CapitalizeTextWatcher())
+        
+        // Add real-time validation
+        setupRealTimeValidation()
+    }
+    
+    private fun setupRealTimeValidation() {
+        // Nome validation
+        binding.editTextNome.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                validateNome(s.toString())
+            }
+        })
+        
+        // Local validation
+        binding.editTextLocal.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                validateLocal(s.toString())
+            }
+        })
+        
+        // Focus change listeners for better UX
+        binding.editTextNome.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                validateNome(binding.editTextNome.text.toString())
+            }
+        }
+        
+        binding.editTextLocal.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                validateLocal(binding.editTextLocal.text.toString())
+            }
+        }
     }
 
     private fun setupObservers() {
@@ -359,30 +395,156 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
 
     private fun validateForm(nome: String, data: String, local: String): Boolean {
+        var isValid = true
+        
+        // Validate nome
+        if (!validateNome(nome)) {
+            isValid = false
+        }
+        
+        // Validate data
+        if (!validateData(data)) {
+            isValid = false
+        }
+        
+        // Validate local
+        if (!validateLocal(local)) {
+            isValid = false
+        }
+        
+        // Validate category
+        if (!validateCategory()) {
+            isValid = false
+        }
+        
+        return isValid
+    }
+    
+    private fun validateNome(nome: String): Boolean {
+        val trimmedNome = nome.trim()
+        
         when {
-            nome.isEmpty() -> {
-                binding.inputLayoutNome.error = "Nome é obrigatório"
+            trimmedNome.isEmpty() -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_required)
                 return false
             }
-            data.isEmpty() -> {
-                binding.inputLayoutData.error = "Data é obrigatória"
+            trimmedNome.length < 2 -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_too_short)
                 return false
             }
-            local.isEmpty() -> {
-                binding.inputLayoutLocal.error = "Local é obrigatório"
+            trimmedNome.length > 50 -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_too_long)
                 return false
             }
-            viewModel.selectedCategory.value == null -> {
-                Toast.makeText(this, "Selecione uma categoria", Toast.LENGTH_SHORT).show()
+            !trimmedNome.matches(Regex("^[a-zA-ZÀ-ſ\\s]+$")) -> {
+                binding.inputLayoutNome.error = getString(R.string.error_nome_invalid_chars)
                 return false
             }
             else -> {
-                // Clear any previous errors
                 binding.inputLayoutNome.error = null
+                return true
+            }
+        }
+    }
+    
+    private fun validateData(data: String): Boolean {
+        when {
+            data.trim().isEmpty() -> {
+                binding.inputLayoutData.error = getString(R.string.error_data_required)
+                return false
+            }
+            !isValidDateFormat(data) -> {
+                binding.inputLayoutData.error = getString(R.string.error_data_invalid_format)
+                return false
+            }
+            isFutureDate(data) -> {
+                binding.inputLayoutData.error = getString(R.string.error_data_future)
+                return false
+            }
+            else -> {
                 binding.inputLayoutData.error = null
+                return true
+            }
+        }
+    }
+    
+    private fun validateLocal(local: String): Boolean {
+        val trimmedLocal = local.trim()
+        
+        when {
+            trimmedLocal.isEmpty() -> {
+                binding.inputLayoutLocal.error = getString(R.string.error_local_required)
+                return false
+            }
+            trimmedLocal.length < 2 -> {
+                binding.inputLayoutLocal.error = getString(R.string.error_local_too_short)
+                return false
+            }
+            trimmedLocal.length > 30 -> {
+                binding.inputLayoutLocal.error = getString(R.string.error_local_too_long)
+                return false
+            }
+            !trimmedLocal.matches(Regex("^[a-zA-ZÀ-ſ\\s]+$")) -> {
+                binding.inputLayoutLocal.error = getString(R.string.error_local_invalid_chars)
+                return false
+            }
+            else -> {
                 binding.inputLayoutLocal.error = null
                 return true
             }
+        }
+    }
+    
+    private fun validateCategory(): Boolean {
+        return if (viewModel.selectedCategory.value == null) {
+            showCategoryError()
+            false
+        } else {
+            clearCategoryError()
+            true
+        }
+    }
+    
+    private fun isValidDateFormat(date: String): Boolean {
+        return try {
+            dateFormatter.parse(date)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun isFutureDate(date: String): Boolean {
+        return try {
+            val inputDate = dateFormatter.parse(date)
+            val today = Calendar.getInstance().time
+            inputDate?.after(today) ?: false
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun showCategoryError() {
+        // Animate both category cards to indicate error
+        binding.cardSaudavel.strokeColor = getColor(android.R.color.holo_red_light)
+        binding.cardDoente.strokeColor = getColor(android.R.color.holo_red_light)
+        binding.cardSaudavel.strokeWidth = 2
+        binding.cardDoente.strokeWidth = 2
+        
+        Toast.makeText(this, getString(R.string.error_category_required), Toast.LENGTH_SHORT).show()
+        
+        // Clear error after 3 seconds
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            clearCategoryError()
+        }, 3000)
+    }
+    
+    private fun clearCategoryError() {
+        if (viewModel.selectedCategory.value == null) {
+            binding.cardSaudavel.strokeColor = getColor(android.R.color.transparent)
+            binding.cardDoente.strokeColor = getColor(android.R.color.transparent)
+            binding.cardSaudavel.strokeWidth = 0
+            binding.cardDoente.strokeWidth = 0
         }
     }
 }

@@ -36,4 +36,25 @@
     <string name="image_added">Imagem adicionada</string>
     <string name="image_removed">Imagem removida</string>
     <string name="duplicate_image">Esta imagem já foi adicionada</string>
+    
+    <!-- Validation Error Messages -->
+    <!-- Nome validation -->
+    <string name="error_nome_required">O nome da planta é obrigatório</string>
+    <string name="error_nome_too_short">O nome deve ter pelo menos 2 caracteres</string>
+    <string name="error_nome_too_long">O nome deve ter no máximo 50 caracteres</string>
+    <string name="error_nome_invalid_chars">Use apenas letras e espaços para o nome</string>
+    
+    <!-- Data validation -->
+    <string name="error_data_required">A data de observação é obrigatória</string>
+    <string name="error_data_invalid_format">Formato de data inválido (use dd/mm/aaaa)</string>
+    <string name="error_data_future">A data não pode ser no futuro</string>
+    
+    <!-- Local validation -->
+    <string name="error_local_required">O local de observação é obrigatório</string>
+    <string name="error_local_too_short">O local deve ter pelo menos 2 caracteres</string>
+    <string name="error_local_too_long">O local deve ter no máximo 30 caracteres</string>
+    <string name="error_local_invalid_chars">Use apenas letras e espaços para o local</string>
+    
+    <!-- Category validation -->
+    <string name="error_category_required">Selecione uma categoria (Saudável ou Doente)</string>
 </resources>
