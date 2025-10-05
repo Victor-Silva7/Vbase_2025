@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -24,6 +25,7 @@ class ComentariosAdapter(
     private val onLikeClick: (Comentario) -> Unit,
     private val onReplyClick: (Comentario) -> Unit,
     private val onMoreOptionsClick: (Comentario) -> Unit,
+    private val onAttachmentClick: (String) -> Unit,
     private val onLoadMore: () -> Unit
 ) : ListAdapter<Comentario, ComentariosAdapter.ComentarioViewHolder>(ComentarioDiffCallback()) {
 
@@ -101,10 +103,19 @@ class ComentariosAdapter(
 
         private fun bindAttachments(comentario: Comentario) {
             binding.apply {
-                // Anexos (simplificado para este exemplo)
+                // Anexos
                 if (comentario.attachments.isNotEmpty()) {
                     recyclerViewAttachments.visibility = View.VISIBLE
-                    // Em uma implementação completa, usaríamos outro adapter para os anexos
+                    recyclerViewAttachments.layoutManager = LinearLayoutManager(
+                        itemView.context, 
+                        LinearLayoutManager.HORIZONTAL, 
+                        false
+                    )
+                    
+                    val adapter = AttachmentPreviewAdapter(comentario.attachments) { imageUrl ->
+                        onAttachmentClick(imageUrl)
+                    }
+                    recyclerViewAttachments.adapter = adapter
                 } else {
                     recyclerViewAttachments.visibility = View.GONE
                 }

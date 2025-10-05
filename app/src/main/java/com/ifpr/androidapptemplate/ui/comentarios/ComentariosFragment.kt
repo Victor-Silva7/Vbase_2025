@@ -4,10 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.FragmentComentariosBinding
 import com.ifpr.androidapptemplate.data.model.Comentario
 
@@ -25,6 +30,9 @@ class ComentariosFragment : Fragment() {
     private lateinit var comentariosAdapter: ComentariosAdapter
     
     private var postId: String = ""
+    
+    // Lista de anexos para o novo comentário
+    private val attachments = mutableListOf<String>()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +77,10 @@ class ComentariosFragment : Fragment() {
                 // Mostrar opções (editar, deletar, etc)
                 showCommentOptions(comentario)
             },
+            onAttachmentClick = { imageUrl ->
+                // Abrir visualizador de imagem em tela cheia
+                showAttachmentPreview(imageUrl)
+            },
             onLoadMore = {
                 viewModel.loadMoreComments()
             }
@@ -85,10 +97,21 @@ class ComentariosFragment : Fragment() {
             // Botão de enviar comentário
             buttonSend.setOnClickListener {
                 val content = editTextComment.text.toString().trim()
-                if (content.isNotEmpty()) {
-                    viewModel.addComment(content)
+                if (content.isNotEmpty() || attachments.isNotEmpty()) {
+                    viewModel.addComment(content, attachments = attachments.toList())
                     editTextComment.text?.clear()
+                    attachments.clear()
+                    updateAttachmentsUI()
+                } else {
+                    Toast.makeText(requireContext(), "Digite um comentário ou adicione um anexo", Toast.LENGTH_SHORT).show()
                 }
+            }
+            
+            // Botão de adicionar anexo (para testes)
+            buttonAddAttachment.setOnClickListener {
+                // Em uma implementação completa, abriríamos um seletor de arquivos
+                // Para este exemplo, vamos adicionar um anexo mock
+                addAttachment("https://example.com/attachment_${System.currentTimeMillis()}.jpg")
             }
             
             // Carregar avatar do usuário (mock)
@@ -196,6 +219,50 @@ class ComentariosFragment : Fragment() {
         // - Deletar (se for do usuário atual)
         // - Denunciar (se for de outro usuário)
         Toast.makeText(requireContext(), "Opções para comentário: ${comentario.id}", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun showAttachmentPreview(imageUrl: String) {
+        // Em uma implementação completa, mostraríamos a imagem em tela cheia
+        // com opções de zoom, download, compartilhamento, etc.
+        Toast.makeText(requireContext(), "Visualizar anexo: $imageUrl", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun updateAttachmentsUI() {
+        binding.apply {
+            if (attachments.isNotEmpty()) {
+                layoutAttachments.visibility = View.VISIBLE
+                containerAttachments.removeAllViews()
+                
+                attachments.forEach { imageUrl ->
+                    // Criar thumbnail para cada anexo
+                    val thumbnailView = layoutInflater.inflate(
+                        R.layout.item_attachment_thumbnail, 
+                        containerAttachments, 
+                        false
+                    )
+                    
+                    // Configurar clique para remover anexo
+                    val removeButton = thumbnailView.findViewById<ImageButton>(R.id.buttonRemoveAttachment)
+                    removeButton.setOnClickListener {
+                        attachments.remove(imageUrl)
+                        updateAttachmentsUI()
+                    }
+                    
+                    containerAttachments.addView(thumbnailView)
+                }
+            } else {
+                layoutAttachments.visibility = View.GONE
+            }
+        }
+    }
+    
+    /**
+     * Adiciona um anexo ao comentário atual
+     * Em uma implementação completa, isso seria chamado após selecionar uma imagem
+     */
+    private fun addAttachment(imageUrl: String) {
+        attachments.add(imageUrl)
+        updateAttachmentsUI()
     }
     
     override fun onDestroyView() {

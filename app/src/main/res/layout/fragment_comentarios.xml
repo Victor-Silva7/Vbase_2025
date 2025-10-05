@@ -158,94 +158,114 @@
     </FrameLayout>
 
     <!-- Input de novo comentário -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/layoutCommentInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/surface"
-        android:elevation="8dp"
-        android:padding="8dp">
+        android:layout_margin="8dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="12dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/divider">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <!-- Avatar do usuário -->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/imageViewUserAvatar"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginEnd="8dp"
-                android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/CircularImageView"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp"
-                tools:src="@drawable/ic_person_24dp" />
-
-            <!-- Campo de texto -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextComment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Adicione um comentário..."
-                    android:inputType="textMultiLine"
-                    android:maxLines="4"
-                    android:minLines="1"
-                    android:padding="12dp"
-                    android:textSize="14sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Botão de enviar -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonSend"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:insetLeft="0dp"
-                android:insetTop="0dp"
-                android:insetRight="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp"
-                app:icon="@drawable/ic_send_24dp"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp"
-                app:iconSize="20dp"
-                app:shapeAppearanceOverlay="@style/CircularImageView" />
-
-        </LinearLayout>
-
-        <!-- Indicador de anexos -->
-        <HorizontalScrollView
-            android:id="@+id/layoutAttachments"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:visibility="gone">
+            android:orientation="vertical"
+            android:padding="12dp">
 
             <LinearLayout
-                android:id="@+id/containerAttachments"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <!-- Anexos serão adicionados dinamicamente aqui -->
+                <!-- Avatar do usuário -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imageViewUserAvatar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="12dp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/CircularImageView"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1dp"
+                    tools:src="@drawable/ic_person_24dp" />
+
+                <!-- Campo de texto -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="0dp"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextComment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Adicione um comentário..."
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        android:minLines="1"
+                        android:padding="12dp"
+                        android:textSize="14sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Botão de adicionar anexo -->
+                <ImageButton
+                    android:id="@+id/buttonAddAttachment"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_attachment_24dp"
+                    app:tint="@color/text_secondary" />
+
+                <!-- Botão de enviar -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSend"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="0dp"
+                    app:backgroundTint="@color/primary_green"
+                    app:icon="@drawable/ic_send_24dp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="20dp"
+                    app:shapeAppearanceOverlay="@style/CircularImageView" />
 
             </LinearLayout>
 
-        </HorizontalScrollView>
+            <!-- Indicador de anexos -->
+            <HorizontalScrollView
+                android:id="@+id/layoutAttachments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/containerAttachments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Anexos serão adicionados dinamicamente aqui -->
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

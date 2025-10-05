@@ -1,202 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/card_background"
-    android:layout_marginBottom="1dp">
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="12dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider"
+    app:cardBackgroundColor="@color/surface">
 
     <!-- Comentário principal -->
     <LinearLayout
         android:id="@+id/layoutCommentContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Avatar do usuário -->
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imageViewUserAvatar"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/CircularImageView"
-            app:strokeColor="@color/divider"
-            app:strokeWidth="1dp"
-            tools:src="@drawable/ic_person_24dp" />
+        <!-- Header do comentário -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <!-- Avatar do usuário -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imageViewUserAvatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/CircularImageView"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp"
+                tools:src="@drawable/ic_person_24dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Nome do usuário e verificação -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/textViewUserName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="Maria Silva" />
+
+                    <!-- Selo de verificação -->
+                    <ImageView
+                        android:id="@+id/imageViewVerified"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_verified_24dp"
+                        android:visibility="gone"
+                        app:tint="@color/primary_green"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <!-- Nível do usuário e tempo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="2dp">
+
+                    <!-- Nível do usuário -->
+                    <TextView
+                        android:id="@+id/textViewUserLevel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primary_green"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        tools:text="Especialista"
+                        tools:ignore="SmallSp" />
+
+                    <!-- Tempo do comentário -->
+                    <TextView
+                        android:id="@+id/textViewTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/text_hint"
+                        android:textSize="12sp"
+                        tools:text="2h" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <!-- Conteúdo do comentário -->
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/textViewContent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginStart="48dp"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"
+            tools:text="Ótima observação! Eu também tenho notado isso no meu jardim." />
 
-            <!-- Header do comentário -->
+        <!-- Indicador de edição -->
+        <TextView
+            android:id="@+id/textViewEdited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:text="(editado)"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Anexos -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewAttachments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:layout_height="80dp" />
+
+        <!-- Ações do comentário -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp">
+
+            <!-- Botão curtir -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="4dp">
-
-                <!-- Nome do usuário -->
-                <TextView
-                    android:id="@+id/textViewUserName"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    tools:text="Maria Silva" />
-
-                <!-- Selo de verificação -->
-                <ImageView
-                    android:id="@+id/imageViewVerified"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_marginStart="4dp"
-                    android:src="@drawable/ic_verified_24dp"
-                    android:visibility="gone"
-                    app:tint="@color/primary_green"
-                    tools:visibility="visible" />
-
-                <!-- Nível do usuário -->
-                <TextView
-                    android:id="@+id/textViewUserLevel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textColor="@color/primary_green"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    tools:text="Especialista"
-                    tools:ignore="SmallSp" />
-
-                <!-- Tempo do comentário -->
-                <TextView
-                    android:id="@+id/textViewTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textColor="@color/text_hint"
-                    android:textSize="12sp"
-                    tools:text="2h" />
-
-            </LinearLayout>
-
-            <!-- Conteúdo do comentário -->
-            <TextView
-                android:id="@+id/textViewContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:lineSpacingExtra="2dp"
-                tools:text="Ótima observação! Eu também tenho notado isso no meu jardim." />
-
-            <!-- Indicador de edição -->
-            <TextView
-                android:id="@+id/textViewEdited"
+                android:id="@+id/buttonLike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(editado)"
-                android:textColor="@color/text_hint"
-                android:textSize="12sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <!-- Anexos -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewAttachments"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:layout_height="80dp" />
-
-            <!-- Ações do comentário -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
                 android:orientation="horizontal"
-                android:layout_marginTop="8dp">
+                android:padding="6dp">
 
-                <!-- Botão curtir -->
-                <LinearLayout
-                    android:id="@+id/buttonLike"
+                <ImageView
+                    android:id="@+id/imageViewLike"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_favorite_border_24dp"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/textViewLikeCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="4dp">
-
-                    <ImageView
-                        android:id="@+id/imageViewLike"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_favorite_border_24dp"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:id="@+id/textViewLikeCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        tools:text="23" />
-
-                </LinearLayout>
-
-                <!-- Botão responder -->
-                <LinearLayout
-                    android:id="@+id/buttonReply"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="4dp">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_reply_24dp"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Responder"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-                <!-- Botão mais opções -->
-                <ImageButton
-                    android:id="@+id/buttonMoreOptions"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginStart="16dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_more_vert_24dp"
-                    app:tint="@color/text_hint" />
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    tools:text="23" />
 
             </LinearLayout>
+
+            <!-- Botão responder -->
+            <LinearLayout
+                android:id="@+id/buttonReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_reply_24dp"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="Responder"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!-- Botão mais opções -->
+            <ImageButton
+                android:id="@+id/buttonMoreOptions"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert_24dp"
+                app:tint="@color/text_hint" />
 
         </LinearLayout>
 
@@ -265,4 +291,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

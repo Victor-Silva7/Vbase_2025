@@ -203,7 +203,8 @@ class ComentariosRepository {
      * Verifica se o cache expirou (5 minutos)
      */
     private fun isCacheExpired(result: ComentariosResult): Boolean {
-        return System.currentTimeMillis() - result.comentarios.firstOrNull()?.timestamp ?: 0 > 5 * 60 * 1000
+        val timestamp = result.comentarios.firstOrNull()?.timestamp ?: 0
+        return System.currentTimeMillis() - timestamp > 5 * 60 * 1000
     }
     
     /**
