@@ -27,7 +27,7 @@
         android:strokeColor="#029e5a"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
-        android:fillColor="none"/>
+        android:fillColor="@android:color/transparent"/>
     
     <!-- Legs -->
     <path
