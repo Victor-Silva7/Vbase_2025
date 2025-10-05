@@ -5,10 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.FragmentFeedBinding
 import com.ifpr.androidapptemplate.data.model.*
 import com.ifpr.androidapptemplate.data.repository.TipoFiltro
@@ -238,11 +241,11 @@ class FeedFragment : Fragment() {
     }
     
     private fun openCommentsScreen(postagem: PostagemFeed) {
-        // Em uma implementação completa, navegaria para a tela de comentários
-        // Por exemplo, usando Navigation Component:
-        // findNavController().navigate(R.id.action_feed_to_comments, bundleOf("postId" to postagem.id))
-        
-        Toast.makeText(requireContext(), "Abrir comentários para: ${postagem.titulo}", Toast.LENGTH_SHORT).show()
+        // Navegar para a tela de comentários usando Navigation Component
+        findNavController().navigate(
+            R.id.navigation_comentarios,
+            bundleOf("postId" to postagem.id)
+        )
     }
     
     override fun onDestroyView() {

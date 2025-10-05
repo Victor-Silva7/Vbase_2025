@@ -22,4 +22,15 @@
         android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+        
+    <fragment
+        android:id="@+id/navigation_comentarios"
+        android:name="com.ifpr.androidapptemplate.ui.comentarios.ComentariosFragment"
+        android:label="Comentários"
+        tools:layout="@layout/fragment_comentarios">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+
 </navigation>
