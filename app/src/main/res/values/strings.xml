@@ -3,4 +3,6 @@
     <string name="title_home">Registro</string>
     <string name="title_dashboard">Postagens</string>
     <string name="title_notifications">Usuário</string>
+    <string name="title_postagens">Postagens</string>
+    <string name="title_registro">Registro</string>
 </resources>
