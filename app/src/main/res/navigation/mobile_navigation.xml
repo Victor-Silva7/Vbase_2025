@@ -22,4 +22,10 @@
         android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+        
+    <fragment
+        android:id="@+id/navigation_postagens"
+        android:name="com.ifpr.androidapptemplate.ui.postagens.PostagensFragment"
+        android:label="@string/title_postagens"
+        tools:layout="@layout/fragment_postagens" />
 </navigation>

@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.ifpr.androidapptemplate.ui.registro.InsectCategory
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -142,7 +143,7 @@ class RegistroInsetoViewModel : ViewModel() {
         }
         
         // Create insect registration object
-        val registro = hashMapOf(
+        val registro = mutableMapOf<String, Any?>(
             "id" to registroId,
             "nome" to nome,
             "data" to data,
@@ -156,7 +157,9 @@ class RegistroInsetoViewModel : ViewModel() {
         // Upload images first, then save registration
         uploadImages(registroId) { imageUrls ->
             if (imageUrls.isNotEmpty()) {
-                registro["imagens"] = imageUrls
+                // Convert list to map with indices as keys
+                val imagensMap = imageUrls.mapIndexed { index, url -> index.toString() to url }.toMap()
+                registro["imagens"] = imagensMap
             }
             
             // Save to Firebase Realtime Database

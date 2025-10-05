@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ActivityRegistroInsetoBinding
+import com.ifpr.androidapptemplate.ui.registro.InsectCategory
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -772,9 +773,4 @@ class RegistroInsetoActivity : AppCompatActivity() {
             binding.cardPraga.strokeWidth = 0
         }
     }
-}
-
-// Enum for insect categories
-enum class InsectCategory {
-    BENEFICIAL, NEUTRAL, PEST
 }
