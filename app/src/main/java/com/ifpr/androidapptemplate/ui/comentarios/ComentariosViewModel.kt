@@ -70,14 +70,14 @@ class ComentariosViewModel : ViewModel() {
     }
     
     /**
-     * Adiciona novo comentário
+     * Adiciona novo comentário ou resposta
      */
     fun addComment(conteudo: String, parentId: String? = null, attachments: List<String> = emptyList()) {
         val currentPostId = _postId.value ?: return
         
         val novoComentario = NovoComentario(
             postId = currentPostId,
-            parentId = parentId,
+            parentId = parentId, // Passa o parentId para criar uma resposta
             conteudo = conteudo,
             attachments = attachments
         )
@@ -88,9 +88,19 @@ class ComentariosViewModel : ViewModel() {
             result.onSuccess { comentario ->
                 // Atualiza a lista de comentários localmente
                 val currentList = repository.currentComments.value?.toMutableList() ?: mutableListOf()
-                currentList.add(0, comentario) // Adiciona no início
-                // Note: Em uma implementação real, precisaríamos atualizar o adapter
                 
+                if (parentId == null) {
+                    // É um comentário principal, adiciona no início
+                    currentList.add(0, comentario)
+                } else {
+                    // É uma resposta, pode ser adicionada na posição apropriada
+                    // Em uma implementação completa, precisaríamos encontrar o comentário pai
+                    // e atualizar sua contagem de respostas
+                    currentList.add(comentario)
+                }
+                
+                // Atualiza o adapter com a nova lista
+                // Note: Em uma implementação real com repository real, isso seria automático
             }.onFailure { exception ->
                 _errorMessage.value = "Erro ao adicionar comentário: ${exception.message}"
             }

@@ -34,6 +34,9 @@ class ComentariosFragment : Fragment() {
     // Lista de anexos para o novo comentário
     private val attachments = mutableListOf<String>()
     
+    // ID do comentário pai quando respondendo a um comentário
+    private var replyToCommentId: String? = null
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Obtém o ID da postagem dos argumentos
@@ -98,10 +101,13 @@ class ComentariosFragment : Fragment() {
             buttonSend.setOnClickListener {
                 val content = editTextComment.text.toString().trim()
                 if (content.isNotEmpty() || attachments.isNotEmpty()) {
-                    viewModel.addComment(content, attachments = attachments.toList())
+                    // Se estamos respondendo a um comentário, passar o parentId
+                    viewModel.addComment(content, replyToCommentId, attachments.toList())
                     editTextComment.text?.clear()
                     attachments.clear()
+                    replyToCommentId = null // Resetar o modo de resposta
                     updateAttachmentsUI()
+                    updateReplyModeUI() // Atualizar UI para modo normal
                 } else {
                     Toast.makeText(requireContext(), "Digite um comentário ou adicione um anexo", Toast.LENGTH_SHORT).show()
                 }
@@ -112,6 +118,13 @@ class ComentariosFragment : Fragment() {
                 // Em uma implementação completa, abriríamos um seletor de arquivos
                 // Para este exemplo, vamos adicionar um anexo mock
                 addAttachment("https://example.com/attachment_${System.currentTimeMillis()}.jpg")
+            }
+            
+            // Botão para cancelar resposta
+            buttonCancelReply.setOnClickListener {
+                replyToCommentId = null
+                editTextComment.setText("")
+                updateReplyModeUI()
             }
             
             // Carregar avatar do usuário (mock)
@@ -203,7 +216,13 @@ class ComentariosFragment : Fragment() {
     }
     
     private fun openReplyInput(comentario: Comentario) {
-        // Em uma implementação completa, abriríamos um input especializado para respostas
+        // Definir o ID do comentário pai
+        replyToCommentId = comentario.id
+        
+        // Atualizar UI para modo de resposta
+        updateReplyModeUI()
+        
+        // Preencher o campo de texto com menção ao usuário
         binding.editTextComment.setText("@${comentario.usuario.nomeExibicao} ")
         binding.editTextComment.setSelection(binding.editTextComment.text?.length ?: 0)
         binding.editTextComment.requestFocus()
@@ -211,6 +230,20 @@ class ComentariosFragment : Fragment() {
         // Mostrar teclado
         val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         imm.showSoftInput(binding.editTextComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+    }
+    
+    private fun updateReplyModeUI() {
+        binding.apply {
+            if (replyToCommentId != null) {
+                // Modo de resposta
+                layoutReplyMode.visibility = View.VISIBLE
+                // Você pode atualizar o texto com o nome do usuário sendo respondido
+                // textViewReplyingTo.text = "Respondendo a ${usuario.nomeExibicao}"
+            } else {
+                // Modo normal
+                layoutReplyMode.visibility = View.GONE
+            }
+        }
     }
     
     private fun showCommentOptions(comentario: Comentario) {

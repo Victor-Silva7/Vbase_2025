@@ -39,7 +39,10 @@ class ComentariosAdapter(
     }
 
     override fun onBindViewHolder(holder: ComentarioViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val comentario = getItem(position)
+        // Calcular nível de aninhamento baseado no parentId
+        val nestingLevel = if (comentario.parentId != null) 1 else 0
+        holder.bind(comentario, nestingLevel)
         
         // Trigger load more quando próximo do final
         if (position >= itemCount - 5) {
@@ -51,13 +54,40 @@ class ComentariosAdapter(
         private val binding: ItemComentarioBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(comentario: Comentario) {
+        fun bind(comentario: Comentario, nestingLevel: Int = 0) {
+            // Aplicar indentação baseada no nível de aninhamento
+            applyNestingStyle(nestingLevel)
+            
             bindUserInfo(comentario)
             bindContent(comentario)
             bindAttachments(comentario)
             bindActions(comentario)
             bindReplies(comentario)
             setupClickListeners(comentario)
+        }
+
+        private fun applyNestingStyle(nestingLevel: Int) {
+            binding.apply {
+                // Ajustar margem esquerda baseada no nível de aninhamento
+                val baseMargin = 8 // dp
+                val additionalMargin = nestingLevel * 16 // 16dp por nível
+                val totalMargin = baseMargin + additionalMargin
+                
+                // Aplicar margem ao card inteiro
+                val layoutParams = root.layoutParams as ViewGroup.MarginLayoutParams
+                val density = itemView.context.resources.displayMetrics.density
+                layoutParams.marginStart = (totalMargin * density).toInt()
+                root.layoutParams = layoutParams
+                
+                // Ajustar padding do conteúdo
+                val contentPadding = 12 - (nestingLevel * 2)
+                layoutCommentContent.setPadding(
+                    (contentPadding * density).toInt(),
+                    (8 * density).toInt(),
+                    (12 * density).toInt(),
+                    (8 * density).toInt()
+                )
+            }
         }
 
         private fun bindUserInfo(comentario: Comentario) {
