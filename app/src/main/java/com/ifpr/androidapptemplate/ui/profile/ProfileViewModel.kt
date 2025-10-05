@@ -27,7 +27,7 @@ class ProfileViewModel : ViewModel() {
         loadCurrentUser()
     }
     
-    private fun loadCurrentUser() {
+    fun loadCurrentUser() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
@@ -41,7 +41,10 @@ class ProfileViewModel : ViewModel() {
                     email = "joao.silva@example.com",
                     avatarUrl = "https://example.com/avatar.jpg",
                     biografia = "Apaixonado por jardinagem e fotografia",
-                    localizacao = "São Paulo, SP"
+                    localizacao = "São Paulo, SP",
+                    telefone = "(11) 99999-9999",
+                    website = "https://joaosilva.com",
+                    nivel = com.ifpr.androidapptemplate.data.model.NivelUsuario.INTERMEDIARIO
                 )
                 
                 _currentUser.value = usuario
@@ -53,16 +56,31 @@ class ProfileViewModel : ViewModel() {
         }
     }
     
-    fun updateProfile(nome: String, biografia: String, localizacao: String) {
+    fun updateProfile(
+        nome: String, 
+        telefone: String, 
+        website: String, 
+        biografia: String, 
+        localizacao: String
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 // Simulate network delay
                 delay(1500)
                 
+                // Validate inputs
+                if (nome.isBlank()) {
+                    _errorMessage.value = "Nome é obrigatório"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
                 // Update current user
                 val updatedUser = _currentUser.value?.copy(
                     nome = nome,
+                    telefone = telefone,
+                    website = website,
                     biografia = biografia,
                     localizacao = localizacao
                 ) ?: return@launch

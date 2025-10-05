@@ -1,6 +1,7 @@
 package com.ifpr.androidapptemplate.ui.profile
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -53,6 +54,24 @@ class ProfileFragment : Fragment() {
                 saveProfile()
             }
             
+            // Set up cancel button
+            buttonCancel.setOnClickListener {
+                cancelChanges()
+            }
+            
+            // Set up account management buttons
+            buttonChangePassword.setOnClickListener {
+                showChangePasswordDialog()
+            }
+            
+            buttonPrivacySettings.setOnClickListener {
+                showPrivacySettingsDialog()
+            }
+            
+            buttonDeleteAccount.setOnClickListener {
+                showDeleteAccountDialog()
+            }
+            
             // Load default profile image
             loadProfileImage("")
         }
@@ -84,11 +103,25 @@ class ProfileFragment : Fragment() {
     
     private fun updateUIWithUserData(usuario: Usuario) {
         binding.apply {
+            textViewUserName.text = usuario.getNomeExibicao()
+            textViewUserEmail.text = usuario.email
             editTextName.setText(usuario.nome)
             editTextEmail.setText(usuario.email)
+            editTextPhone.setText(usuario.telefone)
+            editTextWebsite.setText(usuario.website)
             editTextBio.setText(usuario.biografia)
             editTextLocation.setText(usuario.localizacao)
+            chipUserLevel.text = getUserLevelText(usuario.nivel)
             loadProfileImage(usuario.avatarUrl)
+        }
+    }
+    
+    private fun getUserLevelText(nivel: com.ifpr.androidapptemplate.data.model.NivelUsuario): String {
+        return when (nivel) {
+            com.ifpr.androidapptemplate.data.model.NivelUsuario.INICIANTE -> "Iniciante"
+            com.ifpr.androidapptemplate.data.model.NivelUsuario.INTERMEDIARIO -> "Intermediário"
+            com.ifpr.androidapptemplate.data.model.NivelUsuario.AVANCADO -> "Avançado"
+            com.ifpr.androidapptemplate.data.model.NivelUsuario.ESPECIALISTA -> "Especialista"
         }
     }
     
@@ -115,10 +148,51 @@ class ProfileFragment : Fragment() {
     
     private fun saveProfile() {
         val nome = binding.editTextName.text.toString()
+        val telefone = binding.editTextPhone.text.toString()
+        val website = binding.editTextWebsite.text.toString()
         val bio = binding.editTextBio.text.toString()
         val location = binding.editTextLocation.text.toString()
         
-        profileViewModel.updateProfile(nome, bio, location)
+        // Simple validation
+        if (nome.isBlank()) {
+            binding.editTextName.error = "Nome é obrigatório"
+            return
+        }
+        
+        profileViewModel.updateProfile(nome, telefone, website, bio, location)
+    }
+    
+    private fun cancelChanges() {
+        // Reload user data to cancel changes
+        profileViewModel.loadCurrentUser()
+    }
+    
+    private fun showChangePasswordDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Alterar Senha")
+            .setMessage("Em uma implementação completa, aqui você poderia alterar sua senha.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+    
+    private fun showPrivacySettingsDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Configurações de Privacidade")
+            .setMessage("Em uma implementação completa, aqui você poderia gerenciar suas configurações de privacidade.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+    
+    private fun showDeleteAccountDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Excluir Conta")
+            .setMessage("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.")
+            .setPositiveButton("Excluir") { _, _ ->
+                // In a real app, you would call a method to delete the account
+                Toast.makeText(context, "Conta excluída com sucesso", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
     
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
