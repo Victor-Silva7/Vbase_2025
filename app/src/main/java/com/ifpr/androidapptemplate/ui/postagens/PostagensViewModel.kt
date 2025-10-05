@@ -1,10 +1,10 @@
-package com.ifpr.androidapptemplate.ui.dashboard
+package com.ifpr.androidapptemplate.ui.postagens
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class DashboardViewModel : ViewModel() {
+class PostagensViewModel : ViewModel() {
 
     private val _title = MutableLiveData<String>().apply {
         value = "Postagens Recentes"

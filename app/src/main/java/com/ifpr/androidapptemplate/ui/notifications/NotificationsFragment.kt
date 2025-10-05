@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ifpr.androidapptemplate.databinding.FragmentNotificationsBinding
@@ -12,9 +11,6 @@ import com.ifpr.androidapptemplate.databinding.FragmentNotificationsBinding
 class NotificationsFragment : Fragment() {
 
     private var _binding: FragmentNotificationsBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -22,17 +18,48 @@ class NotificationsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val notificationsViewModel =
-            ViewModelProvider(this).get(NotificationsViewModel::class.java)
-
+        val perfilViewModel = ViewModelProvider(this)[NotificationsViewModel::class.java]
+        
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textNotifications
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+        // Configurar observadores do ViewModel
+        setupObservers(perfilViewModel)
+        
+        // Configurar cliques dos botões
+        setupClickListeners()
+
         return root
+    }
+
+    private fun setupObservers(viewModel: NotificationsViewModel) {
+        // Observar dados do usuário
+        viewModel.userName.observe(viewLifecycleOwner) { name ->
+            binding.textUserName.text = name
+        }
+        
+        viewModel.userEmail.observe(viewLifecycleOwner) { email ->
+            binding.textUserEmail.text = email
+        }
+        
+        viewModel.userStats.observe(viewLifecycleOwner) { stats ->
+            binding.textUserStats.text = stats
+        }
+    }
+
+    private fun setupClickListeners() {
+        // TODO: Configurar cliques para editar perfil, configurações, etc.
+        binding.buttonEditProfile.setOnClickListener {
+            // TODO: Navegar para edição de perfil
+        }
+        
+        binding.buttonSettings.setOnClickListener {
+            // TODO: Abrir configurações
+        }
+        
+        binding.buttonLogout.setOnClickListener {
+            // TODO: Implementar logout
+        }
     }
 
     override fun onDestroyView() {

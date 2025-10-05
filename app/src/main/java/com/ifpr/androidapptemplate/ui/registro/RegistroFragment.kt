@@ -1,4 +1,4 @@
-package com.ifpr.androidapptemplate.ui.home
+package com.ifpr.androidapptemplate.ui.registro
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ifpr.androidapptemplate.databinding.FragmentHomeBinding
+import com.ifpr.androidapptemplate.databinding.FragmentRegistroBinding
 
-class HomeFragment : Fragment() {
+class RegistroFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentRegistroBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -18,13 +18,13 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        val registroViewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
         
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentRegistroBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         // Configurar observadores do ViewModel
-        setupObservers(homeViewModel)
+        setupObservers(registroViewModel)
         
         // Configurar cliques dos botões
         setupClickListeners()
@@ -32,10 +32,10 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    private fun setupObservers(viewModel: HomeViewModel) {
+    private fun setupObservers(viewModel: RegistroViewModel) {
         // Observar mudanças no ViewModel
         viewModel.title.observe(viewLifecycleOwner) { title ->
-            binding.textHome.text = title
+            binding.textRegistroTitle.text = title
         }
     }
 

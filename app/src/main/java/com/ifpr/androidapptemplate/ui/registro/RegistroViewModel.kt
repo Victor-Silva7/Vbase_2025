@@ -1,10 +1,10 @@
-package com.ifpr.androidapptemplate.ui.home
+package com.ifpr.androidapptemplate.ui.registro
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class HomeViewModel : ViewModel() {
+class RegistroViewModel : ViewModel() {
 
     private val _title = MutableLiveData<String>().apply {
         value = "Selecione seu Registro"
@@ -16,17 +16,15 @@ class HomeViewModel : ViewModel() {
     }
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // Função para navegar para registro de planta
+    // Função para futuras operações de registro
     fun navigateToPlantRegistration() {
         // TODO: Implementar navegação para registro de planta
     }
 
-    // Função para navegar para registro de inseto
     fun navigateToInsectRegistration() {
         // TODO: Implementar navegação para registro de inseto
     }
 
-    // Função para navegar para registros do usuário
     fun navigateToUserRecords() {
         // TODO: Implementar navegação para registros do usuário
     }
