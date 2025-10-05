@@ -1,5 +1,6 @@
 package com.ifpr.androidapptemplate.data.model
 
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -50,6 +51,24 @@ data class Comentario(
                 "${weeks}sem"
             }
         }
+    }
+    
+    /**
+     * Formata a data completa do comentário
+     */
+    fun getFormattedDate(): String {
+        val date = Date(timestamp)
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return formatter.format(date)
+    }
+    
+    /**
+     * Formata apenas a data (sem hora)
+     */
+    fun getFormattedDateOnly(): String {
+        val date = Date(timestamp)
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return formatter.format(date)
     }
 }
 

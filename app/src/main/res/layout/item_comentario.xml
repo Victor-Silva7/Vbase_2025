@@ -78,7 +78,7 @@
 
                 </LinearLayout>
 
-                <!-- Nível do usuário e tempo -->
+                <!-- Nível do usuário, tempo e data completa -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,6 +106,17 @@
                         android:textColor="@color/text_hint"
                         android:textSize="12sp"
                         tools:text="2h" />
+
+                    <!-- Indicador de data completa (visível ao passar o mouse/pressionar) -->
+                    <ImageView
+                        android:id="@+id/imageViewTimeInfo"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_info_24dp"
+                        app:tint="@color/text_hint"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                 </LinearLayout>
 

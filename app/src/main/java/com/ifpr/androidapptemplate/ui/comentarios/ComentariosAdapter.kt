@@ -116,8 +116,30 @@ class ComentariosAdapter(
                     setTextColor(Color.parseColor(getUserLevelColor(comentario.usuario.nivel)))
                 }
                 
-                // Tempo do comentário
+                // Tempo do comentário (relativo)
                 textViewTime.text = comentario.getRelativeTime()
+                
+                // Mostrar ícone de informação se o comentário tem data completa
+                imageViewTimeInfo.visibility = View.VISIBLE
+                
+                // Adicionar tooltip com data completa
+                textViewTime.setOnLongClickListener {
+                    android.widget.Toast.makeText(
+                        itemView.context,
+                        "Postado por ${comentario.usuario.nomeExibicao} em ${comentario.getFormattedDate()}",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                    true
+                }
+                
+                // Também mostrar informação ao clicar no ícone de informação
+                imageViewTimeInfo.setOnClickListener {
+                    android.widget.Toast.makeText(
+                        itemView.context,
+                        "Postado por ${comentario.usuario.nomeExibicao} em ${comentario.getFormattedDate()}",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
 
