@@ -57,4 +57,47 @@
     
     <!-- Category validation -->
     <string name="error_category_required">Selecione uma categoria (Saudável ou Doente)</string>
+    
+    <!-- Insect Category Selection -->
+    <string name="beneficial_category_selected">Categoria: Inseto Benéfico selecionado</string>
+    <string name="neutral_category_selected">Categoria: Inseto Neutro selecionado</string>
+    <string name="pest_category_selected">Categoria: Inseto Praga selecionado</string>
+    
+    <!-- Insect Tooltips -->
+    <string name="insect_beneficial_title">Inseto Benéfico</string>
+    <string name="insect_beneficial_description">• Polinizadores (abelhas, borboletas)
+• Predadores de pragas (joaninha, crisopa)
+• Decompositores (besouros, formigas)
+• Ajudam no controle biológico
+• Importantes para o ecossistema</string>
+    
+    <string name="insect_neutral_title">Inseto Neutro</string>
+    <string name="insect_neutral_description">• Não causam danos significativos
+• Podem ser benéficos em algumas situações
+• Não são considerados pragas
+• Vivem em harmonia com as plantas
+• Podem indicar equilíbrio ecológico</string>
+    
+    <string name="insect_pest_title">Inseto Praga</string>
+    <string name="insect_pest_description">• Causam danos às plantas
+• Podem transmitir doenças
+• Reduzem a produção
+• Requerem controle adequado
+• Podem se multiplicar rapidamente</string>
+    
+    <!-- Insect Validation Error Messages -->
+    <string name="error_nome_required_insect">O nome do inseto é obrigatório</string>
+    <string name="error_nome_too_short_insect">O nome deve ter pelo menos 2 caracteres</string>
+    <string name="error_nome_too_long_insect">O nome deve ter no máximo 50 caracteres</string>
+    <string name="error_nome_invalid_chars_insect">Use apenas letras, espaços, hífens e parênteses</string>
+    <string name="error_nome_pattern_insect">Nome deve seguir padrão válido para insetos</string>
+    
+    <string name="error_category_required_insect">Selecione uma categoria (Benéfico, Neutro ou Praga)</string>
+    
+    <string name="error_observacao_required_pest">Para insetos praga, a observação é obrigatória (mín. 10 caracteres)</string>
+    <string name="error_observacao_suggested_beneficial">Para insetos benéficos, recomenda-se detalhar a observação (mín. 5 caracteres)</string>
+    
+    <string name="error_images_required_insect">Adicione pelo menos 1 imagem do inseto</string>
+    <string name="error_images_minimum_pest">Para insetos praga, adicione pelo menos 2 imagens</string>
+    <string name="error_images_minimum_beneficial">Para insetos benéficos, adicione pelo menos 1 imagem</string>
 </resources>
