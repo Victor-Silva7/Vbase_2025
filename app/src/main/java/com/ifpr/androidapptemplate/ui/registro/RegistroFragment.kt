@@ -1,16 +1,17 @@
 package com.ifpr.androidapptemplate.ui.registro
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ifpr.androidapptemplate.databinding.FragmentRegistroBinding
+import com.ifpr.androidapptemplate.databinding.FragmentHomeBinding
 
 class RegistroFragment : Fragment() {
 
-    private var _binding: FragmentRegistroBinding? = null
+    private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -20,7 +21,7 @@ class RegistroFragment : Fragment() {
     ): View {
         val registroViewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
         
-        _binding = FragmentRegistroBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         // Configurar observadores do ViewModel
@@ -35,21 +36,23 @@ class RegistroFragment : Fragment() {
     private fun setupObservers(viewModel: RegistroViewModel) {
         // Observar mudanças no ViewModel
         viewModel.title.observe(viewLifecycleOwner) { title ->
-            binding.textRegistroTitle.text = title
+            binding.textHome.text = title
         }
     }
 
     private fun setupClickListeners() {
         // Configurar cliques dos botões de registro
-        binding.buttonRegistroPlanta.setOnClickListener {
-            // TODO: Navegar para registro de planta
+        binding.cardRegistroPlanta.setOnClickListener {
+            val intent = Intent(requireContext(), RegistroPlantaActivity::class.java)
+            startActivity(intent)
         }
         
-        binding.buttonRegistroInseto.setOnClickListener {
-            // TODO: Navegar para registro de inseto
+        binding.cardRegistroInseto.setOnClickListener {
+            val intent = Intent(requireContext(), RegistroInsetoActivity::class.java)
+            startActivity(intent)
         }
         
-        binding.buttonSeusRegistros.setOnClickListener {
+        binding.cardSeusRegistros.setOnClickListener {
             // TODO: Navegar para lista de registros do usuário
         }
     }
