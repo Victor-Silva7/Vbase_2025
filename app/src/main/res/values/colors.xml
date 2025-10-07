@@ -10,7 +10,7 @@
     
     <!-- V Group - Manejo Verde Colors -->
     <color name="vgroup_green">#029e5a</color>
-    <color name="vgroup_dark_gray">#0d0d0d</color>
+    <color name="vgroup_dark_gray">#1a1a1a</color>
     
     <!-- Primary Colors -->
     <color name="colorPrimary">@color/vgroup_green</color>
@@ -23,14 +23,17 @@
     <color name="colorOnSecondary">@color/white</color>
     
     <!-- Background Colors -->
-    <color name="colorBackground">@color/white</color>
-    <color name="colorSurface">@color/white</color>
-    <color name="colorOnBackground">@color/black</color>
-    <color name="colorOnSurface">@color/black</color>
+    <color name="colorBackground">@color/vgroup_dark_gray</color>
+    <color name="colorSurface">@color/vgroup_dark_gray</color>
+    <color name="colorOnBackground">@color/white</color>
+    <color name="colorOnSurface">@color/white</color>
     
     <!-- Additional UI Colors -->
-    <color name="vgroup_green_light">#40029e5a</color>
+    <color name="vgroup_green_light">#33029e5a</color>
     <color name="vgroup_green_dark">#01663a</color>
-    <color name="vgroup_gray_light">#f0f0f0</color>
-    <color name="vgroup_text_secondary">#666666</color>
+    <color name="vgroup_gray_light">#2d2d2d</color>
+    <color name="vgroup_text_secondary">#b3b3b3</color>
+    
+    <!-- Utility Colors -->
+    <color name="transparent">#00000000</color>
 </resources>

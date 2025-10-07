@@ -5,4 +5,102 @@
     <string name="title_notifications">Usuário</string>
     <string name="title_postagens">Postagens</string>
     <string name="title_registro">Registro</string>
+    
+    <!-- Plant Health Tooltips -->
+    <string name="plant_healthy_title">Planta Saudável</string>
+    <string name="plant_healthy_description">• Folhas verdes e vigorosas
+• Sem manchas ou descoloração
+• Ausência de pragas visíveis
+• Crescimento normal e saudável
+• Estrutura firme e bem formada</string>
+    
+    <string name="plant_sick_title">Planta Doente</string>
+    <string name="plant_sick_description">• Folhas amareladas ou manchadas
+• Presença de pragas ou doenças
+• Murcha ou deformações
+• Crescimento anormal ou atrofiado
+• Sinais de apodrecimento</string>
+    
+    <!-- Category Selection -->
+    <string name="category_tooltip_hint">Toque no ícone para ver explicação ℹ️</string>
+    <string name="healthy_category_selected">Categoria: Planta Saudável selecionada</string>
+    <string name="sick_category_selected">Categoria: Planta Doente selecionada</string>
+    
+    <!-- Dialog -->
+    <string name="understood">Entendi</string>
+    
+    <!-- Permission messages -->
+    <string name="camera_permission_needed">Permissão de câmera necessária para capturar fotos</string>
+    <string name="storage_permission_needed">Permissão de armazenamento necessária para selecionar imagens</string>
+    
+    <!-- Image messages -->
+    <string name="max_images_reached">Máximo de 5 imagens permitidas</string>
+    <string name="image_added">Imagem adicionada</string>
+    <string name="image_removed">Imagem removida</string>
+    <string name="duplicate_image">Esta imagem já foi adicionada</string>
+    
+    <!-- Validation Error Messages -->
+    <!-- Nome validation -->
+    <string name="error_nome_required">O nome da planta é obrigatório</string>
+    <string name="error_nome_too_short">O nome deve ter pelo menos 2 caracteres</string>
+    <string name="error_nome_too_long">O nome deve ter no máximo 50 caracteres</string>
+    <string name="error_nome_invalid_chars">Use apenas letras e espaços para o nome</string>
+    
+    <!-- Data validation -->
+    <string name="error_data_required">A data de observação é obrigatória</string>
+    <string name="error_data_invalid_format">Formato de data inválido (use dd/mm/aaaa)</string>
+    <string name="error_data_future">A data não pode ser no futuro</string>
+    
+    <!-- Local validation -->
+    <string name="error_local_required">O local de observação é obrigatório</string>
+    <string name="error_local_too_short">O local deve ter pelo menos 2 caracteres</string>
+    <string name="error_local_too_long">O local deve ter no máximo 30 caracteres</string>
+    <string name="error_local_invalid_chars">Use apenas letras e espaços para o local</string>
+    
+    <!-- Category validation -->
+    <string name="error_category_required">Selecione uma categoria (Saudável ou Doente)</string>
+    <string name="error_category_required_insect">Selecione uma categoria (Benéfico, Neutro ou Praga)</string>
+    
+    <!-- Nome validation for insects -->
+    <string name="error_nome_required_insect">O nome do inseto é obrigatório</string>
+    <string name="error_nome_too_short_insect">O nome do inseto deve ter pelo menos 2 caracteres</string>
+    <string name="error_nome_too_long_insect">O nome do inseto deve ter no máximo 50 caracteres</string>
+    <string name="error_nome_invalid_chars_insect">Use apenas letras, espaços, hífens e parênteses para o nome do inseto</string>
+    <string name="error_nome_pattern_insect">Nome de inseto inválido. Evite números e caracteres especiais</string>
+    
+    <!-- Observacao validation for insects -->
+    <string name="error_observacao_required_pest">Para insetos praga, descreva os danos observados (mínimo 10 caracteres)</string>
+    <string name="error_observacao_suggested_beneficial">Para insetos benéficos, descreva o comportamento observado</string>
+    
+    <!-- Image validation for insects -->
+    <string name="error_images_required_insect">Adicione pelo menos 1 imagem do inseto para identificação</string>
+    <string name="error_images_minimum_pest">Para insetos praga, adicione pelo menos 2 imagens (inseto e danos)</string>
+    <string name="error_images_minimum_beneficial">Para insetos benéficos, adicione pelo menos 1 imagem clara</string>
+    
+    <!-- Insect Tooltips -->
+    <string name="insect_beneficial_title">Inseto Benéfico</string>
+    <string name="insect_beneficial_description">• Polinizadores (abelhas, borboletas)
+• Predadores naturais de pragas
+• Controladores biológicos
+• Decompostôes de matéria orgânica
+• Contribuem para o equilíbrio ecológico</string>
+    
+    <string name="insect_neutral_title">Inseto Neutro</string>
+    <string name="insect_neutral_description">• Não causam danos significativos
+• Não são considerados benéficos
+• Vivem sem interagir diretamente com plantas
+• Parte do ecossistema natural
+• Não requerem controle</string>
+    
+    <string name="insect_pest_title">Inseto Praga</string>
+    <string name="insect_pest_description">• Causam danos às plantas
+• Sugam seiva ou comem folhas
+• Transmitem doenças
+• Reduzem produtividade
+• Requerem monitoramento e controle</string>
+    
+    <!-- Category Selection for Insects -->
+    <string name="beneficial_category_selected">Categoria: Inseto Benéfico selecionado</string>
+    <string name="neutral_category_selected">Categoria: Inseto Neutro selecionado</string>
+    <string name="pest_category_selected">Categoria: Inseto Praga selecionado</string>
 </resources>
