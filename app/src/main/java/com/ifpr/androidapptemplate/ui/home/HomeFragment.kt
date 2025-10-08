@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ifpr.androidapptemplate.databinding.FragmentHomeBinding
 import com.ifpr.androidapptemplate.ui.registro.RegistroPlantaActivity
+import com.ifpr.androidapptemplate.ui.registro.RegistroInsetoActivity
 
 class HomeFragment : Fragment() {
 
@@ -61,7 +62,8 @@ class HomeFragment : Fragment() {
         }
         
         binding.cardRegistroInseto.setOnClickListener {
-            // TODO: Navegar para registro de inseto
+            val intent = Intent(requireContext(), RegistroInsetoActivity::class.java)
+            startActivity(intent)
         }
         
         binding.cardSeusRegistros.setOnClickListener {
