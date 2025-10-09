@@ -1,6 +1,7 @@
 package com.ifpr.androidapptemplate
 
 import android.os.Bundle
+import android.content.Intent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -26,10 +27,31 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications, R.id.navigation_postagens, R.id.navigation_registro
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        
+        // Verificar se foi solicitada navegação para um fragmento específico
+        handleNavigationIntent(intent)
+    }
+    
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Lidar com intents recebidos quando a activity já está em execução
+        intent?.let { handleNavigationIntent(it) }
+    }
+    
+    private fun handleNavigationIntent(intent: Intent) {
+        val navigateTo = intent.getStringExtra("navigate_to")
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        
+        when (navigateTo) {
+            "registro" -> {
+                navController.navigate(R.id.navigation_registro)
+            }
+            // Adicione outros casos conforme necessário
+        }
     }
 }

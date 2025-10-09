@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+    
+    <!-- Feed/Timeline icon -->
+    <path
+        android:pathData="M16,4l-4,0l0,-1c0,-0.55 -0.45,-1 -1,-1L9,2c-0.55,0 -1,0.45 -1,1l0,1L4,4c-1.1,0 -2,0.9 -2,2l0,11c0,1.1 0.9,2 2,2l16,0c1.1,0 2,-0.9 2,-2L22,6c0,-1.1 -0.9,-2 -2,-2zM20,17L4,17L4,8l16,0l0,9z"
+        android:fillColor="@android:color/white"/>
+    
+    <!-- Content lines -->
+    <path
+        android:pathData="M6,10h12v1H6V10z M6,12h8v1H6V12z M6,14h10v1H6V14z"
+        android:fillColor="@android:color/black"/>
+        
+</vector>

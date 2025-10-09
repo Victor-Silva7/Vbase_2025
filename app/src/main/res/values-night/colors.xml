@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V Group - Manejo Verde Colors (Night Mode) -->
+    <color name="vgroup_green">#029e5a</color>
+    <color name="vgroup_dark_gray">#0d0d0d</color>
+    
+    <!-- Primary Colors -->
+    <color name="colorPrimary">@color/vgroup_green</color>
+    <color name="colorPrimaryVariant">@color/vgroup_green</color>
+    <color name="colorOnPrimary">@color/white</color>
+    
+    <!-- Secondary Colors -->
+    <color name="colorSecondary">@color/vgroup_green</color>
+    <color name="colorSecondaryVariant">@color/vgroup_green</color>
+    <color name="colorOnSecondary">@color/white</color>
+    
+    <!-- Background Colors (darker for night mode) -->
+    <color name="colorBackground">@color/vgroup_dark_gray</color>
+    <color name="colorSurface">@color/vgroup_dark_gray</color>
+    <color name="colorOnBackground">@color/white</color>
+    <color name="colorOnSurface">@color/white</color>
+    
+    <!-- Additional UI Colors (adjusted for night mode) -->
+    <color name="vgroup_green_light">#40029e5a</color>
+    <color name="vgroup_green_dark">#01663a</color>
+    <color name="vgroup_gray_light">#1f1f1f</color>
+    <color name="vgroup_text_secondary">#cccccc</color>
+</resources>
