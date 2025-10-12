@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Original colors -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -8,32 +9,41 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
-    <!-- V Group - Manejo Verde Colors -->
-    <color name="vgroup_green">#029e5a</color>
-    <color name="vgroup_dark_gray">#1a1a1a</color>
+    <!-- V Group - Manejo Verde Theme -->
+    <color name="primary_green">#029e5a</color>
+    <color name="primary_green_dark">#027a47</color>
+    <color name="primary_green_light">#4db882</color>
+    <color name="secondary_green">#66bb6a</color>
+    <color name="accent_green">#8bc34a</color>
     
-    <!-- Primary Colors -->
-    <color name="colorPrimary">@color/vgroup_green</color>
-    <color name="colorPrimaryVariant">@color/vgroup_green</color>
-    <color name="colorOnPrimary">@color/white</color>
+    <!-- Background colors -->
+    <color name="background_light">#fafafa</color>
+    <color name="background_dark">#121212</color>
+    <color name="surface_light">#ffffff</color>
+    <color name="surface_dark">#1e1e1e</color>
     
-    <!-- Secondary Colors -->
-    <color name="colorSecondary">@color/vgroup_green</color>
-    <color name="colorSecondaryVariant">@color/vgroup_green</color>
-    <color name="colorOnSecondary">@color/white</color>
+    <!-- Text colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9e9e9e</color>
+    <color name="text_disabled">#bdbdbd</color>
     
-    <!-- Background Colors -->
-    <color name="colorBackground">@color/vgroup_dark_gray</color>
-    <color name="colorSurface">@color/vgroup_dark_gray</color>
-    <color name="colorOnBackground">@color/white</color>
-    <color name="colorOnSurface">@color/white</color>
+    <!-- Status colors -->
+    <color name="success_color">#4caf50</color>
+    <color name="warning_color">#ff9800</color>
+    <color name="error_color">#f44336</color>
+    <color name="info_color">#2196f3</color>
     
-    <!-- Additional UI Colors -->
-    <color name="vgroup_green_light">#33029e5a</color>
-    <color name="vgroup_green_dark">#01663a</color>
-    <color name="vgroup_gray_light">#2d2d2d</color>
-    <color name="vgroup_text_secondary">#b3b3b3</color>
+    <!-- Category colors -->
+    <color name="healthy_color">#4caf50</color>
+    <color name="sick_color">#f44336</color>
+    <color name="beneficial_color">#2196f3</color>
+    <color name="neutral_color">#9e9e9e</color>
+    <color name="pest_color">#ff5722</color>
     
-    <!-- Utility Colors -->
-    <color name="transparent">#00000000</color>
+    <!-- UI elements -->
+    <color name="divider_color">#e0e0e0</color>
+    <color name="ripple_color">#1f029e5a</color>
+    <color name="overlay_color">#80000000</color>
+    
 </resources>

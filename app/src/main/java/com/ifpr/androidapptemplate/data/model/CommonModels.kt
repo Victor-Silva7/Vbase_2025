@@ -8,6 +8,52 @@ import kotlinx.parcelize.Parcelize
  */
 
 /**
+ * Plant health categories
+ */
+enum class PlantHealthCategory {
+    HEALTHY,
+    SICK
+}
+
+/**
+ * Insect categories
+ */
+enum class InsectCategory {
+    BENEFICIAL,
+    NEUTRAL,
+    PEST
+}
+
+/**
+ * Registration visibility
+ */
+enum class VisibilidadeRegistro {
+    PUBLICO,
+    PRIVADO
+}
+
+/**
+ * Base interface for registrations
+ */
+interface BaseRegistration {
+    val id: String
+    val nome: String
+    val nomePopular: String
+    val nomeCientifico: String
+    val data: String
+    val dataTimestamp: Long
+    val local: String
+    val observacao: String
+    val imagens: List<String>
+    val userId: String
+    val userName: String
+    val timestamp: Long
+    val timestampUltimaEdicao: Long
+    val tipo: String
+    val visibilidade: VisibilidadeRegistro
+}
+
+/**
  * Geographic coordinates for location tracking
  */
 @Parcelize
@@ -155,16 +201,6 @@ enum class StatusRegistro {
     PENDENTE,       // Pending review
     REJEITADO,      // Rejected by moderation
     ARQUIVADO       // Archived by user
-}
-
-/**
- * Visibility settings for registrations
- */
-enum class VisibilidadeRegistro {
-    PUBLICO,        // Visible to all users
-    PRIVADO,        // Visible only to owner
-    AMIGOS,         // Visible to connections only
-    RESTRITO        // Visible to specific users
 }
 
 /**

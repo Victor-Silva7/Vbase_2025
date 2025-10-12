@@ -4,23 +4,38 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     
-    <!-- Leaf shape -->
+    <!-- Plant stem -->
     <path
-        android:pathData="M12,2C8,2 4,6 4,12c0,4 2,6 4,8c1,1 2,2 4,2s3,-1 4,-2c2,-2 4,-4 4,-8C20,6 16,2 12,2z"
+        android:pathData="M12,22L12,6"
+        android:strokeColor="#029e5a"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"/>
+    
+    <!-- Main leaves -->
+    <path
+        android:pathData="M12,6C10,4 6,4 6,8C6,10 8,12 12,12"
         android:fillColor="#029e5a"/>
     
-    <!-- Leaf vein -->
     <path
-        android:pathData="M12,4c0,0 0,8 0,16"
-        android:strokeColor="#ffffff"
-        android:strokeWidth="1.5"
-        android:strokeLineCap="round"/>
+        android:pathData="M12,6C14,4 18,4 18,8C18,10 16,12 12,12"
+        android:fillColor="#029e5a"/>
     
-    <!-- Secondary veins -->
+    <!-- Side leaves -->
     <path
-        android:pathData="M8,8c2,1 4,2 4,4 M16,8c-2,1 -4,2 -4,4 M8,12c2,1 4,2 4,4 M16,12c-2,1 -4,2 -4,4"
-        android:strokeColor="#ffffff"
-        android:strokeWidth="1"
-        android:strokeLineCap="round"/>
+        android:pathData="M12,10C11,8 8,8 8,11C8,12 9,14 12,14"
+        android:fillColor="#4db882"/>
+    
+    <path
+        android:pathData="M12,10C13,8 16,8 16,11C16,12 15,14 12,14"
+        android:fillColor="#4db882"/>
+    
+    <!-- Small top leaves -->
+    <path
+        android:pathData="M12,14C11.5,13 10,13 10,15C10,15.5 10.5,16 12,16"
+        android:fillColor="#66bb6a"/>
+    
+    <path
+        android:pathData="M12,14C12.5,13 14,13 14,15C14,15.5 13.5,16 12,16"
+        android:fillColor="#66bb6a"/>
         
 </vector>

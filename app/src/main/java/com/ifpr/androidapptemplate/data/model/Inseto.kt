@@ -11,36 +11,101 @@ import java.util.*
  */
 @Parcelize
 data class Inseto(
-    val id: String = "",
-    val nome: String = "",
-    val nomePopular: String = "",
-    val nomeCientifico: String = "",
-    val data: String = "",
-    val dataTimestamp: Long = 0L,
-    val local: String = "",
+    override val id: String = generateId(),
+    override val nome: String = "",
+    override val nomePopular: String = "",
+    override val nomeCientifico: String = "",
+    override val data: String = "",
+    override val dataTimestamp: Long = System.currentTimeMillis(),
+    override val local: String = "",
     val coordenadas: Coordenadas? = null,
     val categoria: InsectCategory = InsectCategory.NEUTRAL,
-    val observacao: String = "",
-    val imagens: List<String> = emptyList(),
+    override val observacao: String = "",
+    override val imagens: List<String> = emptyList(),
     val thumbnailUrl: String = "",
-    val userId: String = "",
-    val userName: String = "",
+    override val userId: String = "",
+    override val userName: String = "",
     val userProfileImage: String = "",
-    val timestamp: Long = System.currentTimeMillis(),
-    val timestampUltimaEdicao: Long = 0L,
-    val tipo: String = "INSETO",
+    override val timestamp: Long = System.currentTimeMillis(),
+    override val timestampUltimaEdicao: Long = System.currentTimeMillis(),
+    override val tipo: String = "INSETO",
     val status: StatusRegistro = StatusRegistro.ATIVO,
-    val visibilidade: VisibilidadeRegistro = VisibilidadeRegistro.PUBLICO,
+    override val visibilidade: VisibilidadeRegistro = VisibilidadeRegistro.PRIVADO,
     val tags: List<String> = emptyList(),
     val clima: ClimaObservacao? = null,
     val caracteristicas: CaracteristicasInseto? = null,
     val impactoObservado: ImpactoInseto? = null,
     val validacao: ValidacaoRegistro? = null,
     val estatisticas: EstatisticasInteracao = EstatisticasInteracao()
-) : Parcelable {
+) : Parcelable, BaseRegistration {
     
+    companion object {
+        /**
+         * Gera um ID único para o inseto
+         */
+        fun generateId(): String {
+            return "insect_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(8)}"
+        }
+
+        /**
+         * Cria objeto Inseto a partir de dados do Firebase
+         */
+        fun fromFirebaseMap(map: Map<String, Any?>): Inseto {
+            return Inseto(
+                id = map["id"] as? String ?: generateId(),
+                nome = map["nome"] as? String ?: "",
+                nomePopular = map["nomePopular"] as? String ?: "",
+                nomeCientifico = map["nomeCientifico"] as? String ?: "",
+                data = map["data"] as? String ?: "",
+                dataTimestamp = (map["dataTimestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                local = map["local"] as? String ?: "",
+                coordenadas = (map["coordenadas"] as? Map<String, Any?>)?.let { 
+                    Coordenadas.fromMap(it) 
+                },
+                categoria = try {
+                    InsectCategory.valueOf(map["categoria"] as? String ?: "NEUTRAL")
+                } catch (e: Exception) {
+                    InsectCategory.NEUTRAL
+                },
+                observacao = map["observacao"] as? String ?: "",
+                imagens = (map["imagens"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
+                userId = map["userId"] as? String ?: "",
+                userName = map["userName"] as? String ?: "",
+                userProfileImage = map["userProfileImage"] as? String ?: "",
+                timestamp = (map["timestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                timestampUltimaEdicao = (map["timestampUltimaEdicao"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                tipo = map["tipo"] as? String ?: "INSETO",
+                status = StatusRegistro.valueOf(
+                    map["status"] as? String ?: StatusRegistro.ATIVO.name
+                ),
+                visibilidade = try {
+                    VisibilidadeRegistro.valueOf(map["visibilidade"] as? String ?: "PRIVADO")
+                } catch (e: Exception) {
+                    VisibilidadeRegistro.PRIVADO
+                },
+                tags = (map["tags"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                clima = (map["clima"] as? Map<String, Any?>)?.let { 
+                    ClimaObservacao.fromMap(it) 
+                },
+                caracteristicas = (map["caracteristicas"] as? Map<String, Any?>)?.let { 
+                    CaracteristicasInseto.fromMap(it) 
+                },
+                impactoObservado = (map["impactoObservado"] as? Map<String, Any?>)?.let { 
+                    ImpactoInseto.fromMap(it) 
+                },
+                validacao = (map["validacao"] as? Map<String, Any?>)?.let { 
+                    ValidacaoRegistro.fromMap(it) 
+                },
+                estatisticas = (map["estatisticas"] as? Map<String, Any?>)?.let { 
+                    EstatisticasInteracao.fromMap(it) 
+                } ?: EstatisticasInteracao()
+            )
+        }
+    }
+
     /**
-     * Convert to Firebase-compatible map
+     * Converte o objeto para um mapa para salvar no Firebase
      */
     fun toFirebaseMap(): Map<String, Any?> {
         return mapOf(
@@ -72,7 +137,7 @@ data class Inseto(
             "estatisticas" to estatisticas.toMap()
         )
     }
-    
+
     /**
      * Get formatted date for display
      */
@@ -96,11 +161,21 @@ data class Inseto(
      * Check if insect has images
      */
     fun hasImages(): Boolean = imagens.isNotEmpty()
-    
+
     /**
-     * Get category display text following project specifications
+     * Obtém a primeira imagem disponível
      */
-    fun getCategoryDisplayText(): String {
+    fun getFirstImage(): String? = imagens.firstOrNull()
+
+    /**
+     * Verifica se tem múltiplas imagens
+     */
+    fun hasMultipleImages(): Boolean = imagens.size > 1
+
+    /**
+     * Obtém texto de status do inseto
+     */
+    fun getStatusText(): String {
         return when (categoria) {
             InsectCategory.BENEFICIAL -> "Benéfico"
             InsectCategory.NEUTRAL -> "Neutro"
@@ -129,6 +204,28 @@ data class Inseto(
             InsectCategory.PEST -> "#F44336"       // Red
         }
     }
+
+    /**
+     * Obtém cor do status
+     */
+    fun getStatusColor(): String {
+        return when (categoria) {
+            InsectCategory.BENEFICIAL -> "#2196f3"
+            InsectCategory.NEUTRAL -> "#9e9e9e"
+            InsectCategory.PEST -> "#ff5722"
+        }
+    }
+
+    /**
+     * Obtém ícone do status
+     */
+    fun getStatusIcon(): String {
+        return when (categoria) {
+            InsectCategory.BENEFICIAL -> "ic_benefico_24dp"
+            InsectCategory.NEUTRAL -> "ic_neutro_24dp"
+            InsectCategory.PEST -> "ic_praga_24dp"
+        }
+    }
     
     /**
      * Check if insect belongs to current user
@@ -153,67 +250,32 @@ data class Inseto(
      * Check if observation requires attention (pest category)
      */
     fun requiresAttention(): Boolean = categoria == InsectCategory.PEST
-    
-    companion object {
-        /**
-         * Create from Firebase map
-         */
-        fun fromFirebaseMap(map: Map<String, Any?>): Inseto {
-            return Inseto(
-                id = map["id"] as? String ?: "",
-                nome = map["nome"] as? String ?: "",
-                nomePopular = map["nomePopular"] as? String ?: "",
-                nomeCientifico = map["nomeCientifico"] as? String ?: "",
-                data = map["data"] as? String ?: "",
-                dataTimestamp = map["dataTimestamp"] as? Long ?: 0L,
-                local = map["local"] as? String ?: "",
-                coordenadas = (map["coordenadas"] as? Map<String, Any?>)?.let { 
-                    Coordenadas.fromMap(it) 
-                },
-                categoria = InsectCategory.valueOf(
-                    map["categoria"] as? String ?: InsectCategory.NEUTRAL.name
-                ),
-                observacao = map["observacao"] as? String ?: "",
-                imagens = (map["imagens"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
-                userId = map["userId"] as? String ?: "",
-                userName = map["userName"] as? String ?: "",
-                userProfileImage = map["userProfileImage"] as? String ?: "",
-                timestamp = map["timestamp"] as? Long ?: System.currentTimeMillis(),
-                timestampUltimaEdicao = map["timestampUltimaEdicao"] as? Long ?: 0L,
-                tipo = map["tipo"] as? String ?: "INSETO",
-                status = StatusRegistro.valueOf(
-                    map["status"] as? String ?: StatusRegistro.ATIVO.name
-                ),
-                visibilidade = VisibilidadeRegistro.valueOf(
-                    map["visibilidade"] as? String ?: VisibilidadeRegistro.PUBLICO.name
-                ),
-                tags = (map["tags"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                clima = (map["clima"] as? Map<String, Any?>)?.let { 
-                    ClimaObservacao.fromMap(it) 
-                },
-                caracteristicas = (map["caracteristicas"] as? Map<String, Any?>)?.let { 
-                    CaracteristicasInseto.fromMap(it) 
-                },
-                impactoObservado = (map["impactoObservado"] as? Map<String, Any?>)?.let { 
-                    ImpactoInseto.fromMap(it) 
-                },
-                validacao = (map["validacao"] as? Map<String, Any?>)?.let { 
-                    ValidacaoRegistro.fromMap(it) 
-                },
-                estatisticas = (map["estatisticas"] as? Map<String, Any?>)?.let { 
-                    EstatisticasInteracao.fromMap(it) 
-                } ?: EstatisticasInteracao()
-            )
-        }
-        
-        /**
-         * Generate unique ID for insect
-         */
-        fun generateId(): String {
-            return "insect_${System.currentTimeMillis()}_${(1000..9999).random()}"
-        }
+
+    /**
+     * Verifica se o inseto é público
+     */
+    fun isPublic(): Boolean = visibilidade == VisibilidadeRegistro.PUBLICO
+
+    /**
+     * Obtém resumo do inseto para exibição
+     */
+    fun getSummary(): String {
+        val parts = mutableListOf<String>()
+        if (nomePopular.isNotEmpty()) parts.add(nomePopular)
+        if (nomeCientifico.isNotEmpty()) parts.add("($nomeCientifico)")
+        if (local.isNotEmpty()) parts.add("em $local")
+        return parts.joinToString(" ")
     }
+
+    /**
+     * Verifica se é considerado uma praga
+     */
+    fun isPest(): Boolean = categoria == InsectCategory.PEST
+
+    /**
+     * Verifica se é benéfico
+     */
+    fun isBeneficial(): Boolean = categoria == InsectCategory.BENEFICIAL
 }
 
 /**

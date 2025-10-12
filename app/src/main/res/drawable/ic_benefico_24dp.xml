@@ -2,18 +2,12 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
-    
-    <!-- Beneficial insect (ladybug style) -->
-    <path
-        android:pathData="M12,4m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"
-        android:fillColor="#029e5a"/>
-    
-    <!-- Plus sign for beneficial -->
-    <path
-        android:pathData="M12,8v8 M8,12h8"
-        android:strokeColor="#ffffff"
-        android:strokeWidth="2"
-        android:strokeLineCap="round"/>
-        
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M9,11H7v3h2V11zM13,5h-2v6h2V5zM17,11h-2v3h2V11z"/>
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M20,2H4C2.9,2 2,2.9 2,4v14c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V4C22,2.9 21.1,2 20,2z"/>
 </vector>

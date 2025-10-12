@@ -195,6 +195,38 @@ object FirebaseConfig {
     fun isInitialized(): Boolean = isInitialized
     
     /**
+     * Get current authenticated user ID
+     */
+    fun getCurrentUserId(): String? {
+        checkInitialization()
+        return FirebaseAuth.getInstance().currentUser?.uid
+    }
+    
+    /**
+     * Get current authenticated user name
+     */
+    fun getCurrentUserName(): String? {
+        checkInitialization()
+        return FirebaseAuth.getInstance().currentUser?.displayName
+    }
+    
+    /**
+     * Get current authenticated user email
+     */
+    fun getCurrentUserEmail(): String? {
+        checkInitialization()
+        return FirebaseAuth.getInstance().currentUser?.email
+    }
+    
+    /**
+     * Check if user is authenticated
+     */
+    fun isUserAuthenticated(): Boolean {
+        checkInitialization()
+        return FirebaseAuth.getInstance().currentUser != null
+    }
+    
+    /**
      * Reset initialization status (for testing purposes)
      */
     internal fun resetForTesting() {

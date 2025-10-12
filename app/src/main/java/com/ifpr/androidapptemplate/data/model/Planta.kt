@@ -1,45 +1,72 @@
 package com.ifpr.androidapptemplate.data.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Data model for Plant registration in V Group - Manejo Verde
- * Represents a plant observation with all associated data
+ * Data class para representar uma planta registrada
  */
-@Parcelize
 data class Planta(
-    val id: String = "",
-    val nome: String = "",
-    val nomePopular: String = "",
-    val nomeCientifico: String = "",
-    val data: String = "",
-    val dataTimestamp: Long = 0L,
-    val local: String = "",
-    val coordenadas: Coordenadas? = null,
+    override val id: String = generateId(),
+    override val nome: String = "",
+    override val nomePopular: String = "",
+    override val nomeCientifico: String = "",
+    override val data: String = "",
+    override val dataTimestamp: Long = System.currentTimeMillis(),
+    override val local: String = "",
     val categoria: PlantHealthCategory = PlantHealthCategory.HEALTHY,
-    val observacao: String = "",
-    val imagens: List<String> = emptyList(),
-    val thumbnailUrl: String = "",
-    val userId: String = "",
-    val userName: String = "",
-    val userProfileImage: String = "",
-    val timestamp: Long = System.currentTimeMillis(),
-    val timestampUltimaEdicao: Long = 0L,
-    val tipo: String = "PLANTA",
-    val status: StatusRegistro = StatusRegistro.ATIVO,
-    val visibilidade: VisibilidadeRegistro = VisibilidadeRegistro.PUBLICO,
-    val tags: List<String> = emptyList(),
-    val clima: ClimaObservacao? = null,
-    val caracteristicas: CaracteristicasPlanta? = null,
-    val validacao: ValidacaoRegistro? = null,
-    val estatisticas: EstatisticasInteracao = EstatisticasInteracao()
-) : Parcelable {
-    
+    override val observacao: String = "",
+    override val imagens: List<String> = emptyList(),
+    override val userId: String = "",
+    override val userName: String = "",
+    override val timestamp: Long = System.currentTimeMillis(),
+    override val timestampUltimaEdicao: Long = System.currentTimeMillis(),
+    override val tipo: String = "PLANTA",
+    override val visibilidade: VisibilidadeRegistro = VisibilidadeRegistro.PRIVADO
+) : BaseRegistration {
+
+    companion object {
+        /**
+         * Gera um ID único para a planta
+         */
+        fun generateId(): String {
+            return "plant_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(8)}"
+        }
+
+        /**
+         * Cria objeto Planta a partir de dados do Firebase
+         */
+        fun fromFirebaseMap(map: Map<String, Any?>): Planta {
+            return Planta(
+                id = map["id"] as? String ?: generateId(),
+                nome = map["nome"] as? String ?: "",
+                nomePopular = map["nomePopular"] as? String ?: "",
+                nomeCientifico = map["nomeCientifico"] as? String ?: "",
+                data = map["data"] as? String ?: "",
+                dataTimestamp = (map["dataTimestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                local = map["local"] as? String ?: "",
+                categoria = try {
+                    PlantHealthCategory.valueOf(map["categoria"] as? String ?: "HEALTHY")
+                } catch (e: Exception) {
+                    PlantHealthCategory.HEALTHY
+                },
+                observacao = map["observacao"] as? String ?: "",
+                imagens = (map["imagens"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                userId = map["userId"] as? String ?: "",
+                userName = map["userName"] as? String ?: "",
+                timestamp = (map["timestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                timestampUltimaEdicao = (map["timestampUltimaEdicao"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                tipo = map["tipo"] as? String ?: "PLANTA",
+                visibilidade = try {
+                    VisibilidadeRegistro.valueOf(map["visibilidade"] as? String ?: "PRIVADO")
+                } catch (e: Exception) {
+                    VisibilidadeRegistro.PRIVADO
+                }
+            )
+        }
+    }
+
     /**
-     * Convert to Firebase-compatible map
+     * Converte o objeto para um mapa para salvar no Firebase
      */
     fun toFirebaseMap(): Map<String, Any?> {
         return mapOf(
@@ -50,151 +77,68 @@ data class Planta(
             "data" to data,
             "dataTimestamp" to dataTimestamp,
             "local" to local,
-            "coordenadas" to coordenadas?.toMap(),
             "categoria" to categoria.name,
             "observacao" to observacao,
             "imagens" to imagens,
-            "thumbnailUrl" to thumbnailUrl,
             "userId" to userId,
             "userName" to userName,
-            "userProfileImage" to userProfileImage,
             "timestamp" to timestamp,
             "timestampUltimaEdicao" to timestampUltimaEdicao,
             "tipo" to tipo,
-            "status" to status.name,
-            "visibilidade" to visibilidade.name,
-            "tags" to tags,
-            "clima" to clima?.toMap(),
-            "caracteristicas" to caracteristicas?.toMap(),
-            "validacao" to validacao?.toMap(),
-            "estatisticas" to estatisticas.toMap()
+            "visibilidade" to visibilidade.name
         )
     }
-    
+
     /**
-     * Get formatted date for display
+     * Obtém a primeira imagem disponível
      */
-    fun getFormattedDate(): String {
-        return try {
-            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            if (data.isNotEmpty()) data else formatter.format(Date(timestamp))
-        } catch (e: Exception) {
-            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
-        }
-    }
-    
+    fun getFirstImage(): String? = imagens.firstOrNull()
+
     /**
-     * Get primary image URL
+     * Verifica se tem múltiplas imagens
      */
-    fun getPrimaryImageUrl(): String {
-        return thumbnailUrl.ifEmpty { imagens.firstOrNull() ?: "" }
-    }
-    
+    fun hasMultipleImages(): Boolean = imagens.size > 1
+
     /**
-     * Check if plant has images
+     * Obtém texto de status da planta
      */
-    fun hasImages(): Boolean = imagens.isNotEmpty()
-    
-    /**
-     * Get health status display text
-     */
-    fun getHealthStatusText(): String {
+    fun getStatusText(): String {
         return when (categoria) {
             PlantHealthCategory.HEALTHY -> "Saudável"
             PlantHealthCategory.SICK -> "Doente"
         }
     }
-    
-    /**
-     * Check if plant belongs to current user
-     */
-    fun isOwnedBy(currentUserId: String): Boolean = userId == currentUserId
-    
-    /**
-     * Check if plant is editable
-     */
-    fun isEditable(): Boolean = status == StatusRegistro.ATIVO
-    
-    /**
-     * Get days since observation
-     */
-    fun getDaysSinceObservation(): Int {
-        val observationDate = if (dataTimestamp > 0) dataTimestamp else timestamp
-        val daysDiff = (System.currentTimeMillis() - observationDate) / (1000 * 60 * 60 * 24)
-        return daysDiff.toInt()
-    }
-    
-    companion object {
-        /**
-         * Create from Firebase map
-         */
-        fun fromFirebaseMap(map: Map<String, Any?>): Planta {
-            return Planta(
-                id = map["id"] as? String ?: "",
-                nome = map["nome"] as? String ?: "",
-                nomePopular = map["nomePopular"] as? String ?: "",
-                nomeCientifico = map["nomeCientifico"] as? String ?: "",
-                data = map["data"] as? String ?: "",
-                dataTimestamp = map["dataTimestamp"] as? Long ?: 0L,
-                local = map["local"] as? String ?: "",
-                coordenadas = (map["coordenadas"] as? Map<String, Any?>)?.let { 
-                    Coordenadas.fromMap(it) 
-                },
-                categoria = PlantHealthCategory.valueOf(
-                    map["categoria"] as? String ?: PlantHealthCategory.HEALTHY.name
-                ),
-                observacao = map["observacao"] as? String ?: "",
-                imagens = (map["imagens"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
-                userId = map["userId"] as? String ?: "",
-                userName = map["userName"] as? String ?: "",
-                userProfileImage = map["userProfileImage"] as? String ?: "",
-                timestamp = map["timestamp"] as? Long ?: System.currentTimeMillis(),
-                timestampUltimaEdicao = map["timestampUltimaEdicao"] as? Long ?: 0L,
-                tipo = map["tipo"] as? String ?: "PLANTA",
-                status = StatusRegistro.valueOf(
-                    map["status"] as? String ?: StatusRegistro.ATIVO.name
-                ),
-                visibilidade = VisibilidadeRegistro.valueOf(
-                    map["visibilidade"] as? String ?: VisibilidadeRegistro.PUBLICO.name
-                ),
-                tags = (map["tags"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                clima = (map["clima"] as? Map<String, Any?>)?.let { 
-                    ClimaObservacao.fromMap(it) 
-                },
-                caracteristicas = (map["caracteristicas"] as? Map<String, Any?>)?.let { 
-                    CaracteristicasPlanta.fromMap(it) 
-                },
-                validacao = (map["validacao"] as? Map<String, Any?>)?.let { 
-                    ValidacaoRegistro.fromMap(it) 
-                },
-                estatisticas = (map["estatisticas"] as? Map<String, Any?>)?.let { 
-                    EstatisticasInteracao.fromMap(it) 
-                } ?: EstatisticasInteracao()
-            )
-        }
-        
-        /**
-         * Generate unique ID for plant
-         */
-        fun generateId(): String {
-            return "plant_${System.currentTimeMillis()}_${(1000..9999).random()}"
-        }
-    }
-}
 
-/**
- * Plant health categories following project specifications
- */
-enum class PlantHealthCategory {
-    HEALTHY,    // Saudável
-    SICK        // Doente
+    /**
+     * Obtém cor do status
+     */
+    fun getStatusColor(): String {
+        return when (categoria) {
+            PlantHealthCategory.HEALTHY -> "#4caf50"
+            PlantHealthCategory.SICK -> "#f44336"
+        }
+    }
+
+    /**
+     * Verifica se a planta é pública
+     */
+    fun isPublic(): Boolean = visibilidade == VisibilidadeRegistro.PUBLICO
+
+    /**
+     * Obtém resumo da planta para exibição
+     */
+    fun getSummary(): String {
+        val parts = mutableListOf<String>()
+        if (nomePopular.isNotEmpty()) parts.add(nomePopular)
+        if (nomeCientifico.isNotEmpty()) parts.add("($nomeCientifico)")
+        if (local.isNotEmpty()) parts.add("em $local")
+        return parts.joinToString(" ")
+    }
 }
 
 /**
  * Plant characteristics data class
  */
-@Parcelize
 data class CaracteristicasPlanta(
     val altura: String = "",
     val diametroTronco: String = "",
@@ -204,7 +148,7 @@ data class CaracteristicasPlanta(
     val tipoFruto: String = "",
     val habitat: String = "",
     val observacoesAdicionais: String = ""
-) : Parcelable {
+) {
     
     fun toMap(): Map<String, Any> {
         return mapOf(

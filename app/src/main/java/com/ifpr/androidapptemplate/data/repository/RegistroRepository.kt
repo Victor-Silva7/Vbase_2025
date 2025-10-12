@@ -4,13 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.database.ValueEventListener
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
-import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.model.*
 import kotlinx.coroutines.*
 
 /**
- * Repository for managing plant and insect registrations
- * Follows Repository pattern for clean architecture
+ * Repository for managing plant and insect registrations with user-specific search
+ * Implements user authentication and filtering for logged users
  */
 class RegistroRepository private constructor() {
     
@@ -26,7 +26,6 @@ class RegistroRepository private constructor() {
     }
     
     private val databaseService = FirebaseDatabaseService.getInstance()
-    private val storageManager = FirebaseStorageManager.getInstance()
     private val repositoryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     // LiveData for real-time updates
@@ -35,6 +34,12 @@ class RegistroRepository private constructor() {
     
     private val _userInsects = MutableLiveData<List<Inseto>>()
     val userInsects: LiveData<List<Inseto>> = _userInsects
+    
+    private val _filteredPlants = MutableLiveData<List<Planta>>()
+    val filteredPlants: LiveData<List<Planta>> = _filteredPlants
+    
+    private val _filteredInsects = MutableLiveData<List<Inseto>>()
+    val filteredInsects: LiveData<List<Inseto>> = _filteredInsects
     
     private val _publicPlants = MutableLiveData<List<Planta>>()
     val publicPlants: LiveData<List<Planta>> = _publicPlants
@@ -45,6 +50,10 @@ class RegistroRepository private constructor() {
     // Event listeners for real-time updates
     private var plantsListener: ValueEventListener? = null
     private var insectsListener: ValueEventListener? = null
+    
+    // Current search parameters
+    private var currentPlantQuery = ""
+    private var currentInsectQuery = ""
     
     /**
      * Save plant registration
@@ -89,7 +98,7 @@ class RegistroRepository private constructor() {
     }
     
     /**
-     * Get user's plants (cached with real-time updates)
+     * Get current user's plants (cached with real-time updates)
      */
     fun getUserPlants(userId: String? = null, forceRefresh: Boolean = false) {
         if (forceRefresh || _userPlants.value.isNullOrEmpty()) {
@@ -97,13 +106,19 @@ class RegistroRepository private constructor() {
                 val result = databaseService.getUserPlants(userId)
                 result.onSuccess { plantas ->
                     _userPlants.postValue(plantas)
+                    // Apply current search filter if any
+                    if (currentPlantQuery.isNotEmpty()) {
+                        applyPlantFilter(currentPlantQuery)
+                    } else {
+                        _filteredPlants.postValue(plantas)
+                    }
                 }
             }
         }
     }
     
     /**
-     * Get user's insects (cached with real-time updates)
+     * Get current user's insects (cached with real-time updates)
      */
     fun getUserInsects(userId: String? = null, forceRefresh: Boolean = false) {
         if (forceRefresh || _userInsects.value.isNullOrEmpty()) {
@@ -111,9 +126,183 @@ class RegistroRepository private constructor() {
                 val result = databaseService.getUserInsects(userId)
                 result.onSuccess { insetos ->
                     _userInsects.postValue(insetos)
+                    // Apply current search filter if any
+                    if (currentInsectQuery.isNotEmpty()) {
+                        applyInsectFilter(currentInsectQuery)
+                    } else {
+                        _filteredInsects.postValue(insetos)
+                    }
                 }
             }
         }
+    }
+    
+    /**
+     * Search user's plants by query (user-specific search)
+     */
+    suspend fun searchUserPlants(
+        query: String = "",
+        category: PlantHealthCategory? = null,
+        location: String = "",
+        dateFrom: Long = 0L,
+        dateTo: Long = Long.MAX_VALUE,
+        userId: String? = null
+    ): Result<List<Planta>> {
+        return try {
+            val targetUserId = userId ?: FirebaseConfig.getCurrentUserId()
+                ?: return Result.failure(Exception("User not authenticated"))
+            
+            val userPlantsResult = databaseService.getUserPlants(targetUserId)
+            
+            userPlantsResult.onSuccess { allPlants ->
+                val filteredPlants = allPlants.filter { planta ->
+                    val matchesQuery = query.isEmpty() || 
+                        planta.nome.contains(query, ignoreCase = true) ||
+                        planta.nomePopular.contains(query, ignoreCase = true) ||
+                        planta.nomeCientifico.contains(query, ignoreCase = true) ||
+                        planta.observacao.contains(query, ignoreCase = true) ||
+                        planta.local.contains(query, ignoreCase = true)
+                    
+                    val matchesCategory = category == null || planta.categoria == category
+                    
+                    val matchesLocation = location.isEmpty() || 
+                        planta.local.contains(location, ignoreCase = true)
+                    
+                    val matchesDateRange = planta.timestamp in dateFrom..dateTo
+                    
+                    matchesQuery && matchesCategory && matchesLocation && matchesDateRange
+                }
+                
+                return Result.success(filteredPlants.sortedByDescending { it.timestamp })
+            }
+            
+            userPlantsResult
+            
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Search user's insects by query (user-specific search)
+     */
+    suspend fun searchUserInsects(
+        query: String = "",
+        category: InsectCategory? = null,
+        location: String = "",
+        dateFrom: Long = 0L,
+        dateTo: Long = Long.MAX_VALUE,
+        userId: String? = null
+    ): Result<List<Inseto>> {
+        return try {
+            val targetUserId = userId ?: FirebaseConfig.getCurrentUserId()
+                ?: return Result.failure(Exception("User not authenticated"))
+            
+            val userInsectsResult = databaseService.getUserInsects(targetUserId)
+            
+            userInsectsResult.onSuccess { allInsects ->
+                val filteredInsects = allInsects.filter { inseto ->
+                    val matchesQuery = query.isEmpty() || 
+                        inseto.nome.contains(query, ignoreCase = true) ||
+                        inseto.nomePopular.contains(query, ignoreCase = true) ||
+                        inseto.nomeCientifico.contains(query, ignoreCase = true) ||
+                        inseto.observacao.contains(query, ignoreCase = true) ||
+                        inseto.local.contains(query, ignoreCase = true)
+                    
+                    val matchesCategory = category == null || inseto.categoria == category
+                    
+                    val matchesLocation = location.isEmpty() || 
+                        inseto.local.contains(location, ignoreCase = true)
+                    
+                    val matchesDateRange = inseto.timestamp in dateFrom..dateTo
+                    
+                    matchesQuery && matchesCategory && matchesLocation && matchesDateRange
+                }
+                
+                return Result.success(filteredInsects.sortedByDescending { it.timestamp })
+            }
+            
+            userInsectsResult
+            
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Apply real-time filter to plants
+     */
+    private fun applyPlantFilter(query: String) {
+        currentPlantQuery = query
+        val currentPlants = _userPlants.value ?: return
+        
+        if (query.isEmpty()) {
+            _filteredPlants.postValue(currentPlants)
+            return
+        }
+        
+        val filtered = currentPlants.filter { planta ->
+            planta.nome.contains(query, ignoreCase = true) ||
+            planta.nomePopular.contains(query, ignoreCase = true) ||
+            planta.nomeCientifico.contains(query, ignoreCase = true) ||
+            planta.observacao.contains(query, ignoreCase = true) ||
+            planta.local.contains(query, ignoreCase = true)
+        }
+        
+        _filteredPlants.postValue(filtered)
+    }
+    
+    /**
+     * Apply real-time filter to insects
+     */
+    private fun applyInsectFilter(query: String) {
+        currentInsectQuery = query
+        val currentInsects = _userInsects.value ?: return
+        
+        if (query.isEmpty()) {
+            _filteredInsects.postValue(currentInsects)
+            return
+        }
+        
+        val filtered = currentInsects.filter { inseto ->
+            inseto.nome.contains(query, ignoreCase = true) ||
+            inseto.nomePopular.contains(query, ignoreCase = true) ||
+            inseto.nomeCientifico.contains(query, ignoreCase = true) ||
+            inseto.observacao.contains(query, ignoreCase = true) ||
+            inseto.local.contains(query, ignoreCase = true)
+        }
+        
+        _filteredInsects.postValue(filtered)
+    }
+    
+    /**
+     * Filter plants by query in real-time
+     */
+    fun filterPlants(query: String) {
+        applyPlantFilter(query)
+    }
+    
+    /**
+     * Filter insects by query in real-time
+     */
+    fun filterInsects(query: String) {
+        applyInsectFilter(query)
+    }
+    
+    /**
+     * Clear plant filter
+     */
+    fun clearPlantFilter() {
+        currentPlantQuery = ""
+        _filteredPlants.postValue(_userPlants.value ?: emptyList())
+    }
+    
+    /**
+     * Clear insect filter
+     */
+    fun clearInsectFilter() {
+        currentInsectQuery = ""
+        _filteredInsects.postValue(_userInsects.value ?: emptyList())
     }
     
     /**
@@ -152,6 +341,12 @@ class RegistroRepository private constructor() {
         
         plantsListener = databaseService.listenToUserPlants(userId) { plantas ->
             _userPlants.postValue(plantas)
+            // Apply current filter if any
+            if (currentPlantQuery.isNotEmpty()) {
+                applyPlantFilter(currentPlantQuery)
+            } else {
+                _filteredPlants.postValue(plantas)
+            }
         }
     }
     
@@ -163,6 +358,12 @@ class RegistroRepository private constructor() {
         
         insectsListener = databaseService.listenToUserInsects(userId) { insetos ->
             _userInsects.postValue(insetos)
+            // Apply current filter if any
+            if (currentInsectQuery.isNotEmpty()) {
+                applyInsectFilter(currentInsectQuery)
+            } else {
+                _filteredInsects.postValue(insetos)
+            }
         }
     }
     
@@ -187,102 +388,15 @@ class RegistroRepository private constructor() {
     }
     
     /**
-     * Search plants by criteria
-     */
-    suspend fun searchPlants(
-        query: String = "",
-        category: PlantHealthCategory? = null,
-        location: String = "",
-        dateFrom: Long = 0L,
-        dateTo: Long = Long.MAX_VALUE,
-        userId: String? = null
-    ): Result<List<Planta>> {
-        return try {
-            val allPlantsResult = if (userId != null) {
-                databaseService.getUserPlants(userId)
-            } else {
-                databaseService.getPublicPlants(100) // Get more for filtering
-            }
-            
-            allPlantsResult.onSuccess { allPlants ->
-                val filteredPlants = allPlants.filter { planta ->
-                    val matchesQuery = query.isEmpty() || 
-                        planta.nome.contains(query, ignoreCase = true) ||
-                        planta.nomePopular.contains(query, ignoreCase = true) ||
-                        planta.nomeCientifico.contains(query, ignoreCase = true)
-                    
-                    val matchesCategory = category == null || planta.categoria == category
-                    
-                    val matchesLocation = location.isEmpty() || 
-                        planta.local.contains(location, ignoreCase = true)
-                    
-                    val matchesDateRange = planta.timestamp in dateFrom..dateTo
-                    
-                    matchesQuery && matchesCategory && matchesLocation && matchesDateRange
-                }
-                
-                return Result.success(filteredPlants)
-            }
-            
-            allPlantsResult
-            
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    /**
-     * Search insects by criteria
-     */
-    suspend fun searchInsects(
-        query: String = "",
-        category: InsectCategory? = null,
-        location: String = "",
-        dateFrom: Long = 0L,
-        dateTo: Long = Long.MAX_VALUE,
-        userId: String? = null
-    ): Result<List<Inseto>> {
-        return try {
-            val allInsectsResult = if (userId != null) {
-                databaseService.getUserInsects(userId)
-            } else {
-                databaseService.getPublicInsects(100) // Get more for filtering
-            }
-            
-            allInsectsResult.onSuccess { allInsects ->
-                val filteredInsects = allInsects.filter { inseto ->
-                    val matchesQuery = query.isEmpty() || 
-                        inseto.nome.contains(query, ignoreCase = true) ||
-                        inseto.nomePopular.contains(query, ignoreCase = true) ||
-                        inseto.nomeCientifico.contains(query, ignoreCase = true)
-                    
-                    val matchesCategory = category == null || inseto.categoria == category
-                    
-                    val matchesLocation = location.isEmpty() || 
-                        inseto.local.contains(location, ignoreCase = true)
-                    
-                    val matchesDateRange = inseto.timestamp in dateFrom..dateTo
-                    
-                    matchesQuery && matchesCategory && matchesLocation && matchesDateRange
-                }
-                
-                return Result.success(filteredInsects)
-            }
-            
-            allInsectsResult
-            
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    /**
-     * Get registration statistics
+     * Get registration statistics for current user
      */
     suspend fun getRegistrationStats(userId: String? = null): Result<RegistrationStats> {
         return try {
-            val plantsResult = databaseService.getUserPlants(userId)
-            val insectsResult = databaseService.getUserInsects(userId)
+            val targetUserId = userId ?: FirebaseConfig.getCurrentUserId()
+                ?: return Result.failure(Exception("User not authenticated"))
+                
+            val plantsResult = databaseService.getUserPlants(targetUserId)
+            val insectsResult = databaseService.getUserInsects(targetUserId)
             
             val plantas = plantsResult.getOrElse { emptyList() }
             val insetos = insectsResult.getOrElse { emptyList() }
@@ -296,10 +410,10 @@ class RegistroRepository private constructor() {
                 insetosNeutro = insetos.count { it.categoria == InsectCategory.NEUTRAL },
                 insetosPraga = insetos.count { it.categoria == InsectCategory.PEST },
                 totalImagens = (plantas.sumOf { it.imagens.size } + insetos.sumOf { it.imagens.size }),
-                ultimoRegistro = maxOfOrNull(
-                    plantas.maxOfOrNull { it.timestamp } ?: 0L,
-                    insetos.maxOfOrNull { it.timestamp } ?: 0L
-                ) ?: 0L
+                ultimoRegistro = maxOf(
+                    plantas.maxByOrNull { it.timestamp }?.timestamp ?: 0L,
+                    insetos.maxByOrNull { it.timestamp }?.timestamp ?: 0L
+                )
             )
             
             Result.success(stats)
@@ -313,7 +427,14 @@ class RegistroRepository private constructor() {
      * Check if user is authenticated
      */
     fun isUserAuthenticated(): Boolean {
-        return databaseService.isUserAuthenticated()
+        return FirebaseConfig.isUserAuthenticated()
+    }
+    
+    /**
+     * Get current user ID
+     */
+    fun getCurrentUserId(): String? {
+        return FirebaseConfig.getCurrentUserId()
     }
     
     /**
@@ -322,8 +443,12 @@ class RegistroRepository private constructor() {
     fun clearCache() {
         _userPlants.value = emptyList()
         _userInsects.value = emptyList()
+        _filteredPlants.value = emptyList()
+        _filteredInsects.value = emptyList()
         _publicPlants.value = emptyList()
         _publicInsects.value = emptyList()
+        currentPlantQuery = ""
+        currentInsectQuery = ""
     }
     
     /**

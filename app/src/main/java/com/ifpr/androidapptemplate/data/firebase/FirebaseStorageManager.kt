@@ -4,13 +4,20 @@ import android.content.Context
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
+import kotlinx.coroutines.tasks.await
+import java.io.ByteArrayOutputStream
 import java.io.File
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.UUID
 
 /**
  * Firebase Storage Manager for V Group - Manejo Verde
  * Handles all image upload and download operations for plant and insect registrations
+ * with compression and progress tracking
  */
 class FirebaseStorageManager private constructor() {
     
@@ -25,15 +32,97 @@ class FirebaseStorageManager private constructor() {
         }
     }
     
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
-    private val storageRef: StorageReference = storage.reference
-    
+    private val storage: FirebaseStorage by lazy {
+        FirebaseConfig.getStorage()
+    }
+
+    private val storageRef: StorageReference by lazy {
+        storage.reference
+    }
+
     // Storage paths for different types of content
     private val plantsPath = "plantas"
     private val insectsPath = "insetos"
     private val profilesPath = "perfis"
     private val postsPath = "postagens"
-    
+
+    /**
+     * Upload image with compression and progress tracking
+     */
+    suspend fun uploadImage(
+        imageUri: Uri,
+        userId: String,
+        registrationId: String,
+        context: Context,
+        onProgress: ((Int) -> Unit)? = null
+    ): Result<String> {
+        return try {
+            // Compress image before upload
+            val compressedData = compressImage(imageUri, context)
+            
+            // Create unique filename
+            val fileName = "${UUID.randomUUID()}.jpg"
+            val imageRef = storageRef
+                .child("registrations")
+                .child(userId)
+                .child(registrationId)
+                .child(fileName)
+
+            // Upload with progress tracking
+            val uploadTask = imageRef.putBytes(compressedData)
+            
+            onProgress?.let { callback ->
+                uploadTask.addOnProgressListener { taskSnapshot ->
+                    val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
+                    callback(progress)
+                }
+            }
+
+            // Wait for upload completion
+            uploadTask.await()
+            
+            // Get download URL
+            val downloadUrl = imageRef.downloadUrl.await()
+            
+            Result.success(downloadUrl.toString())
+            
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Upload multiple images
+     */
+    suspend fun uploadImages(
+        imageUris: List<Uri>,
+        userId: String,
+        registrationId: String,
+        context: Context,
+        onProgress: ((Int, Int) -> Unit)? = null
+    ): Result<List<String>> {
+        return try {
+            val downloadUrls = mutableListOf<String>()
+            
+            imageUris.forEachIndexed { index, uri ->
+                val result = uploadImage(uri, userId, registrationId, context) { progress ->
+                    onProgress?.invoke(index + 1, progress)
+                }
+                
+                result.onSuccess { url ->
+                    downloadUrls.add(url)
+                }.onFailure { exception ->
+                    throw exception
+                }
+            }
+            
+            Result.success(downloadUrls)
+            
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Upload a single image for plant registration
      */
@@ -47,7 +136,7 @@ class FirebaseStorageManager private constructor() {
         val fileName = generateImageFileName("planta")
         val imageRef = storageRef.child("$plantsPath/$plantId/$fileName")
         
-        uploadImage(imageRef, imageUri, onSuccess, onFailure, onProgress)
+        uploadImageLegacy(imageRef, imageUri, onSuccess, onFailure, onProgress)
     }
     
     /**
@@ -83,7 +172,7 @@ class FirebaseStorageManager private constructor() {
         val fileName = generateImageFileName("inseto")
         val imageRef = storageRef.child("$insectsPath/$insectId/$fileName")
         
-        uploadImage(imageRef, imageUri, onSuccess, onFailure, onProgress)
+        uploadImageLegacy(imageRef, imageUri, onSuccess, onFailure, onProgress)
     }
     
     /**
@@ -105,119 +194,109 @@ class FirebaseStorageManager private constructor() {
             onProgress
         )
     }
-    
+
     /**
-     * Upload profile image
+     * Delete image from storage
      */
-    fun uploadProfileImage(
-        userId: String,
-        imageUri: Uri,
-        onSuccess: (String) -> Unit,
-        onFailure: (Exception) -> Unit,
-        onProgress: (Double) -> Unit = {}
-    ) {
-        val fileName = generateImageFileName("perfil")
-        val imageRef = storageRef.child("$profilesPath/$userId/$fileName")
-        
-        uploadImage(imageRef, imageUri, onSuccess, onFailure, onProgress)
-    }
-    
-    /**
-     * Upload image for social post
-     */
-    fun uploadPostImage(
-        postId: String,
-        imageUri: Uri,
-        onSuccess: (String) -> Unit,
-        onFailure: (Exception) -> Unit,
-        onProgress: (Double) -> Unit = {}
-    ) {
-        val fileName = generateImageFileName("post")
-        val imageRef = storageRef.child("$postsPath/$postId/$fileName")
-        
-        uploadImage(imageRef, imageUri, onSuccess, onFailure, onProgress)
-    }
-    
-    /**
-     * Delete an image from storage
-     */
-    fun deleteImage(
-        downloadUrl: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        try {
-            val imageRef = storage.getReferenceFromUrl(downloadUrl)
-            imageRef.delete()
-                .addOnSuccessListener { onSuccess() }
-                .addOnFailureListener { exception -> onFailure(exception) }
+    suspend fun deleteImage(imageUrl: String): Result<Unit> {
+        return try {
+            val imageRef = storage.getReferenceFromUrl(imageUrl)
+            imageRef.delete().await()
+            Result.success(Unit)
         } catch (e: Exception) {
-            onFailure(e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Delete multiple images
+     */
+    suspend fun deleteImages(imageUrls: List<String>): Result<Unit> {
+        return try {
+            imageUrls.forEach { url ->
+                val result = deleteImage(url)
+                result.onFailure { exception ->
+                    throw exception
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Delete all images for a registration
+     */
+    suspend fun deleteRegistrationImages(userId: String, registrationId: String): Result<Unit> {
+        return try {
+            val registrationRef = storageRef
+                .child("registrations")
+                .child(userId)
+                .child(registrationId)
+
+            // List all files in the registration folder
+            val listResult = registrationRef.listAll().await()
+            
+            // Delete each file
+            listResult.items.forEach { item ->
+                item.delete().await()
+            }
+            
+            Result.success(Unit)
+            
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Compress image to reduce file size
+     */
+    private fun compressImage(imageUri: Uri, context: Context): ByteArray {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+
+        // Calculate compression quality based on image size
+        val quality = when {
+            bitmap.byteCount > 5_000_000 -> 60 // Large images: 60% quality
+            bitmap.byteCount > 2_000_000 -> 75 // Medium images: 75% quality
+            else -> 85 // Small images: 85% quality
+        }
+
+        // Compress to JPEG with calculated quality
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+        bitmap.recycle()
+
+        return outputStream.toByteArray()
+    }
+
+    /**
+     * Get storage usage for a user
+     */
+    suspend fun getUserStorageUsage(userId: String): Result<Long> {
+        return try {
+            val userRef = storageRef.child("registrations").child(userId)
+            val listResult = userRef.listAll().await()
+            
+            var totalSize = 0L
+            listResult.items.forEach { item ->
+                val metadata = item.metadata.await()
+                totalSize += metadata.sizeBytes
+            }
+            
+            Result.success(totalSize)
+            
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
     
-    /**
-     * Delete all images for a specific registration
-     */
-    fun deleteRegistrationImages(
-        type: String, // "plantas" or "insetos"
-        registrationId: String,
-        onSuccess: () -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        val folderRef = storageRef.child("$type/$registrationId")
-        
-        folderRef.listAll()
-            .addOnSuccessListener { listResult ->
-                if (listResult.items.isEmpty()) {
-                    onSuccess()
-                    return@addOnSuccessListener
-                }
-                
-                var deletedCount = 0
-                val totalItems = listResult.items.size
-                
-                listResult.items.forEach { item ->
-                    item.delete()
-                        .addOnSuccessListener {
-                            deletedCount++
-                            if (deletedCount == totalItems) {
-                                onSuccess()
-                            }
-                        }
-                        .addOnFailureListener { exception ->
-                            onFailure(exception)
-                        }
-                }
-            }
-            .addOnFailureListener { exception ->
-                onFailure(exception)
-            }
-    }
+    // Legacy methods for backward compatibility
     
-    /**
-     * Get storage statistics for user content
-     */
-    fun getUserStorageStats(
-        userId: String,
-        onSuccess: (StorageStats) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        // Implementation would count user's images across all categories
-        // This is a placeholder for future implementation
-        val stats = StorageStats(
-            totalImages = 0,
-            plantImages = 0,
-            insectImages = 0,
-            postImages = 0,
-            storageUsed = 0L
-        )
-        onSuccess(stats)
-    }
-    
-    // Private helper methods
-    
-    private fun uploadImage(
+    private fun uploadImageLegacy(
         imageRef: StorageReference,
         imageUri: Uri,
         onSuccess: (String) -> Unit,
@@ -262,7 +341,7 @@ class FirebaseStorageManager private constructor() {
             val fileName = generateImageFileName(prefix, index)
             val imageRef = storageRef.child("$basePath/$fileName")
             
-            uploadImage(
+            uploadImageLegacy(
                 imageRef = imageRef,
                 imageUri = uri,
                 onSuccess = { downloadUrl ->

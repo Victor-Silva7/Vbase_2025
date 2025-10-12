@@ -443,14 +443,14 @@ class FirebaseDatabaseService private constructor() {
     /**
      * Get current authenticated user ID
      */
-    private fun getCurrentUserId(): String? {
+    fun getCurrentUserId(): String? {
         return auth.currentUser?.uid
     }
     
     /**
      * Get current authenticated user name
      */
-    private fun getCurrentUserName(): String? {
+    fun getCurrentUserName(): String? {
         return auth.currentUser?.displayName
     }
     

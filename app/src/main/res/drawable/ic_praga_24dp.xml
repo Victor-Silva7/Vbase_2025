@@ -2,18 +2,12 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
-    
-    <!-- Pest insect -->
-    <path
-        android:pathData="M12,4m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"
-        android:fillColor="#ff5722"/>
-    
-    <!-- Minus/X sign for pest -->
-    <path
-        android:pathData="M9,9l6,6 M15,9l-6,6"
-        android:strokeColor="#ffffff"
-        android:strokeWidth="2"
-        android:strokeLineCap="round"/>
-        
+    android:viewportHeight="24"
+    android:tint="?attr/colorOnSurface">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M12,2l3.09,6.26L22,9.27l-5,4.87 1.18,6.88L12,17.77l-6.18,3.25L7,14.14 2,9.27l6.91,-1.01L12,2z"/>
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M10,15l-3.5,-3.5 1.41,-1.41L10,12.17l6.09,-6.09L17.5,7.5 10,15z"/>
 </vector>
