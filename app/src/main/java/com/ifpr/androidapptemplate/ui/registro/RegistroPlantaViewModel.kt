@@ -5,6 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
+import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
+import com.ifpr.androidapptemplate.data.model.Planta
+import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
+import com.ifpr.androidapptemplate.utils.ImageUploadManager
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +37,12 @@ class RegistroPlantaViewModel : ViewModel() {
     private var currentPhotoPath: String? = null
     private var currentPhotoUri: Uri? = null
     private var appContext: Context? = null
+    
+    // Firebase services
+    private val database = FirebaseConfig.getDatabase()
+    private val storageManager = FirebaseConfig.getStorageManager()
+    private val databaseService = FirebaseConfig.getDatabaseService()
+    private val imageUploadManager = ImageUploadManager.getInstance()
     
     // Maximum number of images allowed
     private val maxImages = 5
@@ -155,66 +169,108 @@ class RegistroPlantaViewModel : ViewModel() {
             return
         }
         
-        // Create plant registration object
-        val plantRegistration = PlantRegistration(
-            id = generateId(),
+        // Create plant registration object using new data model
+        val plantRegistration = Planta(
+            id = Planta.generateId(),
             nome = nome.trim(),
             data = data,
+            dataTimestamp = convertDateToTimestamp(data),
             local = local.trim(),
             categoria = _selectedCategory.value!!,
             observacao = observacao.trim(),
-            imagens = _selectedImages.value?.toList() ?: emptyList(),
-            userId = getCurrentUserId(), // Would get from Firebase Auth
-            timestamp = System.currentTimeMillis()
+            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            userId = getCurrentUserId(),
+            userName = getCurrentUserName(),
+            timestamp = System.currentTimeMillis(),
+            tipo = "PLANTA"
         )
         
         // TODO: Save to Firebase
         saveToFirebase(plantRegistration)
     }
 
-    private fun saveToFirebase(registration: PlantRegistration) {
-        // Simulate Firebase save operation
+    private fun saveToFirebase(registration: Planta) {
         try {
-            // TODO: Implement actual Firebase save
-            // 1. Upload images to Firebase Storage
-            // 2. Save registration data to Realtime Database
-            // 3. Update user statistics
+            val plantId = registration.id
+            val imageUris = registration.imagens.map { Uri.parse(it) }
+            val context = appContext ?: throw IllegalStateException("Context not set")
             
-            // For now, simulate success after delay
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                _isLoading.value = false
-                _saveSuccess.value = true
-            }, 2000)
+            // Use enhanced ImageUploadManager for better compression and progress tracking
+            if (imageUris.isNotEmpty()) {
+                imageUploadManager.uploadPlantImages(
+                    context = context,
+                    plantId = plantId,
+                    imageUris = imageUris,
+                    onSuccess = { downloadUrls ->
+                        // Save registration with image URLs
+                        val updatedRegistration = registration.copy(imagens = downloadUrls)
+                        saveRegistrationToDatabase(updatedRegistration)
+                    },
+                    onFailure = { exception ->
+                        _isLoading.value = false
+                        _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                    }
+                )
+            } else {
+                // Save registration without images
+                saveRegistrationToDatabase(registration)
+            }
             
         } catch (e: Exception) {
             _isLoading.value = false
             _errorMessage.value = "Erro ao salvar: ${e.message}"
         }
     }
-
-    private fun generateId(): String {
-        return "plant_${System.currentTimeMillis()}_${(1000..9999).random()}"
+    
+    private fun saveRegistrationToDatabase(registration: Planta) {
+        // Use coroutines for async database operations
+        viewModelScope.launch {
+            try {
+                val result = databaseService.savePlant(registration)
+                
+                result.onSuccess { plantId ->
+                    _isLoading.value = false
+                    _saveSuccess.value = true
+                    clearFormData()
+                }.onFailure { exception ->
+                    _isLoading.value = false
+                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                }
+                
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _errorMessage.value = "Erro inesperado: ${e.message}"
+            }
+        }
+    }
+    
+    private fun clearFormData() {
+        _selectedCategory.value = null
+        _selectedImages.value = mutableListOf()
+        currentPhotoPath = null
+        currentPhotoUri = null
     }
 
     private fun getCurrentUserId(): String {
         // TODO: Get from Firebase Auth
         return "user_placeholder"
     }
+    
+    private fun getCurrentUserName(): String {
+        // TODO: Get from Firebase Auth
+        return "Usuario Anonimo"
+    }
+    
+    private fun convertDateToTimestamp(dateString: String): Long {
+        return try {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            formatter.parse(dateString)?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+    }
 
     fun clearError() {
         _errorMessage.value = ""
     }
 }
-
-// Data class for plant registration
-data class PlantRegistration(
-    val id: String,
-    val nome: String,
-    val data: String,
-    val local: String,
-    val categoria: PlantHealthCategory,
-    val observacao: String,
-    val imagens: List<Uri>,
-    val userId: String,
-    val timestamp: Long
-)

@@ -27,6 +27,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
             
+        <!-- Upload Progress Bar -->
+        <ProgressBar
+            android:id="@+id/upload_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_margin="8dp"
+            android:progressTint="@color/vgroup_green"
+            android:progressBackgroundTint="@color/vgroup_text_secondary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+            
+        <!-- Compression Indicator -->
+        <ImageView
+            android:id="@+id/compression_indicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_compress"
+            android:background="@drawable/circle_background_green"
+            android:padding="2dp"
+            android:visibility="gone"
+            app:tint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+            
         <!-- Loading overlay -->
         <View
             android:id="@+id/loading_overlay"

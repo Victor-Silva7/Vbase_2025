@@ -1,0 +1,68 @@
+{
+  "rules": {
+    "publico": {
+      "plantas": {
+        ".read": "auth != null",
+        "$plantId": {
+          ".write": "auth != null && newData.child('userId').val() == auth.uid"
+        }
+      },
+      "insetos": {
+        ".read": "auth != null",
+        "$insectId": {
+          ".write": "auth != null && newData.child('userId').val() == auth.uid"
+        }
+      },
+      "postagens": {
+        ".read": "auth != null",
+        "$postId": {
+          ".write": "auth != null && newData.child('userId').val() == auth.uid"
+        }
+      }
+    },
+    
+    "usuarios": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId",
+        
+        "perfil": {
+          ".validate": "newData.hasChildren(['nome', 'email'])"
+        },
+        
+        "plantas": {
+          "$plantId": {
+            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'PLANTA' && newData.child('userId').val() == auth.uid"
+          }
+        },
+        
+        "insetos": {
+          "$insectId": {
+            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'INSETO' && newData.child('userId').val() == auth.uid"
+          }
+        },
+        
+        "postagens": {
+          "$postId": {
+            ".validate": "newData.hasChildren(['id', 'conteudo', 'timestamp']) && newData.child('userId').val() == auth.uid"
+          }
+        }
+      }
+    },
+    
+    "estatisticas": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    
+    "categorias": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

@@ -6,9 +6,16 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
+import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
+import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
+import com.ifpr.androidapptemplate.data.model.Inseto
 import com.ifpr.androidapptemplate.ui.registro.InsectCategory
+import com.ifpr.androidapptemplate.utils.ImageUploadManager
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,8 +42,10 @@ class RegistroInsetoViewModel : ViewModel() {
     private var currentPhotoPath: String? = null
     
     // Firebase references
-    private val database = FirebaseDatabase.getInstance()
-    private val storage = FirebaseStorage.getInstance()
+    private val database = FirebaseConfig.getDatabase()
+    private val storageManager = FirebaseConfig.getStorageManager()
+    private val databaseService = FirebaseConfig.getDatabaseService()
+    private val imageUploadManager = ImageUploadManager.getInstance()
     
     fun setContext(context: Context) {
         this.context = context
@@ -142,74 +151,71 @@ class RegistroInsetoViewModel : ViewModel() {
             return
         }
         
-        // Create insect registration object
-        val registro = mutableMapOf<String, Any?>(
-            "id" to registroId,
-            "nome" to nome,
-            "data" to data,
-            "local" to local,
-            "categoria" to category.name,
-            "observacao" to observacao,
-            "timestamp" to System.currentTimeMillis(),
-            "tipo" to "INSETO"
+        // Create insect registration object using new data model
+        val registro = Inseto(
+            id = Inseto.generateId(),
+            nome = nome,
+            data = data,
+            dataTimestamp = convertDateToTimestamp(data),
+            local = local,
+            categoria = category,
+            observacao = observacao,
+            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            timestamp = System.currentTimeMillis(),
+            tipo = "INSETO"
         )
         
         // Upload images first, then save registration
-        uploadImages(registroId) { imageUrls ->
-            if (imageUrls.isNotEmpty()) {
-                // Convert list to map with indices as keys
-                val imagensMap = imageUrls.mapIndexed { index, url -> index.toString() to url }.toMap()
-                registro["imagens"] = imagensMap
-            }
-            
-            // Save to Firebase Realtime Database
-            database.reference.child("insetos").child(registroId)
-                .setValue(registro)
-                .addOnSuccessListener {
+        val images = _selectedImages.value ?: mutableListOf()
+        if (images.isNotEmpty()) {
+            imageUploadManager.uploadInsectImages(
+                context = context,
+                insectId = registro.id,
+                imageUris = images,
+                onSuccess = { downloadUrls ->
+                    // Save registration with image URLs
+                    val updatedRegistro = registro.copy(imagens = downloadUrls)
+                    saveRegistrationToDatabase(updatedRegistro)
+                },
+                onFailure = { exception ->
                     _isLoading.value = false
-                    _saveSuccess.value = true
-                    clearForm()
+                    _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
                 }
-                .addOnFailureListener { exception ->
-                    _isLoading.value = false
-                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
-                }
+            )
+        } else {
+            // Save registration without images
+            saveRegistrationToDatabase(registro)
         }
     }
     
-    private fun uploadImages(registroId: String, onComplete: (List<String>) -> Unit) {
-        val images = _selectedImages.value ?: mutableListOf()
-        
-        if (images.isEmpty()) {
-            onComplete(emptyList())
-            return
+    private fun saveRegistrationToDatabase(registration: Inseto) {
+        // Use coroutines for async database operations
+        viewModelScope.launch {
+            try {
+                val result = databaseService.saveInsect(registration)
+                
+                result.onSuccess { insectId ->
+                    _isLoading.value = false
+                    _saveSuccess.value = true
+                    clearForm()
+                }.onFailure { exception ->
+                    _isLoading.value = false
+                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                }
+                
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _errorMessage.value = "Erro inesperado: ${e.message}"
+            }
         }
-        
-        val uploadedUrls = mutableListOf<String>()
-        var uploadedCount = 0
-        
-        images.forEach { uri ->
-            val imageRef = storage.reference.child("insetos/$registroId/${UUID.randomUUID()}.jpg")
-            
-            imageRef.putFile(uri)
-                .addOnSuccessListener { taskSnapshot ->
-                    imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                        uploadedUrls.add(downloadUri.toString())
-                        uploadedCount++
-                        
-                        if (uploadedCount == images.size) {
-                            onComplete(uploadedUrls)
-                        }
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    uploadedCount++
-                    _errorMessage.value = "Erro ao fazer upload da imagem: ${exception.message}"
-                    
-                    if (uploadedCount == images.size) {
-                        onComplete(uploadedUrls)
-                    }
-                }
+    }
+    
+    private fun convertDateToTimestamp(dateString: String): Long {
+        return try {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            formatter.parse(dateString)?.time ?: System.currentTimeMillis()
+        } catch (e: Exception) {
+            System.currentTimeMillis()
         }
     }
     
