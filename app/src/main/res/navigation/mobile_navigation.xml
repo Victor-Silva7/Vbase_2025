@@ -24,14 +24,8 @@
         tools:layout="@layout/fragment_notifications" />
         
     <fragment
-        android:id="@+id/navigation_postagens"
-        android:name="com.ifpr.androidapptemplate.ui.postagens.PostagensFragment"
-        android:label="@string/title_postagens"
-        tools:layout="@layout/fragment_postagens" />
-        
-    <fragment
-        android:id="@+id/navigation_registro"
-        android:name="com.ifpr.androidapptemplate.ui.registro.RegistroFragment"
-        android:label="@string/title_registro"
-        tools:layout="@layout/fragment_registro" />
+        android:id="@+id/navigation_public_search"
+        android:name="com.ifpr.androidapptemplate.ui.search.PublicSearchFragment"
+        android:label="@string/title_public_search"
+        tools:layout="@layout/fragment_public_search" />
 </navigation>

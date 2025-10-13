@@ -24,37 +24,15 @@
         <!-- Customize your theme here. -->
     </style>
     
-    <!-- V Group Button Styles -->
-    <style name="VGroupButton" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/vgroup_green</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="cornerRadius">12dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:layout_marginVertical">8dp</item>
+    <!-- Styles for image shapes -->
+    <style name="CircularImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
     
-    <style name="VGroupButton.Outline" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="strokeColor">@color/vgroup_green</item>
-        <item name="android:textColor">@color/vgroup_green</item>
-        <item name="cornerRadius">12dp</item>
-        <item name="android:textSize">16sp</item>
-        <item name="strokeWidth">2dp</item>
+    <style name="RoundedImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
     </style>
     
-    <!-- V Group EditText Style -->
-    <style name="VGroupEditText" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/vgroup_green</item>
-        <item name="boxStrokeWidth">2dp</item>
-        <item name="hintTextColor">@color/vgroup_text_secondary</item>
-        <item name="android:textColorHint">@color/vgroup_text_secondary</item>
-    </style>
-    
-    <!-- V Group Card Style -->
-    <style name="VGroupCard" parent="Widget.MaterialComponents.CardView">
-        <item name="cardBackgroundColor">@color/vgroup_gray_light</item>
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">4dp</item>
-        <item name="contentPadding">16dp</item>
-    </style>
 </resources>

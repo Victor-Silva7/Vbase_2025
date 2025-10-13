@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Imagem/Avatar -->
+        <FrameLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp">
+
+            <ImageView
+                android:id="@+id/ivResultImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@drawable/category_badge_background"
+                android:src="@drawable/ic_image_placeholder"
+                android:contentDescription="Imagem do resultado" />
+
+            <!-- Badge do tipo -->
+            <ImageView
+                android:id="@+id/ivTypeBadge"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_planta_24dp"
+                android:background="@drawable/circle_background_green"
+                android:padding="2dp"
+                android:contentDescription="Tipo do resultado" />
+
+        </FrameLayout>
+
+        <!-- Conteúdo -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <!-- Título -->
+            <TextView
+                android:id="@+id/tvResultTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rosa Vermelha"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Rosa Vermelha do Jardim" />
+
+            <!-- Subtítulo -->
+            <TextView
+                android:id="@+id/tvResultSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rosa damascena"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Rosa damascena • Jardim Central" />
+
+            <!-- Informações adicionais -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+
+                <!-- Autor -->
+                <TextView
+                    android:id="@+id/tvResultAuthor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="João Silva"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:drawableStart="@drawable/ic_user_placeholder"
+                    android:drawablePadding="4dp"
+                    tools:text="João Silva" />
+
+                <!-- Timestamp -->
+                <TextView
+                    android:id="@+id/tvResultTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="há 2h"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="há 2h" />
+
+            </LinearLayout>
+
+            <!-- Métricas (curtidas, comentários) -->
+            <LinearLayout
+                android:id="@+id/layoutMetrics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvLikes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="23 curtidas"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:drawableStart="@drawable/ic_favorite_24dp"
+                    android:drawablePadding="4dp"
+                    android:layout_marginEnd="16dp"
+                    tools:text="23 curtidas" />
+
+                <TextView
+                    android:id="@+id/tvComments"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 comentários"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:drawableStart="@drawable/ic_comment_24dp"
+                    android:drawablePadding="4dp"
+                    tools:text="5 comentários" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Menu de opções -->
+        <ImageView
+            android:id="@+id/ivResultMenu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_more_vert_24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:alpha="0.6"
+            android:contentDescription="Opções do resultado" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_person_24dp"
         android:title="@string/title_notifications" />
 
+    <item
+        android:id="@+id/navigation_public_search"
+        android:icon="@drawable/ic_search_24dp"
+        android:title="@string/title_public_search" />
+
 </menu>
