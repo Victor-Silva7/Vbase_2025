@@ -8,6 +8,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
     
     <!-- Cores do aplicativo V Group - Manejo Verde -->
     <color name="primary_green">#4CAF50</color>
@@ -49,4 +50,8 @@
     <color name="like_color">#E91E63</color>
     <color name="comment_color">#2196F3</color>
     <color name="share_color">#4CAF50</color>
+    
+    <!-- Cores adicionais -->
+    <color name="divider_color">#E0E0E0</color>
+    <color name="info_color">#2196F3</color>
 </resources>

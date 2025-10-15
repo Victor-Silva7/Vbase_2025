@@ -112,4 +112,45 @@
     <string name="sort_by_date">Ordenar por data</string>
     <string name="sort_by_popularity">Ordenar por popularidade</string>
     
+    <!-- Strings para atividades de registro -->
+    <string name="back_button">Voltar</string>
+    <string name="share_registration">Compartilhar registro</string>
+    <string name="category_icon">Ícone da categoria</string>
+    <string name="healthy">Saudável</string>
+    <string name="registration_type">Tipo de registro</string>
+    <string name="location_icon">Ícone de localização</string>
+    <string name="location">Localização</string>
+    <string name="date_icon">Ícone de data</string>
+    <string name="registration_date">Data do registro</string>
+    <string name="observations">Observações</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Excluir</string>
+    <string name="category_tooltip_hint">Dica da categoria</string>
+    
+    <!-- Strings para meus registros -->
+    <string name="meus_registros_title">Meus Registros</string>
+    <string name="search_icon">Ícone de busca</string>
+    <string name="search_registrations_hint">Buscar registros...</string>
+    <string name="clear_search">Limpar busca</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_plants">Plantas</string>
+    <string name="filter_insects">Insetos</string>
+    <string name="plantas">Plantas</string>
+    <string name="insetos">Insetos</string>
+    <string name="total">Total</string>
+    <string name="empty_state_icon">Ícone de estado vazio</string>
+    <string name="no_plants_registered">Nenhuma planta registrada</string>
+    <string name="no_plants_message">Você ainda não registrou nenhuma planta.</string>
+    <string name="add_first_registration">Adicionar primeiro registro</string>
+    <string name="add_registration">Adicionar registro</string>
+    
+    <!-- Strings para fragmentos -->
+    <string name="error_icon">Ícone de erro</string>
+    <string name="error_loading_registrations">Erro ao carregar registros</string>
+    <string name="check_connection_try_again">Verifique sua conexão e tente novamente</string>
+    <string name="try_again">Tentar novamente</string>
+    <string name="registration_image">Imagem do registro</string>
+    <string name="multiple_images">Múltiplas imagens</string>
+    <string name="share">Compartilhar</string>
+    
 </resources>

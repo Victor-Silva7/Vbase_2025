@@ -24,12 +24,6 @@
         tools:layout="@layout/fragment_notifications" />
         
     <fragment
-        android:id="@+id/navigation_public_search"
-        android:name="com.ifpr.androidapptemplate.ui.search.PublicSearchFragment"
-        android:label="@string/title_public_search"
-        tools:layout="@layout/fragment_public_search" />
-        
-    <fragment
         android:id="@+id/navigation_comentarios"
         android:name="com.ifpr.androidapptemplate.ui.comentarios.ComentariosFragment"
         android:label="Comentários"
@@ -38,4 +32,5 @@
             android:name="postId"
             app:argType="string" />
     </fragment>
+
 </navigation>

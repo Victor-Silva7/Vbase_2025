@@ -1,42 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
-<com.google.android.material.card.MaterialCardView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-=======
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
->>>>>>> sistema_comentarios
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-<<<<<<< HEAD
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:strokeWidth="0dp">
-=======
     app:cardElevation="4dp"
     app:cardCornerRadius="12dp"
     app:strokeWidth="1dp"
     app:strokeColor="@color/divider">
->>>>>>> sistema_comentarios
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-<<<<<<< HEAD
-        <!-- Header do Card com informações do usuário -->
-        <RelativeLayout
-            android:id="@+id/layoutUserHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-=======
         <!-- Header do usuário -->
         <LinearLayout
             android:id="@+id/layoutUserHeader"
@@ -48,57 +26,19 @@
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true">
->>>>>>> sistema_comentarios
 
             <!-- Avatar do usuário -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/imageViewUserAvatar"
-<<<<<<< HEAD
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-=======
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="12dp"
->>>>>>> sistema_comentarios
                 android:scaleType="centerCrop"
                 app:shapeAppearanceOverlay="@style/CircularImageView"
                 app:strokeColor="@color/divider"
                 app:strokeWidth="1dp"
                 tools:src="@drawable/ic_person_24dp" />
 
-<<<<<<< HEAD
-            <!-- Informações do usuário -->
-            <LinearLayout
-                android:id="@+id/layoutUserInfo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="8dp"
-                android:layout_toStartOf="@+id/layoutPostMeta"
-                android:layout_toEndOf="@+id/imageViewUserAvatar"
-                android:orientation="vertical">
-
-                <!-- Nome do usuário com verificação -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/textViewUserName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="Maria Silva" />
-
-=======
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -123,7 +63,6 @@
                         tools:text="Maria Silva" />
 
                     <!-- Selo de verificação -->
->>>>>>> sistema_comentarios
                     <ImageView
                         android:id="@+id/imageViewVerified"
                         android:layout_width="16dp"
@@ -138,14 +77,6 @@
 
                 <!-- Nível do usuário e localização -->
                 <LinearLayout
-<<<<<<< HEAD
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-=======
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -153,96 +84,38 @@
                     android:layout_marginTop="2dp">
 
                     <!-- Nível do usuário -->
->>>>>>> sistema_comentarios
                     <TextView
                         android:id="@+id/textViewUserLevel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/primary_green"
-<<<<<<< HEAD
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        tools:text="Especialista" />
-
-                    <View
-                        android:layout_width="4dp"
-                        android:layout_height="4dp"
-                        android:layout_marginHorizontal="6dp"
-                        android:background="@drawable/ic_verified_24dp"
-                        app:tint="@color/text_hint" />
-
-=======
                         android:textSize="10sp"
                         android:textStyle="bold"
                         tools:text="Especialista"
                         tools:ignore="SmallSp" />
 
                     <!-- Localização do usuário -->
->>>>>>> sistema_comentarios
                     <TextView
                         android:id="@+id/textViewUserLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-<<<<<<< HEAD
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        tools:text="São Paulo, SP" />
-=======
                         android:layout_marginStart="8dp"
                         android:textColor="@color/text_hint"
                         android:textSize="10sp"
                         tools:text="Curitiba, PR"
                         tools:ignore="SmallSp" />
->>>>>>> sistema_comentarios
 
                 </LinearLayout>
 
             </LinearLayout>
 
-<<<<<<< HEAD
-            <!-- Meta informações da postagem -->
-            <LinearLayout
-                android:id="@+id/layoutPostMeta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:gravity="end|center_vertical"
-                android:orientation="vertical">
-
-                <!-- Tempo da postagem -->
-                <TextView
-                    android:id="@+id/textViewPostTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_hint"
-                    android:textSize="12sp"
-                    tools:text="2h" />
-
-                <!-- Ícone do tipo de postagem -->
-                <ImageView
-                    android:id="@+id/imageViewPostType"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="4dp"
-                    tools:src="@drawable/ic_planta_24dp"
-                    app:tint="@color/primary_green" />
-
-            </LinearLayout>
-
-        </RelativeLayout>
-=======
         </LinearLayout>
->>>>>>> sistema_comentarios
 
         <!-- Conteúdo da postagem -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-<<<<<<< HEAD
-            android:paddingHorizontal="16dp">
-=======
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:paddingBottom="12dp">
@@ -274,7 +147,6 @@
                     app:tint="@color/healthy_color" />
 
             </LinearLayout>
->>>>>>> sistema_comentarios
 
             <!-- Título da postagem -->
             <TextView
@@ -282,95 +154,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
-<<<<<<< HEAD
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:lineSpacingExtra="2dp"
-                tools:text="Rosa do meu jardim floresceu!" />
-=======
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp"
                 tools:text="Minha nova planta" />
->>>>>>> sistema_comentarios
 
             <!-- Descrição da postagem -->
             <TextView
                 android:id="@+id/textViewPostDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-<<<<<<< HEAD
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_primary"
-=======
                 android:textColor="@color/text_secondary"
->>>>>>> sistema_comentarios
                 android:textSize="14sp"
                 android:lineSpacingExtra="2dp"
                 android:maxLines="3"
                 android:ellipsize="end"
-<<<<<<< HEAD
-                tools:text="Depois de 3 meses cuidando com muito carinho, minha rosa finalmente deu sua primeira florada. As pétalas estão com uma cor incrível!" />
-
-        </LinearLayout>
-
-        <!-- Imagem da postagem -->
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imageViewPostPhoto"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="12dp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/RoundedImageView"
-            tools:src="@drawable/ic_planta_24dp" />
-
-        <!-- Informações específicas (planta ou inseto) -->
-        <LinearLayout
-            android:id="@+id/layoutSpecificInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="vertical"
-            android:paddingHorizontal="16dp">
-
-            <!-- Chips com informações -->
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:chipSpacingHorizontal="8dp"
-                app:singleLine="false">
-
-                <!-- Nome científico -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipScientificName"
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    app:chipIconTint="@color/text_secondary"
-                    tools:text="Rosa gallica" />
-
-                <!-- Família -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipFamily"
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    tools:text="Rosaceae" />
-
-                <!-- Status/Tipo -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipStatus"
-                    style="@style/Widget.Material3.Chip.Assist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    tools:text="Floração" />
-
-            </com.google.android.material.chip.ChipGroup>
-=======
                 tools:text="Esta é uma descrição da minha nova planta. Ela está crescendo muito bem e já está com 30cm de altura." />
 
             <!-- Imagem da postagem -->
@@ -386,61 +184,29 @@
                 app:strokeWidth="1dp"
                 tools:src="@drawable/ic_planta_24dp"
                 tools:visibility="visible" />
->>>>>>> sistema_comentarios
 
             <!-- Localização da postagem -->
             <LinearLayout
                 android:id="@+id/layoutPostLocation"
-<<<<<<< HEAD
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-=======
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_marginTop="8dp"
->>>>>>> sistema_comentarios
                 android:visibility="gone"
                 tools:visibility="visible">
 
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-<<<<<<< HEAD
-                    android:src="@drawable/ic_location_on_24dp"
-                    app:tint="@color/text_secondary" />
-=======
                     android:src="@drawable/ic_location_24dp"
                     app:tint="@color/text_hint" />
->>>>>>> sistema_comentarios
 
                 <TextView
                     android:id="@+id/textViewPostLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-<<<<<<< HEAD
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    tools:text="Jardim Botânico - SP" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/divider" />
-
-        <!-- Footer com interações -->
-=======
                     android:textColor="@color/text_hint"
                     android:textSize="12sp"
                     tools:text="Jardim Botânico, Curitiba, PR" />
@@ -465,43 +231,27 @@
             android:layout_height="1dp"
             android:background="@color/divider" />
 
->>>>>>> sistema_comentarios
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-<<<<<<< HEAD
-            android:padding="16dp">
-=======
             android:padding="12dp">
->>>>>>> sistema_comentarios
 
             <!-- Estatísticas de interação -->
             <TextView
                 android:id="@+id/textViewInteractionStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-<<<<<<< HEAD
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:layout_marginBottom="12dp"
-=======
                 android:textColor="@color/text_hint"
                 android:textSize="12sp"
                 android:layout_marginBottom="8dp"
->>>>>>> sistema_comentarios
                 tools:text="23 curtidas • 5 comentários • 2 compartilhamentos" />
 
             <!-- Botões de ação -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-<<<<<<< HEAD
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-=======
                 android:orientation="horizontal">
->>>>>>> sistema_comentarios
 
                 <!-- Botão curtir -->
                 <LinearLayout
@@ -509,11 +259,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-<<<<<<< HEAD
-                    android:background="?android:attr/selectableItemBackground"
-=======
                     android:background="?attr/selectableItemBackground"
->>>>>>> sistema_comentarios
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
@@ -544,11 +290,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-<<<<<<< HEAD
-                    android:background="?android:attr/selectableItemBackground"
-=======
                     android:background="?attr/selectableItemBackground"
->>>>>>> sistema_comentarios
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
@@ -577,11 +319,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-<<<<<<< HEAD
-                    android:background="?android:attr/selectableItemBackground"
-=======
                     android:background="?attr/selectableItemBackground"
->>>>>>> sistema_comentarios
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
@@ -610,11 +348,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-<<<<<<< HEAD
-                    android:background="?android:attr/selectableItemBackground"
-=======
                     android:background="?attr/selectableItemBackground"
->>>>>>> sistema_comentarios
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center"
