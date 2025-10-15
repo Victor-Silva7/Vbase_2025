@@ -5,166 +5,235 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ifpr.androidapptemplate.data.model.*
-import com.ifpr.androidapptemplate.data.repository.FeedRepository
 import com.ifpr.androidapptemplate.data.repository.TipoFiltro
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 /**
- * ViewModel para gerenciar o feed com suporte a paginação
+ * ViewModel para o feed de postagens
+ * Gerencia estado de carregamento, postagens filtradas e interações do usuário
  */
 class FeedViewModel : ViewModel() {
     
-    private val repository = FeedRepository()
+    // Estado de carregamento
+    private val _loadingState = MutableLiveData<LoadingState>()
+    val loadingState: LiveData<LoadingState> = _loadingState
     
-    // Estados observáveis
-    val loadingState: LiveData<LoadingState> = repository.loadingState
-    val currentPosts: LiveData<List<PostagemFeed>> = repository.currentPosts
+    // Postagens atuais
+    private val _currentPosts = MutableLiveData<List<PostagemFeed>>()
+    val currentPosts: LiveData<List<PostagemFeed>> = _currentPosts
     
-    private val _isRefreshing = MutableLiveData<Boolean>(false)
+    // Estado de refresh
+    private val _isRefreshing = MutableLiveData<Boolean>()
     val isRefreshing: LiveData<Boolean> = _isRefreshing
     
-    private val _errorMessage = MutableLiveData<String?>(null)
+    // Mensagens de erro
+    private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
     
-    // Estado atual dos filtros
+    // Filtros atuais
     private var currentFilter = TipoFiltro.TODAS
     private var currentSearchQuery = ""
     
+    // Paginação
+    private var currentPage = 0
+    private val pageSize = 10
+    private var hasMorePages = true
+    
+    // Debounce para busca
+    private var searchJob: Job? = null
+    private val searchDebounceDelay = 300L
+    
     init {
-        loadFirstPage()
+        loadInitialFeed()
     }
     
     /**
-     * Carrega primeira página (inicial ou refresh)
+     * Carrega o feed inicial
      */
-    fun loadFirstPage(
-        filtro: TipoFiltro = TipoFiltro.TODAS,
-        searchQuery: String = \"\"
-    ) {
-        currentFilter = filtro
-        currentSearchQuery = searchQuery
+    private fun loadInitialFeed() {
+        _loadingState.value = LoadingState.Loading
+        _isRefreshing.value = false
         
+        // Em uma implementação completa, carregaria do Firebase
+        // Por enquanto, usamos dados mock
         viewModelScope.launch {
-            val result = repository.loadFirstPage(filtro, searchQuery)
-            result.onFailure { exception ->
-                _errorMessage.postValue(exception.message)
+            delay(1000) // Simula network delay
+            
+            try {
+                val mockPosts = PostagemMockData.gerarPostagensMock()
+                _currentPosts.value = mockPosts
+                _loadingState.value = LoadingState.Success(true)
+            } catch (e: Exception) {
+                _errorMessage.value = "Erro ao carregar postagens: ${e.message}"
+                _loadingState.value = LoadingState.Error(e.message ?: "Erro desconhecido")
             }
         }
     }
     
     /**
-     * Refresh do feed (pull-to-refresh)
+     * Atualiza o feed (pull-to-refresh)
      */
     fun refreshFeed() {
-        _isRefreshing.postValue(true)
+        _isRefreshing.value = true
         
         viewModelScope.launch {
-            repository.clearCache()
-            val result = repository.loadFirstPage(currentFilter, currentSearchQuery)
+            delay(1000) // Simula network delay
             
-            _isRefreshing.postValue(false)
-            
-            result.onFailure { exception ->
-                _errorMessage.postValue(\"Erro ao atualizar: ${exception.message}\")
+            try {
+                val mockPosts = PostagemMockData.gerarPostagensMock()
+                _currentPosts.value = mockPosts
+                _isRefreshing.value = false
+                _loadingState.value = LoadingState.Success(true)
+                _errorMessage.value = null
+            } catch (e: Exception) {
+                _errorMessage.value = "Erro ao atualizar feed: ${e.message}"
+                _isRefreshing.value = false
             }
         }
     }
     
     /**
-     * Carrega próxima página (scroll infinito)
+     * Carrega a próxima página (scroll infinito)
      */
     fun loadNextPage() {
-        if (!repository.canLoadMore()) return
+        if (!hasMorePages || _loadingState.value is LoadingState.LoadingMore) return
+        
+        _loadingState.value = LoadingState.LoadingMore
         
         viewModelScope.launch {
-            val result = repository.loadNextPage()
-            result.onFailure { exception ->
-                _errorMessage.postValue(\"Erro ao carregar mais: ${exception.message}\")
+            delay(1000) // Simula network delay
+            
+            try {
+                // Em uma implementação real, buscaria a próxima página do Firebase
+                currentPage++
+                
+                // Se chegamos ao fim das páginas mock, não tem mais conteúdo
+                if (currentPage > 3) {
+                    hasMorePages = false
+                    _loadingState.value = LoadingState.Success(false)
+                    return@launch
+                }
+                
+                val mockPosts = PostagemMockData.gerarPostagensMock()
+                val currentList = _currentPosts.value ?: emptyList()
+                val newList = currentList + mockPosts
+                _currentPosts.value = newList
+                _loadingState.value = LoadingState.Success(true)
+            } catch (e: Exception) {
+                _errorMessage.value = "Erro ao carregar mais postagens: ${e.message}"
+                _loadingState.value = LoadingState.Error(e.message ?: "Erro desconhecido")
             }
         }
     }
     
     /**
-     * Aplica filtro de categoria
+     * Aplica filtro por categoria
      */
     fun applyFilter(filtro: TipoFiltro) {
-        if (currentFilter != filtro) {
-            loadFirstPage(filtro, currentSearchQuery)
-        }
+        currentFilter = filtro
+        filterAndSearchPosts()
     }
     
     /**
-     * Aplica busca de texto
+     * Aplica busca por texto
      */
     fun applySearch(query: String) {
-        if (currentSearchQuery != query.trim()) {
-            loadFirstPage(currentFilter, query.trim())
+        // Cancela busca anterior
+        searchJob?.cancel()
+        
+        // Nova busca com debounce
+        searchJob = viewModelScope.launch {
+            delay(searchDebounceDelay)
+            currentSearchQuery = query
+            filterAndSearchPosts()
         }
     }
     
     /**
-     * Limpa busca
+     * Filtra e busca postagens com base nos critérios atuais
      */
-    fun clearSearch() {
+    private fun filterAndSearchPosts() {
+        val allPosts = _currentPosts.value ?: return
+        var filteredPosts = allPosts
+        
+        // Aplica filtro por categoria
+        filteredPosts = when (currentFilter) {
+            TipoFiltro.PLANTAS -> filteredPosts.filter { it.tipo == TipoPostagem.PLANTA }
+            TipoFiltro.INSETOS -> filteredPosts.filter { it.tipo == TipoPostagem.INSETO }
+            TipoFiltro.TODAS -> filteredPosts
+        }
+        
+        // Aplica busca por texto
         if (currentSearchQuery.isNotEmpty()) {
-            loadFirstPage(currentFilter, \"\")
+            filteredPosts = filteredPosts.filter { postagem ->
+                postagem.titulo.contains(currentSearchQuery, ignoreCase = true) ||
+                postagem.descricao.contains(currentSearchQuery, ignoreCase = true) ||
+                postagem.usuario.nomeExibicao.contains(currentSearchQuery, ignoreCase = true) ||
+                postagem.tags.any { it.contains(currentSearchQuery, ignoreCase = true) } ||
+                (postagem.detalhesPlanta?.nomeComum?.contains(currentSearchQuery, ignoreCase = true) == true) ||
+                (postagem.detalhesPlanta?.nomeCientifico?.contains(currentSearchQuery, ignoreCase = true) == true) ||
+                (postagem.detalhesInseto?.nomeComum?.contains(currentSearchQuery, ignoreCase = true) == true) ||
+                (postagem.detalhesInseto?.nomeCientifico?.contains(currentSearchQuery, ignoreCase = true) == true)
+            }
         }
+        
+        _currentPosts.value = filteredPosts
     }
     
     /**
-     * Atualiza uma postagem específica (para interações)
-     */
-    fun updatePostagem(postagem: PostagemFeed) {
-        repository.updatePostagem(postagem)
-    }
-    
-    /**
-     * Curtir/descurtir postagem
+     * Alterna estado de curtida de uma postagem
      */
     fun toggleLike(postagem: PostagemFeed) {
-        val novasInteracoes = postagem.interacoes.copy(
-            curtidoPeloUsuario = !postagem.interacoes.curtidoPeloUsuario,
-            curtidas = if (postagem.interacoes.curtidoPeloUsuario) {
-                postagem.interacoes.curtidas - 1
+        // Em uma implementação real, atualizaria no Firebase
+        // Por enquanto, apenas simula a mudança local
+        val currentList = _currentPosts.value ?: return
+        val updatedList = currentList.map { p ->
+            if (p.id == postagem.id) {
+                val novasInteracoes = p.interacoes.copy(
+                    curtidoPeloUsuario = !p.interacoes.curtidoPeloUsuario,
+                    curtidas = if (p.interacoes.curtidoPeloUsuario) {
+                        (p.interacoes.curtidas - 1).coerceAtLeast(0)
+                    } else {
+                        p.interacoes.curtidas + 1
+                    }
+                )
+                p.copy(interacoes = novasInteracoes)
             } else {
-                postagem.interacoes.curtidas + 1
+                p
             }
-        )
-        
-        val postagemAtualizada = postagem.copy(interacoes = novasInteracoes)
-        updatePostagem(postagemAtualizada)
+        }
+        _currentPosts.value = updatedList
     }
     
     /**
-     * Salvar/remover dos favoritos
+     * Alterna estado de salvamento de uma postagem
      */
     fun toggleBookmark(postagem: PostagemFeed) {
-        val novasInteracoes = postagem.interacoes.copy(
-            salvosPeloUsuario = !postagem.interacoes.salvosPeloUsuario
-        )
-        
-        val postagemAtualizada = postagem.copy(interacoes = novasInteracoes)
-        updatePostagem(postagemAtualizada)
-    }
-    
-    /**
-     * Obtém informações de paginação atuais
-     */
-    fun getPaginationInfo(): PaginationInfo {
-        return repository.getPaginationInfo()
-    }
-    
-    /**
-     * Verifica se pode carregar mais páginas
-     */
-    fun canLoadMore(): Boolean {
-        return repository.canLoadMore()
+        // Em uma implementação real, atualizaria no Firebase
+        // Por enquanto, apenas simula a mudança local
+        val currentList = _currentPosts.value ?: return
+        val updatedList = currentList.map { p ->
+            if (p.id == postagem.id) {
+                val novasInteracoes = p.interacoes.copy(
+                    salvosPeloUsuario = !p.interacoes.salvosPeloUsuario
+                )
+                p.copy(interacoes = novasInteracoes)
+            } else {
+                p
+            }
+        }
+        _currentPosts.value = updatedList
     }
     
     /**
      * Limpa mensagem de erro
      */
     fun clearError() {
-        _errorMessage.postValue(null)
+        _errorMessage.value = null
+    }
+    
+    override fun onCleared() {
+        super.onCleared()
+        searchJob?.cancel()
     }
 }

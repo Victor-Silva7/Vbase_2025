@@ -110,6 +110,9 @@ data class PostagemFeed(
     // Interações sociais
     val interacoes: InteracoesPostagem = InteracoesPostagem(),
     
+    // Comentários
+    val comentarioStats: ComentarioStats = ComentarioStats(),
+    
     // Status e configurações
     val isPublico: Boolean = true,
     val isVerificado: Boolean = false,

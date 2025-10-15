@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="12dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider"
+    app:cardBackgroundColor="@color/surface">
+
+    <!-- Comentário principal -->
+    <LinearLayout
+        android:id="@+id/layoutCommentContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Header do comentário -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <!-- Avatar do usuário -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imageViewUserAvatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/CircularImageView"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp"
+                tools:src="@drawable/ic_person_24dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Nome do usuário e verificação -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/textViewUserName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        tools:text="Maria Silva" />
+
+                    <!-- Selo de verificação -->
+                    <ImageView
+                        android:id="@+id/imageViewVerified"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_verified_24dp"
+                        android:visibility="gone"
+                        app:tint="@color/primary_green"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <!-- Nível do usuário, tempo e data completa -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="2dp">
+
+                    <!-- Nível do usuário -->
+                    <TextView
+                        android:id="@+id/textViewUserLevel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/primary_green"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        tools:text="Especialista"
+                        tools:ignore="SmallSp" />
+
+                    <!-- Tempo do comentário -->
+                    <TextView
+                        android:id="@+id/textViewTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/text_hint"
+                        android:textSize="12sp"
+                        tools:text="2h" />
+
+                    <!-- Indicador de data completa (visível ao passar o mouse/pressionar) -->
+                    <ImageView
+                        android:id="@+id/imageViewTimeInfo"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_info_24dp"
+                        app:tint="@color/text_hint"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Conteúdo do comentário -->
+        <TextView
+            android:id="@+id/textViewContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"
+            tools:text="Ótima observação! Eu também tenho notado isso no meu jardim." />
+
+        <!-- Indicador de edição -->
+        <TextView
+            android:id="@+id/textViewEdited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:text="(editado)"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Anexos -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewAttachments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:layout_height="80dp" />
+
+        <!-- Ações do comentário -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp">
+
+            <!-- Botão curtir -->
+            <LinearLayout
+                android:id="@+id/buttonLike"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp">
+
+                <ImageView
+                    android:id="@+id/imageViewLike"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_favorite_border_24dp"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/textViewLikeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    tools:text="23" />
+
+            </LinearLayout>
+
+            <!-- Botão responder -->
+            <LinearLayout
+                android:id="@+id/buttonReply"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_reply_24dp"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="Responder"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!-- Botão mais opções -->
+            <ImageButton
+                android:id="@+id/buttonMoreOptions"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert_24dp"
+                app:tint="@color/text_hint" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Respostas (se houver) -->
+    <LinearLayout
+        android:id="@+id/layoutReplies"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- Indicador de respostas ocultas -->
+        <LinearLayout
+            android:id="@+id/layoutHiddenReplies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="56dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <View
+                android:layout_width="24dp"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/textViewRepliesCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/primary_green"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="3 respostas" />
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_expand_more_24dp"
+                app:tint="@color/primary_green" />
+
+        </LinearLayout>
+
+        <!-- Lista de respostas visíveis -->
+        <LinearLayout
+            android:id="@+id/containerReplies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="48dp"
+            android:paddingEnd="0dp">
+
+            <!-- Respostas serão adicionadas dinamicamente aqui -->
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

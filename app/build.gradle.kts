@@ -65,20 +65,19 @@ dependencies {
     
     // ViewPager2 e SwipeRefreshLayout
     implementation("androidx.viewpager2:viewpager2:1.0.0")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.androidx.swiperefreshlayout)
     
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     
     // Image loading (Glide)
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
     
     // CircleImageView para avatares
     implementation("de.hdodenhof:circleimageview:3.1.0")
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
