@@ -278,14 +278,6 @@ data class Inseto(
     fun isBeneficial(): Boolean = categoria == InsectCategory.BENEFICIAL
 }
 
-/**
- * Insect categories following project specifications with tooltip descriptions
- */
-enum class InsectCategory {
-    BENEFICIAL, // Benéfico: Polinizadores, predadores naturais, controladores biológicos
-    NEUTRAL,    // Neutro: Não causam danos significativos, parte do ecossistema natural
-    PEST        // Praga: Causam danos às plantas, requerem monitoramento e controle
-}
 
 /**
  * Insect characteristics data class

@@ -62,26 +62,26 @@ class UploadProgressDialog(
                     binding.buttonCancel.isEnabled = true
                 }
                 UploadStatus.COMPRESSING -> {
-                    binding.textDetails.text = \"Comprimindo imagens para otimizar qualidade\"
+                    binding.textDetails.text = "Comprimindo imagens para otimizar qualidade"
                     binding.buttonCancel.isEnabled = true
                 }
                 UploadStatus.UPLOADING -> {
-                    binding.textDetails.text = \"Enviando imagens para o servidor\"
+                    binding.textDetails.text = "Enviando imagens para o servidor"
                     binding.buttonCancel.isEnabled = true
                 }
                 UploadStatus.SUCCESS -> {
                     binding.progressBar.progress = 100
-                    binding.textProgress.text = \"100%\"
-                    binding.textDetails.text = \"Upload concluído com sucesso!\"
-                    binding.buttonCancel.text = \"Fechar\"
+                    binding.textProgress.text = "100%"
+                    binding.textDetails.text = "Upload concluído com sucesso!"
+                    binding.buttonCancel.text = "Fechar"
                     binding.buttonCancel.isEnabled = true
                     // Auto dismiss after 1 second
                     binding.root.postDelayed({ dismiss() }, 1000)
                 }
                 UploadStatus.FAILED -> {
-                    binding.textProgress.text = \"Erro\"
-                    binding.textDetails.text = \"Falha no upload. Tente novamente.\"
-                    binding.buttonCancel.text = \"Fechar\"
+                    binding.textProgress.text = "Erro"
+                    binding.textDetails.text = "Falha no upload. Tente novamente."
+                    binding.buttonCancel.text = "Fechar"
                     binding.buttonCancel.isEnabled = true
                 }
                 UploadStatus.CANCELLED -> {

@@ -153,4 +153,65 @@
     <string name="multiple_images">Múltiplas imagens</string>
     <string name="share">Compartilhar</string>
     
+    <!-- Strings para Google Sign-In -->
+    <string name="button_google_login">Entrar com Google</string>
+    
+    <!-- Strings para cores -->
+    <string name="secondary_green">#81C784</string>
+    <string name="sick">Doente</string>
+    <string name="sick_color">#FF5722</string>
+    <string name="beneficial">Benéfico</string>
+    <string name="neutral">Neutro</string>
+    <string name="neutral_color">#2196F3</string>
+    <string name="pest">Praga</string>
+    
+    <!-- Strings para validação de insetos -->
+    <string name="error_observacao_required_pest">Observações são obrigatórias para pragas</string>
+    <string name="error_observacao_suggested_beneficial">Observações são recomendadas para insetos benéficos</string>
+    <string name="beneficial_category_selected">Categoria benéfica selecionada</string>
+    <string name="neutral_category_selected">Categoria neutra selecionada</string>
+    <string name="pest_category_selected">Categoria praga selecionada</string>
+    <string name="camera_permission_needed">Permissão de câmera necessária</string>
+    <string name="storage_permission_needed">Permissão de armazenamento necessária</string>
+    <string name="insect_beneficial_title">Inseto Benéfico</string>
+    <string name="insect_beneficial_description">Polinizadores, predadores naturais, controladores biológicos</string>
+    <string name="insect_neutral_title">Inseto Neutro</string>
+    <string name="insect_neutral_description">Não causam danos significativos, parte do ecossistema natural</string>
+    <string name="insect_pest_title">Inseto Praga</string>
+    <string name="insect_pest_description">Causam danos às plantas, requerem monitoramento e controle</string>
+    <string name="understood">Entendi</string>
+    <string name="error_images_required_insect">Pelo menos uma imagem é obrigatória</string>
+    <string name="error_images_minimum_pest">Mínimo 2 imagens para pragas</string>
+    <string name="error_images_minimum_beneficial">Mínimo 1 imagem para benéficos</string>
+    <string name="error_nome_required_insect">Nome do inseto é obrigatório</string>
+    <string name="error_nome_too_short_insect">Nome muito curto (mínimo 2 caracteres)</string>
+    <string name="error_nome_too_long_insect">Nome muito longo (máximo 50 caracteres)</string>
+    <string name="error_nome_invalid_chars_insect">Nome contém caracteres inválidos</string>
+    <string name="error_nome_pattern_insect">Nome deve começar com letra</string>
+    <string name="error_data_required">Data é obrigatória</string>
+    <string name="error_data_invalid_format">Formato de data inválido</string>
+    <string name="error_data_future">Data não pode ser futura</string>
+    <string name="error_local_required">Local é obrigatório</string>
+    <string name="error_local_too_short">Local muito curto (mínimo 2 caracteres)</string>
+    <string name="error_local_too_long">Local muito longo (máximo 100 caracteres)</string>
+    <string name="error_local_invalid_chars">Local contém caracteres inválidos</string>
+    <string name="error_category_required_insect">Categoria do inseto é obrigatória</string>
+    
+    <!-- Strings para validação de plantas -->
+    <string name="healthy_category_selected">Categoria saudável selecionada</string>
+    <string name="sick_category_selected">Categoria doente selecionada</string>
+    <string name="plant_healthy_title">Planta Saudável</string>
+    <string name="plant_sick_title">Planta Doente</string>
+    <string name="plant_healthy_description">Planta em bom estado de saúde</string>
+    <string name="plant_sick_description">Planta com sinais de doença ou problemas</string>
+    <string name="error_nome_required">Nome é obrigatório</string>
+    <string name="error_nome_too_short">Nome muito curto (mínimo 2 caracteres)</string>
+    <string name="error_nome_too_long">Nome muito longo (máximo 50 caracteres)</string>
+    <string name="error_nome_invalid_chars">Nome contém caracteres inválidos</string>
+    <string name="error_category_required">Categoria é obrigatória</string>
+    
+    <!-- Strings para registros -->
+    <string name="no_insects_registered">Nenhum inseto registrado</string>
+    <string name="no_insects_message">Você ainda não registrou nenhum inseto</string>
+    
 </resources>

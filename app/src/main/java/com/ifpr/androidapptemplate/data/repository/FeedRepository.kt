@@ -110,8 +110,8 @@ class FeedRepository {
         } catch (e: Exception) {
             isLoading = false
             currentPage-- // Reverte página em caso de erro
-            _loadingState.postValue(LoadingState.Error(e.message ?: \"Erro ao carregar mais postagens\"))
-            Result.failure(e)
+            _loadingState.postValue(LoadingState.Error(e.message ?: "Erro ao carregar mais postagens"))
+            return Result.failure(e)
         }
     }
     
@@ -172,7 +172,7 @@ class FeedRepository {
      * Cria chave de cache baseada nos filtros
      */
     private fun createCacheKey(filtro: TipoFiltro, searchQuery: String, page: Int): String {
-        return \"${filtro.name}_${searchQuery.hashCode()}_$page\"
+        return "${filtro.name}_${searchQuery.hashCode()}_$page"
     }
     
     /**
@@ -229,12 +229,6 @@ class FeedRepository {
     }
 }
 
-/**
- * Enum para tipos de filtro
- */
-enum class TipoFiltro {
-    TODAS, PLANTAS, INSETOS
-}
 
 /**
  * Informações sobre o estado da paginação

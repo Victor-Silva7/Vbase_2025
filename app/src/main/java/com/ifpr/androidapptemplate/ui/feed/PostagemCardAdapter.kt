@@ -119,14 +119,10 @@ class PostagemCardAdapter(
         }
         submitList(newList)
     }
-<<<<<<< HEAD
-
-=======
     
     /**
      * ViewHolder para postagens
      */
->>>>>>> sistema_comentarios
     inner class PostagemViewHolder(
         private val binding: ItemPostagemCardBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -329,12 +325,9 @@ class PostagemCardAdapter(
                     textViewBookmark.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_secondary))
                     textViewBookmark.text = "Salvar"
                 }
-<<<<<<< HEAD
-=======
                 
                 // Contador de comentários
                 // Note: Esta informação já está incluída no getTextoInteracoes()
->>>>>>> sistema_comentarios
             }
         }
 

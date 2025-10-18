@@ -54,4 +54,7 @@
     <!-- Cores adicionais -->
     <color name="divider_color">#E0E0E0</color>
     <color name="info_color">#2196F3</color>
+    <color name="secondary_green">#81C784</color>
+    <color name="sick_color">#FF5722</color>
+    <color name="neutral_color">#2196F3</color>
 </resources>

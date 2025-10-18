@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications, R.id.navigation_postagens, R.id.navigation_registro
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -48,10 +48,8 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         
         when (navigateTo) {
-            "registro" -> {
-                navController.navigate(R.id.navigation_registro)
-            }
-            // Adicione outros casos conforme necessário
+            // Adicione casos de navegação conforme necessário
+            // Exemplo: "comentarios" -> navController.navigate(R.id.navigation_comentarios)
         }
     }
 }
