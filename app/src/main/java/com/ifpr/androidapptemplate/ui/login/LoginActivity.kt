@@ -16,6 +16,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.ifpr.androidapptemplate.MainActivity
 import com.ifpr.androidapptemplate.R
+import com.google.android.gms.common.SignInButton
 
 class LoginActivity : AppCompatActivity() {
 
@@ -23,7 +24,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var passwordEditText: EditText
     private lateinit var loginButton: Button
     private lateinit var registerLink: TextView
-    private lateinit var googleLoginButton: Button
+    private lateinit var googleLoginButton: SignInButton
+
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 9001
     private val TAG = "LoginActivity"
@@ -36,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
         passwordEditText = findViewById(R.id.edit_text_password)
         loginButton = findViewById(R.id.button_login)
         registerLink = findViewById(R.id.registerLink)
-        googleLoginButton = findViewById(R.id.button_google_login)
+        googleLoginButton = findViewById<SignInButton>(R.id.button_google_login)
 
         // Configurar Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

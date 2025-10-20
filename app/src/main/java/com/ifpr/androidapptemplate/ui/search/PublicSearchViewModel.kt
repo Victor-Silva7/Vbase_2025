@@ -25,6 +25,10 @@ class PublicSearchViewModel : ViewModel() {
     private val _isSearching = MutableLiveData<Boolean>(false)
     val isSearching: LiveData<Boolean> = _isSearching
 
+    // Alias esperado pela UI
+    private val _isLoading = MutableLiveData<Boolean>(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     private val _searchResults = MutableLiveData<PublicSearchResult>()
     val searchResults: LiveData<PublicSearchResult> = _searchResults
 
@@ -41,6 +45,10 @@ class PublicSearchViewModel : ViewModel() {
     // Sugestões e histórico
     private val _searchSuggestions = MutableLiveData<List<String>>()
     val searchSuggestions: LiveData<List<String>> = _searchSuggestions
+
+    // Sugestões tipadas para o adapter da UI
+    private val _suggestions = MutableLiveData<List<SearchSuggestion>>()
+    val suggestions: LiveData<List<SearchSuggestion>> = _suggestions
 
     private val _recentSearches = MutableLiveData<List<String>>()
     val recentSearches: LiveData<List<String>> = _recentSearches
@@ -79,21 +87,30 @@ class PublicSearchViewModel : ViewModel() {
         // Observar estado de busca
         repository.isSearching.observeForever { isSearching ->
             _isSearching.postValue(isSearching)
+            _isLoading.postValue(isSearching)
         }
 
         // Observar sugestões
         repository.searchSuggestions.observeForever { suggestions ->
             _searchSuggestions.postValue(suggestions)
+            _suggestions.postValue(suggestions.map { SearchSuggestion(it, SuggestionType.POPULAR) })
         }
 
         // Observar buscas recentes
         repository.recentSearches.observeForever { recent ->
             _recentSearches.postValue(recent)
+            // Atualiza sugestões quando em estado inicial
+            if (_searchMode.value == SearchMode.INITIAL) {
+                _suggestions.postValue(recent.map { SearchSuggestion(it, SuggestionType.RECENT_SEARCH) })
+            }
         }
 
         // Observar buscas populares
         repository.popularSearches.observeForever { popular ->
             _popularSearches.postValue(popular)
+            if (_searchMode.value == SearchMode.INITIAL && (suggestions.value.isNullOrEmpty())) {
+                _suggestions.postValue(popular.map { SearchSuggestion(it, SuggestionType.POPULAR) })
+            }
         }
     }
 
@@ -107,6 +124,20 @@ class PublicSearchViewModel : ViewModel() {
                 _searchMode.postValue(SearchMode.INITIAL)
             } catch (e: Exception) {
                 _errorMessage.postValue("Erro ao carregar dados iniciais: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Carregar sugestões iniciais (recentes e populares)
+     */
+    fun loadInitialSuggestions() {
+        viewModelScope.launch {
+            try {
+                repository.getTrendingSearches()
+                // recentSearches já é carregado no init do repository
+            } catch (e: Exception) {
+                _errorMessage.postValue("Erro ao carregar sugestões: ${e.message}")
             }
         }
     }
@@ -175,6 +206,13 @@ class PublicSearchViewModel : ViewModel() {
     }
 
     /**
+     * Atualizar sugestões com base na query atual (usado pela UI)
+     */
+    fun updateSuggestions(query: String) {
+        searchWithSuggestions(query)
+    }
+
+    /**
      * Aplicar filtros
      */
     fun applyFilters(filters: SearchFilters) {
@@ -240,6 +278,16 @@ class PublicSearchViewModel : ViewModel() {
      */
     fun clearSearchHistory() {
         repository.clearSearchHistory()
+    }
+
+    /**
+     * Expor carregamento de buscas recentes para UI
+     */
+    fun loadRecentSearches() {
+        // Repository já expõe via LiveData; aqui apenas garantimos refresh das sugestões mostradas
+        _recentSearches.value?.let { recent ->
+            _suggestions.postValue(recent.map { SearchSuggestion(it, SuggestionType.RECENT_SEARCH) })
+        }
     }
 
     /**

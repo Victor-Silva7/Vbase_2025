@@ -48,198 +48,93 @@ class SearchResultsAdapter(
             binding.root.setOnClickListener {
                 onItemClick(item)
             }
-            
-            // Score de relevância
-            binding.textRelevanceScore.text = "%.1f".format(item.relevanceScore)
         }
 
         private fun bindPlant(plant: PublicPlanta) {
             binding.apply {
                 // Ícone do tipo
-                imageViewTypeIcon.setImageResource(R.drawable.ic_planta_24dp)
+                ivTypeBadge.setImageResource(R.drawable.ic_planta_24dp)
                 
                 // Informações principais
-                textViewTitle.text = plant.nome
-                textViewSubtitle.text = "Planta • ${plant.familia}"
-                textViewDescription.text = plant.descricao
-                
-                // Status da planta
-                textViewStatus.apply {
-                    text = plant.status
-                    setTextColor(getStatusColor(plant.status))
-                }
-                
-                // Localização
-                if (plant.localizacao.isNotEmpty()) {
-                    textViewLocation.apply {
-                        visibility = View.VISIBLE
-                        text = plant.localizacao
-                    }
-                    imageViewLocation.visibility = View.VISIBLE
-                } else {
-                    textViewLocation.visibility = View.GONE
-                    imageViewLocation.visibility = View.GONE
-                }
+                tvResultTitle.text = plant.nome
+                tvResultSubtitle.text = if (plant.nomeCientifico.isNotEmpty()) plant.nomeCientifico else plant.local
                 
                 // Data
-                textViewDate.text = formatDate(plant.dataRegistro)
+                tvResultTime.text = plant.getFormattedDate()
                 
                 // Usuário que registrou
-                textViewUser.text = "Por ${plant.nomeUsuario}"
+                tvResultAuthor.text = plant.userName
                 
                 // Imagem da planta
-                if (plant.imageUrl.isNotEmpty()) {
-                    imageViewPhoto.visibility = View.VISIBLE
+                val photoUrl = plant.imagens.firstOrNull().orEmpty()
+                if (photoUrl.isNotEmpty()) {
+                    ivResultImage.visibility = View.VISIBLE
                     Glide.with(itemView.context)
-                        .load(plant.imageUrl)
+                        .load(photoUrl)
                         .placeholder(R.drawable.ic_planta_24dp)
                         .error(R.drawable.ic_error_24dp)
-                        .into(imageViewPhoto)
+                        .into(ivResultImage)
                 } else {
-                    imageViewPhoto.visibility = View.GONE
+                    ivResultImage.visibility = View.GONE
                 }
-                
-                // Informações adicionais
-                textViewAdditionalInfo.text = "Altura: ${plant.altura}cm"
-                
-                // Verificado
-                imageViewVerified.visibility = if (plant.verificado) View.VISIBLE else View.GONE
             }
         }
 
         private fun bindInsect(insect: PublicInseto) {
             binding.apply {
                 // Ícone do tipo
-                imageViewTypeIcon.setImageResource(R.drawable.ic_inseto_24dp)
+                ivTypeBadge.setImageResource(R.drawable.ic_inseto_24dp)
                 
                 // Informações principais
-                textViewTitle.text = insect.nome
-                textViewSubtitle.text = "Inseto • ${insect.familia}"
-                textViewDescription.text = insect.descricao
-                
-                // Tipo do inseto
-                textViewStatus.apply {
-                    text = insect.tipo
-                    setTextColor(getInsectTypeColor(insect.tipo))
-                }
-                
-                // Localização
-                if (insect.localizacao.isNotEmpty()) {
-                    textViewLocation.apply {
-                        visibility = View.VISIBLE
-                        text = insect.localizacao
-                    }
-                    imageViewLocation.visibility = View.VISIBLE
-                } else {
-                    textViewLocation.visibility = View.GONE
-                    imageViewLocation.visibility = View.GONE
-                }
+                tvResultTitle.text = insect.nome
+                tvResultSubtitle.text = if (insect.nomeCientifico.isNotEmpty()) insect.nomeCientifico else insect.local
                 
                 // Data
-                textViewDate.text = formatDate(insect.dataRegistro)
+                tvResultTime.text = insect.getFormattedDate()
                 
                 // Usuário que registrou
-                textViewUser.text = "Por ${insect.nomeUsuario}"
+                tvResultAuthor.text = insect.userName
                 
                 // Imagem do inseto
-                if (insect.imageUrl.isNotEmpty()) {
-                    imageViewPhoto.visibility = View.VISIBLE
+                val photoUrl = insect.imagens.firstOrNull().orEmpty()
+                if (photoUrl.isNotEmpty()) {
+                    ivResultImage.visibility = View.VISIBLE
                     Glide.with(itemView.context)
-                        .load(insect.imageUrl)
+                        .load(photoUrl)
                         .placeholder(R.drawable.ic_inseto_24dp)
                         .error(R.drawable.ic_error_24dp)
-                        .into(imageViewPhoto)
+                        .into(ivResultImage)
                 } else {
-                    imageViewPhoto.visibility = View.GONE
+                    ivResultImage.visibility = View.GONE
                 }
-                
-                // Informações adicionais
-                textViewAdditionalInfo.text = "Tamanho: ${insect.tamanho}mm"
-                
-                // Verificado
-                imageViewVerified.visibility = if (insect.verificado) View.VISIBLE else View.GONE
             }
         }
 
         private fun bindUser(user: PublicUser) {
             binding.apply {
                 // Ícone do tipo
-                imageViewTypeIcon.setImageResource(R.drawable.ic_person_24dp)
+                ivTypeBadge.setImageResource(R.drawable.ic_person_24dp)
                 
                 // Informações principais
-                textViewTitle.text = user.displayName
-                textViewSubtitle.text = "Usuário"
-                textViewDescription.text = user.bio
-                
-                // Nível/Tipo do usuário
-                textViewStatus.apply {
-                    text = user.userLevel
-                    setTextColor(getUserLevelColor(user.userLevel))
-                }
-                
-                // Localização
-                if (user.location.isNotEmpty()) {
-                    textViewLocation.apply {
-                        visibility = View.VISIBLE
-                        text = user.location
-                    }
-                    imageViewLocation.visibility = View.VISIBLE
-                } else {
-                    textViewLocation.visibility = View.GONE
-                    imageViewLocation.visibility = View.GONE
-                }
+                tvResultTitle.text = user.nome
+                tvResultSubtitle.text = "@${user.username}"
+                tvResultAuthor.text = "${user.totalRegistros} registros"
                 
                 // Data de registro
-                textViewDate.text = "Membro desde ${formatDate(user.joinDate)}"
-                
-                // Oculta usuário (já é o próprio usuário)
-                textViewUser.visibility = View.GONE
+                tvResultTime.text = formatDate(user.lastActivityTimestamp)
                 
                 // Avatar do usuário
-                if (user.profileImageUrl.isNotEmpty()) {
-                    imageViewPhoto.visibility = View.VISIBLE
+                if (user.avatarUrl.isNotEmpty()) {
+                    ivResultImage.visibility = View.VISIBLE
                     Glide.with(itemView.context)
-                        .load(user.profileImageUrl)
+                        .load(user.avatarUrl)
                         .placeholder(R.drawable.ic_person_24dp)
                         .error(R.drawable.ic_person_24dp)
                         .transform(CircleCrop())
-                        .into(imageViewPhoto)
+                        .into(ivResultImage)
                 } else {
-                    imageViewPhoto.visibility = View.GONE
+                    ivResultImage.visibility = View.GONE
                 }
-                
-                // Informações adicionais
-                textViewAdditionalInfo.text = "${user.totalRegistrations} registros"
-                
-                // Verificado
-                imageViewVerified.visibility = if (user.isVerified) View.VISIBLE else View.GONE
-            }
-        }
-
-        private fun getStatusColor(status: String): Int {
-            return when (status.lowercase()) {
-                "saudável", "healthy" -> itemView.context.getColor(R.color.healthy_color)
-                "doente", "sick" -> itemView.context.getColor(R.color.error_color)
-                "em crescimento", "growing" -> itemView.context.getColor(R.color.primary_green)
-                else -> itemView.context.getColor(R.color.text_secondary)
-            }
-        }
-
-        private fun getInsectTypeColor(tipo: String): Int {
-            return when (tipo.lowercase()) {
-                "benéfico", "beneficial" -> itemView.context.getColor(R.color.beneficial_color)
-                "praga", "pest" -> itemView.context.getColor(R.color.pest_color)
-                "neutro", "neutral" -> itemView.context.getColor(R.color.text_secondary)
-                else -> itemView.context.getColor(R.color.text_secondary)
-            }
-        }
-
-        private fun getUserLevelColor(level: String): Int {
-            return when (level.lowercase()) {
-                "expert", "especialista" -> itemView.context.getColor(R.color.primary_green)
-                "intermediário", "intermediate" -> itemView.context.getColor(R.color.beneficial_color)
-                "iniciante", "beginner" -> itemView.context.getColor(R.color.text_secondary)
-                else -> itemView.context.getColor(R.color.text_secondary)
             }
         }
 
@@ -271,7 +166,7 @@ class SearchResultsAdapter(
                 oldItem is SearchableItem.InsectResult && newItem is SearchableItem.InsectResult ->
                     oldItem.insect.id == newItem.insect.id
                 oldItem is SearchableItem.UserResult && newItem is SearchableItem.UserResult ->
-                    oldItem.user.userId == newItem.user.userId
+                    oldItem.user.id == newItem.user.id
                 else -> false
             }
         }

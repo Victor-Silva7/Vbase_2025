@@ -25,40 +25,27 @@ class NotificationsFragment : Fragment() {
 
         // Configurar observadores do ViewModel
         setupObservers(perfilViewModel)
-        
-        // Configurar cliques dos botões
-        setupClickListeners()
+        // Carregar dados reais do usuário autenticado
+        perfilViewModel.loadUserData()
 
         return root
     }
 
     private fun setupObservers(viewModel: NotificationsViewModel) {
-        // Observar dados do usuário
+        // Exibir um resumo simples usando o único TextView do layout
         viewModel.userName.observe(viewLifecycleOwner) { name ->
-            binding.textUserName.text = name
+            binding.textNotifications.text = name
         }
         
         viewModel.userEmail.observe(viewLifecycleOwner) { email ->
-            binding.textUserEmail.text = email
+            // Anexar email como informação adicional
+            val current = binding.textNotifications.text?.toString()?.takeIf { it.isNotEmpty() } ?: "Usuário"
+            binding.textNotifications.text = "$current\n$email"
         }
         
         viewModel.userStats.observe(viewLifecycleOwner) { stats ->
-            binding.textUserStats.text = stats
-        }
-    }
-
-    private fun setupClickListeners() {
-        // TODO: Configurar cliques para editar perfil, configurações, etc.
-        binding.buttonEditProfile.setOnClickListener {
-            // TODO: Navegar para edição de perfil
-        }
-        
-        binding.buttonSettings.setOnClickListener {
-            // TODO: Abrir configurações
-        }
-        
-        binding.buttonLogout.setOnClickListener {
-            // TODO: Implementar logout
+            val current = binding.textNotifications.text?.toString()?.takeIf { it.isNotEmpty() } ?: ""
+            binding.textNotifications.text = listOf(current, stats).filter { it.isNotEmpty() }.joinToString("\n")
         }
     }
 

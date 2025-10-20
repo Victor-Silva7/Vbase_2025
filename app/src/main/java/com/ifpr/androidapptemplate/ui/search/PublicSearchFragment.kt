@@ -53,7 +53,7 @@ class PublicSearchFragment : Fragment() {
             handleSearchResultClick(item)
         }
         
-        binding.recyclerViewResults.apply {
+        binding.recyclerSearchResults.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = searchResultsAdapter
         }
@@ -61,22 +61,22 @@ class PublicSearchFragment : Fragment() {
         // Adapter para sugestões
         searchSuggestionsAdapter = SearchSuggestionsAdapter(
             onSuggestionClick = { suggestion ->
-                binding.editTextSearch.setText(suggestion)
+                binding.etSearchPublic.setText(suggestion)
                 viewModel.search(suggestion)
             },
             onInsertClick = { suggestion ->
-                val currentText = binding.editTextSearch.text.toString()
+                val currentText = binding.etSearchPublic.text.toString()
                 val newText = if (currentText.isEmpty()) {
                     suggestion
                 } else {
                     "$currentText $suggestion"
                 }
-                binding.editTextSearch.setText(newText)
-                binding.editTextSearch.setSelection(newText.length)
+                binding.etSearchPublic.setText(newText)
+                binding.etSearchPublic.setSelection(newText.length)
             }
         )
         
-        binding.recyclerViewSuggestions.apply {
+        binding.recyclerSuggestions.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = searchSuggestionsAdapter
         }
@@ -84,7 +84,7 @@ class PublicSearchFragment : Fragment() {
     
     private fun setupSearchInterface() {
         // Configuração da busca em tempo real
-        binding.editTextSearch.addTextChangedListener { text ->
+        binding.etSearchPublic.addTextChangedListener { text ->
             val query = text.toString().trim()
             if (query.isEmpty()) {
                 viewModel.clearSearch()
@@ -95,18 +95,18 @@ class PublicSearchFragment : Fragment() {
         }
         
         // Botão de limpar busca
-        binding.buttonClearSearch.setOnClickListener {
-            binding.editTextSearch.text?.clear()
+        binding.ivClearSearch.setOnClickListener {
+            binding.etSearchPublic.text?.clear()
             viewModel.clearSearch()
         }
         
         // Botão de filtros
-        binding.buttonFilters.setOnClickListener {
+        binding.ivAdvancedFilters.setOnClickListener {
             showFiltersDialog()
         }
         
         // Botão de ordenação
-        binding.buttonSort.setOnClickListener {
+        binding.ivSortOptions.setOnClickListener {
             showSortDialog()
         }
     }
@@ -130,7 +130,7 @@ class PublicSearchFragment : Fragment() {
         
         // Observa estado de carregamento
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.layoutLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
         
         // Observa mensagens de erro
@@ -148,14 +148,14 @@ class PublicSearchFragment : Fragment() {
     }
     
     private fun setupClickListeners() {
-        // Clique no botão de busca recente
-        binding.textRecentSearches.setOnClickListener {
-            viewModel.loadRecentSearches()
+        // Limpar histórico de buscas
+        binding.tvClearHistory.setOnClickListener {
+            viewModel.clearSearchHistory()
         }
         
         // Clique para tentar novamente em caso de erro
-        binding.buttonRetry.setOnClickListener {
-            val query = binding.editTextSearch.text.toString()
+        binding.btnRetrySearch.setOnClickListener {
+            val query = binding.etSearchPublic.text.toString()
             if (query.isNotEmpty()) {
                 viewModel.search(query)
             }
@@ -165,10 +165,11 @@ class PublicSearchFragment : Fragment() {
     private fun updateUIForSearchMode(mode: SearchMode) {
         // Oculta todas as views primeiro
         binding.layoutInitialState.visibility = View.GONE
-        binding.layoutSuggestions.visibility = View.GONE
-        binding.layoutResults.visibility = View.GONE
+        binding.recyclerSuggestions.visibility = View.GONE
+        binding.layoutSearchResults.visibility = View.GONE
         binding.layoutNoResults.visibility = View.GONE
         binding.layoutError.visibility = View.GONE
+        binding.layoutLoading.visibility = View.GONE
         
         // Mostra a view apropriada baseada no modo
         when (mode) {
@@ -176,14 +177,14 @@ class PublicSearchFragment : Fragment() {
                 binding.layoutInitialState.visibility = View.VISIBLE
             }
             SearchMode.SUGGESTIONS -> {
-                binding.layoutSuggestions.visibility = View.VISIBLE
+                binding.recyclerSuggestions.visibility = View.VISIBLE
             }
             SearchMode.SEARCHING -> {
-                binding.layoutResults.visibility = View.VISIBLE
-                // Progress bar é controlado separadamente
+                binding.layoutSearchResults.visibility = View.VISIBLE
+                binding.layoutLoading.visibility = View.VISIBLE
             }
             SearchMode.RESULTS -> {
-                binding.layoutResults.visibility = View.VISIBLE
+                binding.layoutSearchResults.visibility = View.VISIBLE
             }
             SearchMode.NO_RESULTS -> {
                 binding.layoutNoResults.visibility = View.VISIBLE
@@ -195,7 +196,7 @@ class PublicSearchFragment : Fragment() {
     }
     
     private fun updateResultsCount(count: Int) {
-        binding.textResultsCount.text = when (count) {
+        binding.tvResultsCount.text = when (count) {
             0 -> "Nenhum resultado"
             1 -> "1 resultado encontrado"
             else -> "$count resultados encontrados"
@@ -204,14 +205,7 @@ class PublicSearchFragment : Fragment() {
     
     private fun updateFiltersIndicator(filters: SearchFilters) {
         val hasActiveFilters = filters.hasActiveFilters()
-        binding.buttonFilters.isSelected = hasActiveFilters
-        
-        if (hasActiveFilters) {
-            val activeCount = filters.getActiveFiltersCount()
-            binding.buttonFilters.text = "Filtros ($activeCount)"
-        } else {
-            binding.buttonFilters.text = "Filtros"
-        }
+        binding.ivAdvancedFilters.isSelected = hasActiveFilters
     }
     
     private fun handleSearchResultClick(item: SearchableItem) {
@@ -226,7 +220,7 @@ class PublicSearchFragment : Fragment() {
             }
             is SearchableItem.UserResult -> {
                 // Navegar para perfil do usuário
-                Toast.makeText(requireContext(), "Usuário: ${item.user.displayName}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Usuário: ${item.user.nome}", Toast.LENGTH_SHORT).show()
             }
         }
     }

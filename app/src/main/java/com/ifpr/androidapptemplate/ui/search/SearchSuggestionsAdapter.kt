@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ItemSearchSuggestionBinding
 import com.ifpr.androidapptemplate.data.model.SearchSuggestion
+import com.ifpr.androidapptemplate.data.model.SuggestionType
 
 /**
  * Adapter para exibir sugestões de busca e buscas recentes

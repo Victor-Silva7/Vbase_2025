@@ -55,12 +55,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    // Google Sign-In
+    implementation(libs.google.play.services.auth)
     
-    // Firebase dependencies
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-database-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
+    // Firebase Analytics (gerenciado pelo BOM acima)
     implementation("com.google.firebase:firebase-analytics-ktx")
     
     // ViewPager2 e SwipeRefreshLayout
@@ -69,6 +67,9 @@ dependencies {
     
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // CardView
+    implementation("androidx.cardview:cardview:1.0.0")
     
     // Image loading (Glide)
     implementation(libs.glide)

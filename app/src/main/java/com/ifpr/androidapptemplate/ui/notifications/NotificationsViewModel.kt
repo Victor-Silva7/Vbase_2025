@@ -3,16 +3,17 @@ package com.ifpr.androidapptemplate.ui.notifications
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class NotificationsViewModel : ViewModel() {
 
     private val _userName = MutableLiveData<String>().apply {
-        value = "Usuário V Group"
+        value = "Usuário"
     }
     val userName: LiveData<String> = _userName
 
     private val _userEmail = MutableLiveData<String>().apply {
-        value = "usuario@vgroup.com"
+        value = ""
     }
     val userEmail: LiveData<String> = _userEmail
 
@@ -29,7 +30,17 @@ class NotificationsViewModel : ViewModel() {
     // Função para carregar dados do usuário
     fun loadUserData() {
         _isLoading.value = true
-        // TODO: Carregar dados do Firebase
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val nome = user.displayName ?: "Usuário"
+            val email = user.email ?: ""
+            _userName.value = nome
+            _userEmail.value = email
+            // TODO: buscar estatísticas reais no Realtime DB
+        } else {
+            _userName.value = "Não autenticado"
+            _userEmail.value = ""
+        }
         _isLoading.value = false
     }
 

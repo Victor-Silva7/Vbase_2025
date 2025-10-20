@@ -13,7 +13,7 @@ import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
 import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Inseto
-import com.ifpr.androidapptemplate.ui.registro.InsectCategory
+import com.ifpr.androidapptemplate.data.model.InsectCategory
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
 import java.io.File

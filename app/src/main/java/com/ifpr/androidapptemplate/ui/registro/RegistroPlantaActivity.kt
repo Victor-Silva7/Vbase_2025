@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ActivityRegistroPlantaBinding
+import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -547,9 +548,4 @@ class RegistroPlantaActivity : AppCompatActivity() {
             binding.cardDoente.strokeWidth = 0
         }
     }
-}
-
-// Enum for plant health categories
-enum class PlantHealthCategory {
-    HEALTHY, SICK
 }

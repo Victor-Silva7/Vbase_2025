@@ -227,6 +227,22 @@ data class SearchFilters(
                hasScientificName == null &&
                minInteractions == 0
     }
+
+    fun hasActiveFilters(): Boolean = !isEmpty()
+
+    fun getActiveFiltersCount(): Int {
+        var count = 0
+        if (type != SearchItemType.ALL) count++
+        if (location.isNotEmpty()) count++
+        if (dateRange != DateRange.ALL_TIME) count++
+        if (sortBy != SortOrder.RELEVANCE) count++
+        if (userId.isNotEmpty()) count++
+        if (categoria.isNotEmpty()) count++
+        if (hasImages != null) count++
+        if (hasScientificName != null) count++
+        if (minInteractions > 0) count++
+        return count
+    }
 }
 
 /**
@@ -248,4 +264,26 @@ enum class SortOrder {
     DATE_ASC,
     POPULARITY,
     ALPHABETICAL
+}
+
+/**
+ * Sugestão de busca tipada para a UI de busca pública
+ */
+data class SearchSuggestion(
+    val text: String,
+    val type: SuggestionType
+)
+
+/**
+ * Tipos de sugestões apresentadas
+ */
+enum class SuggestionType {
+    RECENT_SEARCH,
+    PLANT_NAME,
+    INSECT_NAME,
+    LOCATION,
+    USER_NAME,
+    FAMILY,
+    STATUS,
+    POPULAR
 }

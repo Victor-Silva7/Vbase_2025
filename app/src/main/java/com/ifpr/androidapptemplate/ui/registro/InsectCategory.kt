@@ -1,5 +1,3 @@
 package com.ifpr.androidapptemplate.ui.registro
 
-enum class InsectCategory {
-    BENEFICIAL, NEUTRAL, PEST
-}
+typealias InsectCategory = com.ifpr.androidapptemplate.data.model.InsectCategory

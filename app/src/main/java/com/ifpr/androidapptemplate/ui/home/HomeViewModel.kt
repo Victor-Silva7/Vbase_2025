@@ -3,18 +3,18 @@ package com.ifpr.androidapptemplate.ui.home
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class HomeViewModel : ViewModel() {
 
     private val _title = MutableLiveData<String>().apply {
-        value = "Selecione seu Registro"
+        value = "Início"
     }
     val title: LiveData<String> = _title
-
-    private val _isLoading = MutableLiveData<Boolean>().apply {
-        value = false
-    }
-    val isLoading: LiveData<Boolean> = _isLoading
 
     private val _plantCount = MutableLiveData<String>().apply {
         value = "0"
@@ -26,28 +26,41 @@ class HomeViewModel : ViewModel() {
     }
     val insectCount: LiveData<String> = _insectCount
 
-    // Função para carregar estatísticas do usuário
+    private val database = FirebaseDatabase.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    init {
+        loadUserStats()
+    }
+
     fun loadUserStats() {
-        _isLoading.value = true
-        // TODO: Carregar estatísticas do Firebase
-        // Por enquanto, valores estáticos
-        _plantCount.value = "0"
-        _insectCount.value = "0"
-        _isLoading.value = false
-    }
+        val currentUser = auth.currentUser ?: return
+        val userId = currentUser.uid
 
-    // Função para navegar para registro de planta
-    fun navigateToPlantRegistration() {
-        // TODO: Implementar navegação para registro de planta
-    }
+        // Carregar contagem de plantas (caminho unificado: usuarios/plantas)
+        database.getReference("usuarios/$userId/plantas")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val count = snapshot.childrenCount
+                    _plantCount.value = count.toString()
+                }
 
-    // Função para navegar para registro de inseto
-    fun navigateToInsectRegistration() {
-        // TODO: Implementar navegação para registro de inseto
-    }
+                override fun onCancelled(error: DatabaseError) {
+                    // Tratar erro
+                }
+            })
 
-    // Função para navegar para registros do usuário
-    fun navigateToUserRecords() {
-        // TODO: Implementar navegação para registros do usuário
+        // Carregar contagem de insetos (caminho unificado: usuarios/insetos)
+        database.getReference("usuarios/$userId/insetos")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val count = snapshot.childrenCount
+                    _insectCount.value = count.toString()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Tratar erro
+                }
+            })
     }
 }

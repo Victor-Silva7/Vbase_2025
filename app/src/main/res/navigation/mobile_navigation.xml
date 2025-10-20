@@ -7,15 +7,15 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.ifpr.androidapptemplate.ui.home.HomeFragment"
+        android:name="com.ifpr.androidapptemplate.ui.registro.RegistroFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_registro" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.ifpr.androidapptemplate.ui.dashboard.DashboardFragment"
+        android:name="com.ifpr.androidapptemplate.ui.postagens.PostagensFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_postagens" />
 
     <fragment
         android:id="@+id/navigation_notifications"
@@ -23,6 +23,13 @@
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
         
+    <!-- Lista de registros do usuário (navegação interna da aba Registro) -->
+    <fragment
+        android:id="@+id/navigation_registros_list"
+        android:name="com.ifpr.androidapptemplate.ui.registro.RegistrosListFragment"
+        android:label="@string/meus_registros_title"
+        tools:layout="@layout/fragment_registros_list" />
+
     <fragment
         android:id="@+id/navigation_comentarios"
         android:name="com.ifpr.androidapptemplate.ui.comentarios.ComentariosFragment"

@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">V Group - Manejo Verde</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_home">Registro</string>
+    <string name="title_dashboard">Postagens</string>
+    <string name="title_notifications">Usuário</string>
     
     <!-- Feed de Postagens -->
     <string name="title_feed">Feed</string>
@@ -213,5 +213,15 @@
     <!-- Strings para registros -->
     <string name="no_insects_registered">Nenhum inseto registrado</string>
     <string name="no_insects_message">Você ainda não registrou nenhum inseto</string>
-    
+
+    <!-- strings -->
+    <string name="plant_icon">Ícone de planta</string>
+    <string name="insect_icon">Ícone de inseto</string>
+    <string name="add_plant_icon">Adicionar planta</string>
+    <string name="add_insect_icon">Adicionar inseto</string>
+    <string name="arrow_forward_icon">Seta para frente</string>
+    <string name="list_icon">Ícone de lista</string>
+    <string name="plants">Plantas</string>
+    <string name="insects">Insetos</string>
+
 </resources>

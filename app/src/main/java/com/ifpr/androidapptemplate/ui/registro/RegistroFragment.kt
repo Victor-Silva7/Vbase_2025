@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ifpr.androidapptemplate.databinding.FragmentHomeBinding
+import com.ifpr.androidapptemplate.databinding.FragmentRegistroBinding
+import androidx.navigation.fragment.findNavController
+import com.ifpr.androidapptemplate.R
 
 class RegistroFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentRegistroBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -21,7 +23,7 @@ class RegistroFragment : Fragment() {
     ): View {
         val registroViewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
         
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentRegistroBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         // Configurar observadores do ViewModel
@@ -35,25 +37,24 @@ class RegistroFragment : Fragment() {
 
     private fun setupObservers(viewModel: RegistroViewModel) {
         // Observar mudanças no ViewModel
-        viewModel.title.observe(viewLifecycleOwner) { title ->
-            binding.textHome.text = title
-        }
+        // Atualizações específicas do layout de registro podem ser adicionadas aqui
     }
 
     private fun setupClickListeners() {
         // Configurar cliques dos botões de registro
-        binding.cardRegistroPlanta.setOnClickListener {
+        binding.buttonRegistroPlanta.setOnClickListener {
             val intent = Intent(requireContext(), RegistroPlantaActivity::class.java)
             startActivity(intent)
         }
         
-        binding.cardRegistroInseto.setOnClickListener {
+        binding.buttonRegistroInseto.setOnClickListener {
             val intent = Intent(requireContext(), RegistroInsetoActivity::class.java)
             startActivity(intent)
         }
         
-        binding.cardSeusRegistros.setOnClickListener {
-            // TODO: Navegar para lista de registros do usuário
+        binding.buttonSeusRegistros.setOnClickListener {
+            // Navegar para lista de registros do usuário (fragment interno)
+            findNavController().navigate(R.id.navigation_registros_list)
         }
     }
 
