@@ -166,8 +166,15 @@ class ImageUploadManager private constructor() {
                     
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to compress image: ${e.message}")
-                    // Use original image if compression fails
-                    compressedUris.add(uri)
+                    // Fallback: copy original URI to a temp file to ensure file:// scheme for upload
+                    try {
+                        val copied = copyUriToTempFile(context, uri)
+                        compressedUris.add(copied)
+                    } catch (e2: Exception) {
+                        Log.e(TAG, "Failed to copy image to temp file: ${e2.message}")
+                        // As a last resort, keep original URI
+                        compressedUris.add(uri)
+                    }
                 }
             }
             
@@ -207,6 +214,37 @@ class ImageUploadManager private constructor() {
         resizedBitmap.recycle()
         
         return Uri.fromFile(tempFile)
+    }
+    
+    /**
+     * Copy the source URI to a temp file to guarantee a file:// URI for upload
+     */
+    private fun copyUriToTempFile(context: Context, sourceUri: Uri): Uri {
+        val input = context.contentResolver.openInputStream(sourceUri)
+            ?: throw IllegalStateException("Unable to open source URI")
+        val mime = context.contentResolver.getType(sourceUri) ?: "image/jpeg"
+        val ext = when {
+            mime.contains("heic", true) -> ".heic"
+            mime.contains("heif", true) -> ".heif"
+            mime.contains("png", true) -> ".png"
+            mime.contains("webp", true) -> ".webp"
+            else -> ".jpg"
+        }
+        val outFile = File(context.cacheDir, "copied_${System.currentTimeMillis()}${ext}")
+        val output = FileOutputStream(outFile)
+        input.use { i ->
+            output.use { o ->
+                val buffer = ByteArray(8 * 1024)
+                var read: Int
+                while (true) {
+                    read = i.read(buffer)
+                    if (read == -1) break
+                    o.write(buffer, 0, read)
+                }
+                o.flush()
+            }
+        }
+        return Uri.fromFile(outFile)
     }
     
     /**
@@ -305,7 +343,7 @@ class ImageUploadManager private constructor() {
             try {
                 if (uri.scheme == "file") {
                     val file = File(uri.path ?: return@forEach)
-                    if (file.exists() && file.name.startsWith("compressed_")) {
+                    if (file.exists() && (file.name.startsWith("compressed_") || file.name.startsWith("copied_"))) {
                         file.delete()
                     }
                 }

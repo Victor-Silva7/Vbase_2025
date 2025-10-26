@@ -42,13 +42,15 @@
         <activity 
             android:name=".ui.registro.RegistroPlantaActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AndroidAppTemplate" />
+            android:theme="@style/Theme.AndroidAppTemplate"
+            android:windowSoftInputMode="adjustResize" />
         
         <!-- Add RegistroInsetoActivity -->
         <activity 
             android:name=".ui.registro.RegistroInsetoActivity"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AndroidAppTemplate" />
+            android:theme="@style/Theme.AndroidAppTemplate"
+            android:windowSoftInputMode="adjustResize" />
         
         <!-- FileProvider for camera images -->
         <provider

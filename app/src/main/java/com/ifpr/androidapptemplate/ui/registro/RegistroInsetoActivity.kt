@@ -42,7 +42,17 @@ class RegistroInsetoActivity : AppCompatActivity() {
         }
     }
     
-    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+    private val galleryPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia()
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.addImagesFromGallery(uris)
+        }
+    }
+
+    private val legacyGalleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
         if (uris.isNotEmpty()) {
             viewModel.addImagesFromGallery(uris)
         }
@@ -296,10 +306,19 @@ class RegistroInsetoActivity : AppCompatActivity() {
     }
 
     private fun selectFromGallery() {
-        if (checkStoragePermission()) {
-            galleryLauncher.launch("image/*")
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Use Photo Picker on Android 13+
+            galleryPickerLauncher.launch(
+                androidx.activity.result.PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                )
+            )
         } else {
-            requestStoragePermission()
+            if (checkStoragePermission()) {
+                legacyGalleryLauncher.launch("image/*")
+            } else {
+                requestStoragePermission()
+            }
         }
     }
 

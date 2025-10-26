@@ -303,21 +303,80 @@ class FirebaseStorageManager private constructor() {
         onFailure: (Exception) -> Unit,
         onProgress: (Double) -> Unit
     ) {
-        val uploadTask = imageRef.putFile(imageUri)
-        
-        uploadTask.addOnProgressListener { taskSnapshot ->
-            val progress = (100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount
-            onProgress(progress)
-        }.addOnSuccessListener {
-            // Get download URL
+        fun resolveDownloadUrlOrRef() {
             imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
                 onSuccess(downloadUri.toString())
-            }.addOnFailureListener { exception ->
-                onFailure(exception)
+            }.addOnFailureListener {
+                onSuccess(imageRef.toString())
             }
-        }.addOnFailureListener { exception ->
-            onFailure(exception)
         }
+
+        fun inferContentType(): String {
+            val path = imageUri.lastPathSegment?.lowercase(Locale.getDefault()) ?: ""
+            return when {
+                path.endsWith(".jpg") || path.endsWith(".jpeg") -> "image/jpeg"
+                path.endsWith(".png") -> "image/png"
+                path.endsWith(".webp") -> "image/webp"
+                path.endsWith(".heic") -> "image/heic"
+                path.endsWith(".heif") -> "image/heif"
+                else -> "image/jpeg"
+            }
+        }
+
+        fun startPutFile() {
+            val metadata = com.google.firebase.storage.StorageMetadata.Builder()
+                .setContentType(inferContentType())
+                .build()
+            val uploadTask = imageRef.putFile(imageUri, metadata)
+            uploadTask.addOnProgressListener { taskSnapshot ->
+                val progress = (100.0 * taskSnapshot.bytesTransferred) / taskSnapshot.totalByteCount
+                onProgress(progress)
+            }.addOnSuccessListener {
+                resolveDownloadUrlOrRef()
+            }.addOnFailureListener { exception ->
+                // Retry with stream for file:// URIs (workaround for certain OEM/content issues)
+                if ("file".equals(imageUri.scheme, ignoreCase = true)) {
+                    try {
+                        val file = java.io.File(imageUri.path ?: "")
+                        if (file.exists()) {
+                            val stream = file.inputStream()
+                            val metadata2 = com.google.firebase.storage.StorageMetadata.Builder()
+                                .setContentType(inferContentType())
+                                .build()
+                            val streamTask = imageRef.putStream(stream, metadata2)
+                            streamTask.addOnProgressListener { ts ->
+                                val progress = (100.0 * ts.bytesTransferred) / ts.totalByteCount
+                                onProgress(progress)
+                            }.addOnSuccessListener {
+                                resolveDownloadUrlOrRef()
+                            }.addOnFailureListener { ex2 ->
+                                val enriched = enrichStorageException(ex2, imageRef)
+                                onFailure(enriched)
+                            }.addOnCompleteListener {
+                                try { stream.close() } catch (_: Exception) {}
+                            }
+                        } else {
+                            onFailure(enrichStorageException(exception, imageRef))
+                        }
+                    } catch (e: Exception) {
+                        onFailure(e)
+                    }
+                } else {
+                    onFailure(enrichStorageException(exception, imageRef))
+                }
+            }
+        }
+
+        startPutFile()
+    }
+
+    private fun enrichStorageException(ex: Exception, ref: StorageReference): Exception {
+        return if (ex is com.google.firebase.storage.StorageException) {
+            val code = ex.errorCode
+            val http = ex.httpResultCode
+            val path = ref.path
+            Exception("Storage error code=$code http=$http path=$path msg=${ex.message}", ex)
+        } else ex
     }
     
     private fun uploadMultipleImages(

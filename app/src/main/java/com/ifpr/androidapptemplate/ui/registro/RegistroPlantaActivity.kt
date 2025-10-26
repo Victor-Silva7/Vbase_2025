@@ -42,7 +42,17 @@ class RegistroPlantaActivity : AppCompatActivity() {
         }
     }
     
-    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+    private val galleryPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia()
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            viewModel.addImagesFromGallery(uris)
+        }
+    }
+
+    private val legacyGalleryLauncher = registerForActivityResult(
+        ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
         if (uris.isNotEmpty()) {
             viewModel.addImagesFromGallery(uris)
         }
@@ -239,19 +249,32 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
 
     private fun selectFromGallery() {
-        if (checkStoragePermission()) {
-            galleryLauncher.launch("image/*")
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Use Photo Picker on Android 13+
+            galleryPickerLauncher.launch(
+                androidx.activity.result.PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                )
+            )
         } else {
-            requestStoragePermission()
+            if (checkStoragePermission()) {
+                legacyGalleryLauncher.launch("image/*")
+            } else {
+                requestStoragePermission()
+            }
         }
     }
 
     private fun updateCategorySelection(category: PlantHealthCategory?) {
-        // Reset both cards with animation
+        // Reset visuals for both cards first
         animateCardSelection(binding.cardSaudavel, false)
         animateCardSelection(binding.cardDoente, false)
-        
-        // Highlight selected card with animation
+        binding.cardSaudavel.strokeColor = getColor(android.R.color.transparent)
+        binding.cardDoente.strokeColor = getColor(android.R.color.transparent)
+        binding.cardSaudavel.strokeWidth = 0
+        binding.cardDoente.strokeWidth = 0
+
+        // Highlight selected card
         when (category) {
             PlantHealthCategory.HEALTHY -> {
                 animateCardSelection(binding.cardSaudavel, true)
@@ -263,12 +286,7 @@ class RegistroPlantaActivity : AppCompatActivity() {
                 binding.cardDoente.strokeColor = getColor(com.ifpr.androidapptemplate.R.color.vgroup_green)
                 binding.cardDoente.strokeWidth = 4
             }
-            null -> {
-                binding.cardSaudavel.strokeColor = getColor(android.R.color.transparent)
-                binding.cardDoente.strokeColor = getColor(android.R.color.transparent)
-                binding.cardSaudavel.strokeWidth = 0
-                binding.cardDoente.strokeWidth = 0
-            }
+            null -> { /* already reset above */ }
         }
     }
     
@@ -312,9 +330,15 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
     
     private fun checkStoragePermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this, Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this, Manifest.permission.READ_MEDIA_IMAGES
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(
+                this, Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
     }
     
     private fun requestCameraPermission() {
@@ -326,11 +350,19 @@ class RegistroPlantaActivity : AppCompatActivity() {
     }
     
     private fun requestStoragePermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-            STORAGE_PERMISSION_REQUEST
-        )
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+                STORAGE_PERMISSION_REQUEST
+            )
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_REQUEST
+            )
+        }
     }
     
     override fun onRequestPermissionsResult(
