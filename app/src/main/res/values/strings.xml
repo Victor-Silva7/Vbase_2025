@@ -174,11 +174,11 @@
     <string name="camera_permission_needed">Permissão de câmera necessária</string>
     <string name="storage_permission_needed">Permissão de armazenamento necessária</string>
     <string name="insect_beneficial_title">Inseto Benéfico</string>
-    <string name="insect_beneficial_description">Polinizadores, predadores naturais, controladores biológicos</string>
+    <string name="insect_beneficial_description">Ajudam o meio ambiente. Podem polinizar flores, controlar pragas e manter o equilíbrio natural</string>
     <string name="insect_neutral_title">Inseto Neutro</string>
-    <string name="insect_neutral_description">Não causam danos significativos, parte do ecossistema natural</string>
+    <string name="insect_neutral_description">Vivem no ambiente sem causar prejuízo nem trazer grandes benefícios diretos. Fazem parte do equilíbrio natural e sua importância varia conforme o local e a situação</string>
     <string name="insect_pest_title">Inseto Praga</string>
-    <string name="insect_pest_description">Causam danos às plantas, requerem monitoramento e controle</string>
+    <string name="insect_pest_description">Podem causar danos às plantas, alimentos ou construções. São considerados pragas quando atrapalham atividades humanas ou agrícolas, exigindo controle e monitoramento</string>
     <string name="understood">Entendi</string>
     <string name="error_images_required_insect">Pelo menos uma imagem é obrigatória</string>
     <string name="error_images_minimum_pest">Mínimo 2 imagens para pragas</string>
@@ -203,7 +203,7 @@
     <string name="plant_healthy_title">Planta Saudável</string>
     <string name="plant_sick_title">Planta Doente</string>
     <string name="plant_healthy_description">Planta em bom estado de saúde</string>
-    <string name="plant_sick_description">Planta com sinais de doença ou problemas</string>
+    <string name="plant_sick_description">Planta com sinais de doença ou outros problemas</string>
     <string name="error_nome_required">Nome é obrigatório</string>
     <string name="error_nome_too_short">Nome muito curto (mínimo 2 caracteres)</string>
     <string name="error_nome_too_long">Nome muito longo (máximo 50 caracteres)</string>
