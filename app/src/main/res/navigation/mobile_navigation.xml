@@ -22,7 +22,7 @@
         android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
-        
+    
     <!-- Lista de registros do usuário (navegação interna da aba Registro) -->
     <fragment
         android:id="@+id/navigation_registros_list"
@@ -40,4 +40,9 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.ifpr.androidapptemplate.ui.usuario.PerfilUsuarioFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_perfil_usuario" />
 </navigation>
