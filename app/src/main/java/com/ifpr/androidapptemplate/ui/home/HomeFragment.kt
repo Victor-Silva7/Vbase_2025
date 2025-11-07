@@ -1,3 +1,5 @@
+package com.ifpr.androidapptemplate.ui.home
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.Context
@@ -18,6 +20,7 @@ import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -77,27 +80,14 @@ class HomeFragment : Fragment() {
         // Configurar cliques dos botões
         setupClickListeners()
 
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        inicializaGerenciamentoLocalizacao(root)
 
-        inicializaGerenciamentoLocalizacao(view)
-
-        val container = view.findViewById<LinearLayout>(R.id.itemContainer)
-        carregarItensMarketplace(container)
-
-        val fab = view.findViewById<FloatingActionButton>(R.id.fab_ai)
-
-        fab.setOnClickListener {
-            val context = view.context
-            val intent = Intent(context, AiLogicActivity::class.java)
-            context.startActivity(intent)
-        }
+        setupClickListeners()
 
         return root
     }
 
     private fun inicializaGerenciamentoLocalizacao(view: View) {
-        currentAddressTextView = view.findViewById(R.id.currentAddressTextView)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         if (ActivityCompat.checkSelfPermission(
@@ -198,7 +188,8 @@ class HomeFragment : Fragment() {
     private fun setupObservers(viewModel: HomeViewModel) {
         // Observar mudanças no ViewModel
         viewModel.title.observe(viewLifecycleOwner) { title ->
-            binding.textHome.text = title
+            // Corrigir o erro de compilação
+            binding.textHomeTitle.text = title
         }
         
         // Observar estatísticas
@@ -228,6 +219,12 @@ class HomeFragment : Fragment() {
         
         binding.cardSeusRegistros.setOnClickListener {
             // TODO: Navegar para lista de registros do usuário
+        }
+        
+        // Configurar clique do FAB para abrir o chatbot de IA
+        binding.fabAi.setOnClickListener {
+            val intent = Intent(requireContext(), AiLogicActivity::class.java)
+            startActivity(intent)
         }
     }
 

@@ -4,7 +4,8 @@
 
     <!-- Permissions for camera and storage -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
         android:maxSdkVersion="28" />
@@ -51,6 +52,12 @@
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AndroidAppTemplate"
             android:windowSoftInputMode="adjustResize" />
+        
+        <!-- Add AiLogicActivity -->
+        <activity 
+            android:name=".ui.ai.AiLogicActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AndroidAppTemplate" />
         
         <!-- FileProvider for camera images -->
         <provider

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -61,9 +62,10 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.firebase.ai)
-    implementation(libs.google.firebase.ai)
 
     implementation(libs.glide)
+    implementation(libs.circleimageview)
+    implementation(libs.androidx.swiperefreshlayout)
 
     implementation(libs.jetbrains.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

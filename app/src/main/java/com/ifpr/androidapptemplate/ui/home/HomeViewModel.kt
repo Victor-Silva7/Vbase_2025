@@ -12,7 +12,7 @@ import com.google.firebase.database.ValueEventListener
 class HomeViewModel : ViewModel() {
 
     private val _title = MutableLiveData<String>().apply {
-        value = "Início"
+        value = "Bem-vindo ao VBase"
     }
     val title: LiveData<String> = _title
 
@@ -26,41 +26,32 @@ class HomeViewModel : ViewModel() {
     }
     val insectCount: LiveData<String> = _insectCount
 
-    private val database = FirebaseDatabase.getInstance()
-    private val auth = FirebaseAuth.getInstance()
-
-    init {
-        loadUserStats()
-    }
-
     fun loadUserStats() {
-        val currentUser = auth.currentUser ?: return
-        val userId = currentUser.uid
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val databaseRef = FirebaseDatabase.getInstance().getReference("itens").child(userId)
 
-        // Carregar contagem de plantas (caminho unificado: usuarios/plantas)
-        database.getReference("usuarios/$userId/plantas")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val count = snapshot.childrenCount
-                    _plantCount.value = count.toString()
+        databaseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                var plantas = 0
+                var insetos = 0
+
+                for (itemSnapshot in snapshot.children) {
+                    val tipo = itemSnapshot.child("tipo").getValue(String::class.java)
+                    when (tipo) {
+                        "planta" -> plantas++
+                        "inseto" -> insetos++
+                    }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Tratar erro
-                }
-            })
+                _plantCount.value = plantas.toString()
+                _insectCount.value = insetos.toString()
+            }
 
-        // Carregar contagem de insetos (caminho unificado: usuarios/insetos)
-        database.getReference("usuarios/$userId/insetos")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val count = snapshot.childrenCount
-                    _insectCount.value = count.toString()
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    // Tratar erro
-                }
-            })
+            override fun onCancelled(error: DatabaseError) {
+                // Erro ao carregar estatísticas
+                _plantCount.value = "0"
+                _insectCount.value = "0"
+            }
+        })
     }
 }
