@@ -80,9 +80,19 @@ class PerfilUsuarioFragment : Fragment() {
             registerEmailEditText.isEnabled = false
         }
 
-        user?.let {
+        user?.let { currentUser ->
             // Exibe a foto do perfil usando a biblioteca Glide
-            Glide.with(this).load(it.photoUrl).into(userProfileImageView)
+            currentUser.photoUrl?.let { photoUrl ->
+                try {
+                    Glide.with(requireContext())
+                        .load(photoUrl)
+                        .placeholder(R.drawable.ic_profile_placeholder) // Adicione um placeholder padrão
+                        .error(R.drawable.ic_error_placeholder) // Adicione um placeholder de erro
+                        .into(userProfileImageView)
+                } catch (e: Exception) {
+                    Log.e("PerfilUsuarioFragment", "Erro ao carregar imagem de perfil", e)
+                }
+            }
         }
 
         registerButton.setOnClickListener {

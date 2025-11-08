@@ -16,44 +16,15 @@
         android:layout_height="wrap_content"
         android:padding="24dp">
 
-        <!-- Header -->
-        <ImageView
-            android:id="@+id/icon_back"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_arrow_back"
-            android:tint="@color/white"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/text_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Registro de Inseto"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/icon_back"
-            app:layout_constraintTop_toTopOf="@id/icon_back"
-            app:layout_constraintBottom_toBottomOf="@id/icon_back" />
-
         <ImageView
             android:id="@+id/icon_insect_header"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginTop="32dp"
             android:src="@drawable/ic_inseto_24dp"
             android:tint="@color/vgroup_green"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/text_title" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Nome Input -->
         <com.google.android.material.textfield.TextInputLayout
@@ -61,7 +32,7 @@
             style="@style/VGroupEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             android:hint="Nome do Inseto"
             app:boxStrokeColor="@color/vgroup_green"
             app:hintTextColor="@color/vgroup_text_secondary"
@@ -85,7 +56,6 @@
             style="@style/VGroupEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:hint="Data do Registro"
             app:boxStrokeColor="@color/vgroup_green"
             app:hintTextColor="@color/vgroup_text_secondary"

@@ -18,17 +18,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Título -->
-            <TextView
-                android:id="@+id/text_home_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textAlignment="center"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="24dp"/>
-
             <!-- Seção de Estatísticas -->
             <TextView
                 android:layout_width="match_parent"

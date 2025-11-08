@@ -42,16 +42,18 @@
         <!-- Add RegistroPlantaActivity -->
         <activity 
             android:name=".ui.registro.RegistroPlantaActivity"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AndroidAppTemplate"
-            android:windowSoftInputMode="adjustResize" />
+            android:theme="@style/Theme.AndroidAppTemplate.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
         
         <!-- Add RegistroInsetoActivity -->
         <activity 
             android:name=".ui.registro.RegistroInsetoActivity"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.AndroidAppTemplate"
-            android:windowSoftInputMode="adjustResize" />
+            android:theme="@style/Theme.AndroidAppTemplate.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false"
+            android:windowActionBar="false"
+            android:windowNoTitle="true" />
         
         <!-- Add AiLogicActivity -->
         <activity 

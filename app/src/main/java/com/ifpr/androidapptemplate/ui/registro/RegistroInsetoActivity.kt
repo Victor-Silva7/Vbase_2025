@@ -202,10 +202,7 @@ class RegistroInsetoActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        binding.iconBack.setOnClickListener {
-            finish()
-        }
-        
+
         binding.editTextData.setOnClickListener {
             showDatePicker()
         }

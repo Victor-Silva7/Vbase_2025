@@ -186,12 +186,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers(viewModel: HomeViewModel) {
-        // Observar mudanças no ViewModel
-        viewModel.title.observe(viewLifecycleOwner) { title ->
-            // Corrigir o erro de compilação
-            binding.textHomeTitle.text = title
-        }
-        
         // Observar estatísticas
         viewModel.plantCount.observe(viewLifecycleOwner) { count ->
             binding.textStatsPlantas.text = count

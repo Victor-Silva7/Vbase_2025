@@ -43,7 +43,6 @@ class PostagensFragment : Fragment() {
     private fun setupObservers(viewModel: PostagensViewModel) {
         // Observar mudanças no ViewModel
         viewModel.title.observe(viewLifecycleOwner) { title ->
-            binding.textPostagensTitle.text = title
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->

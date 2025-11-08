@@ -25,13 +25,14 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+        // Configuração sem ActionBar
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications,
                 R.id.navigation_profile
             )
         )
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        // Removido setupActionBarWithNavController para remover os títulos
         navView.setupWithNavController(navController)
         
         // Verificar se foi solicitada navegação para um fragmento específico
