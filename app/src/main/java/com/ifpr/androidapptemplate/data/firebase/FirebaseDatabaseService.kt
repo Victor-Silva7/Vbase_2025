@@ -1,5 +1,6 @@
 package com.ifpr.androidapptemplate.data.firebase
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.ifpr.androidapptemplate.data.model.*
@@ -471,23 +472,29 @@ class FirebaseDatabaseService private constructor() {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val plantas = mutableListOf<Planta>()
+                var errorCount = 0
+                
                 snapshot.children.forEach { childSnapshot ->
                     val plantData = childSnapshot.value as? Map<String, Any?> ?: return@forEach
                     try {
                         val planta = Planta.fromFirebaseMap(plantData)
                         plantas.add(planta)
                     } catch (e: Exception) {
-                        // Skip invalid data entries
+                        errorCount++
+                        Log.e("FirebaseDB", "Erro ao desserializar planta: ${e.message}")
                     }
                 }
+                
+                Log.d("FirebaseDB", "Listener: Carregadas ${plantas.size} plantas de $targetUserId (${errorCount} erros)")
                 callback(plantas.sortedByDescending { it.timestamp })
             }
             
             override fun onCancelled(error: DatabaseError) {
-                // Handle error
+                Log.e("FirebaseDB", "Listener cancelado para plantas: ${error.message}")
             }
         }
         
+        Log.d("FirebaseDB", "Attaching listener para: usuarios/$targetUserId/plantas")
         userPlantsRef.addValueEventListener(listener)
         return listener
     }
@@ -502,23 +509,29 @@ class FirebaseDatabaseService private constructor() {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val insetos = mutableListOf<Inseto>()
+                var errorCount = 0
+                
                 snapshot.children.forEach { childSnapshot ->
                     val insectData = childSnapshot.value as? Map<String, Any?> ?: return@forEach
                     try {
                         val inseto = Inseto.fromFirebaseMap(insectData)
                         insetos.add(inseto)
                     } catch (e: Exception) {
-                        // Skip invalid data entries
+                        errorCount++
+                        Log.e("FirebaseDB", "Erro ao desserializar inseto: ${e.message}")
                     }
                 }
+                
+                Log.d("FirebaseDB", "Listener: Carregados ${insetos.size} insetos de $targetUserId (${errorCount} erros)")
                 callback(insetos.sortedByDescending { it.timestamp })
             }
             
             override fun onCancelled(error: DatabaseError) {
-                // Handle error
+                Log.e("FirebaseDB", "Listener cancelado para insetos: ${error.message}")
             }
         }
         
+        Log.d("FirebaseDB", "Attaching listener para: usuarios/$targetUserId/insetos")
         userInsectsRef.addValueEventListener(listener)
         return listener
     }

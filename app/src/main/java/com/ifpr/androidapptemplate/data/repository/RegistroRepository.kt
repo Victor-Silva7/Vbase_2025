@@ -2,6 +2,7 @@ package com.ifpr.androidapptemplate.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import com.google.firebase.database.ValueEventListener
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.firebase.FirebaseConfig
@@ -339,7 +340,9 @@ class RegistroRepository private constructor() {
     fun startListeningToUserPlants(userId: String? = null) {
         stopListeningToUserPlants() // Stop existing listener
         
+        Log.d("RegistroRepository", "Starting listener para plantas do usuário")
         plantsListener = databaseService.listenToUserPlants(userId) { plantas ->
+            Log.d("RegistroRepository", "Plantas atualizadas: ${plantas.size} registros")
             _userPlants.postValue(plantas)
             // Apply current filter if any
             if (currentPlantQuery.isNotEmpty()) {
@@ -356,7 +359,9 @@ class RegistroRepository private constructor() {
     fun startListeningToUserInsects(userId: String? = null) {
         stopListeningToUserInsects() // Stop existing listener
         
+        Log.d("RegistroRepository", "Starting listener para insetos do usuário")
         insectsListener = databaseService.listenToUserInsects(userId) { insetos ->
+            Log.d("RegistroRepository", "Insetos atualizados: ${insetos.size} registros")
             _userInsects.postValue(insetos)
             // Apply current filter if any
             if (currentInsectQuery.isNotEmpty()) {

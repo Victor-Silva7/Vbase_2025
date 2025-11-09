@@ -47,6 +47,12 @@ class MeusRegistrosFragment : Fragment() {
         viewModel.loadRegistrations()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Recarrega dados toda vez que o fragment é exibido (ao voltar do Registro Activity)
+        viewModel.loadRegistrations()
+    }
+
     /**
      * Configura o RecyclerView
      */
@@ -255,6 +261,10 @@ class MeusRegistrosFragment : Fragment() {
      * Mostra o estado vazio
      */
     private fun showEmptyState() {
+        // Atualiza o texto baseado no filtro atual antes de exibir
+        val currentFilter = viewModel.currentFilter.value ?: FiltroCategoria.TODOS
+        updateEmptyStateForFilter(currentFilter)
+        
         binding.layoutEmptyState.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
     }
@@ -367,18 +377,16 @@ class MeusRegistrosFragment : Fragment() {
      * Navega para o registro de plantas
      */
     private fun navigateToPlantRegistration() {
-        // TODO: Implement navigation to plant registration activity
-        // val intent = android.content.Intent(requireContext(), RegistroPlantaActivity::class.java)
-        // startActivity(intent)
+        val intent = android.content.Intent(requireContext(), RegistroPlantaActivity::class.java)
+        startActivity(intent)
     }
 
     /**
      * Navega para o registro de insetos
      */
     private fun navigateToInsectRegistration() {
-        // TODO: Implement navigation to insect registration activity
-        // val intent = android.content.Intent(requireContext(), RegistroInsetoActivity::class.java)
-        // startActivity(intent)
+        val intent = android.content.Intent(requireContext(), RegistroInsetoActivity::class.java)
+        startActivity(intent)
     }
 
     /**

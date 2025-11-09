@@ -1,56 +1,45 @@
 package com.ifpr.androidapptemplate.utils
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
-import kotlinx.coroutines.*
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
+import com.ifpr.androidapptemplate.data.firebase.RealtimeDatabaseImageManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
- * Enhanced Image Upload Manager for V Group - Manejo Verde
- * Handles image compression, optimization, and batch uploads with progress tracking
+ * Gerenciador de upload de imagens para Base64 no Realtime Database
  */
 class ImageUploadManager private constructor() {
-    
+
     companion object {
+        private const val TAG = "ImageUploadManager"
+
         @Volatile
         private var INSTANCE: ImageUploadManager? = null
-        
+
         fun getInstance(): ImageUploadManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: ImageUploadManager().also { INSTANCE = it }
             }
         }
-        
-        private const val TAG = "ImageUploadManager"
-        private const val MAX_IMAGE_WIDTH = 1920
-        private const val MAX_IMAGE_HEIGHT = 1920
-        private const val JPEG_QUALITY = 85
-        private const val MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
     }
-    
-    private val storageManager = FirebaseStorageManager.getInstance()
+
+    private val realtimeManager = RealtimeDatabaseImageManager.getInstance()
     private val uploadScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
-    // Upload progress tracking
+
     private val _uploadProgress = MutableLiveData<UploadProgress>()
     val uploadProgress: LiveData<UploadProgress> = _uploadProgress
-    
+
     private val _uploadStatus = MutableLiveData<UploadStatus>()
     val uploadStatus: LiveData<UploadStatus> = _uploadStatus
-    
+
     /**
-     * Upload plant images with compression and progress tracking
+     * Upload de imagens de plantas para Base64 no Realtime Database
      */
     fun uploadPlantImages(
         context: Context,
@@ -62,43 +51,42 @@ class ImageUploadManager private constructor() {
         uploadScope.launch {
             try {
                 _uploadStatus.postValue(UploadStatus.STARTING)
-                
-                val compressedImages = compressImages(context, imageUris)
-                
-                _uploadStatus.postValue(UploadStatus.UPLOADING)
-                
-                uploadCompressedImages(
-                    images = compressedImages,
-                    uploadFunction = { images, onSuccessCallback, onFailureCallback, onProgressCallback ->
-                        storageManager.uploadPlantImages(
-                            plantId = plantId,
-                            imageUris = images,
-                            onSuccess = onSuccessCallback,
-                            onFailure = onFailureCallback,
-                            onProgress = onProgressCallback
-                        )
-                    },
-                    onSuccess = { urls ->
+
+                val path = "plantas/$plantId"
+                val result = realtimeManager.saveImages(
+                    context = context,
+                    imageUris = imageUris,
+                    path = path
+                ) { progress ->
+                    _uploadProgress.postValue(UploadProgress(
+                        currentStep = 1,
+                        progress = progress.toDouble()
+                    ))
+                }
+
+                result.fold(
+                    onSuccess = { imageIds ->
                         _uploadStatus.postValue(UploadStatus.SUCCESS)
-                        onSuccess(urls)
-                        cleanupTempFiles(compressedImages)
+                        onSuccess(imageIds)
                     },
-                    onFailure = { exception ->
-                        _uploadStatus.postValue(UploadStatus.FAILED)
+                    onFailure = { throwable ->
+                        val exception = if (throwable is Exception) throwable else Exception(throwable)
+                        Log.e(TAG, "Erro no upload: ${exception.message}", exception)
+                        _uploadStatus.postValue(UploadStatus.ERROR)
                         onFailure(exception)
-                        cleanupTempFiles(compressedImages)
                     }
                 )
-                
+
             } catch (e: Exception) {
-                _uploadStatus.postValue(UploadStatus.FAILED)
+                Log.e(TAG, "Erro geral: ${e.message}", e)
+                _uploadStatus.postValue(UploadStatus.ERROR)
                 onFailure(e)
             }
         }
     }
-    
+
     /**
-     * Upload insect images with compression and progress tracking
+     * Upload insect images using Base64 on Realtime Database
      */
     fun uploadInsectImages(
         context: Context,
@@ -110,315 +98,44 @@ class ImageUploadManager private constructor() {
         uploadScope.launch {
             try {
                 _uploadStatus.postValue(UploadStatus.STARTING)
-                
-                val compressedImages = compressImages(context, imageUris)
-                
-                _uploadStatus.postValue(UploadStatus.UPLOADING)
-                
-                uploadCompressedImages(
-                    images = compressedImages,
-                    uploadFunction = { images, onSuccessCallback, onFailureCallback, onProgressCallback ->
-                        storageManager.uploadInsectImages(
-                            insectId = insectId,
-                            imageUris = images,
-                            onSuccess = onSuccessCallback,
-                            onFailure = onFailureCallback,
-                            onProgress = onProgressCallback
-                        )
-                    },
-                    onSuccess = { urls ->
+
+                val path = "insetos/$insectId"
+                val result = realtimeManager.saveImages(
+                    context = context,
+                    imageUris = imageUris,
+                    path = path
+                ) { progress ->
+                    _uploadProgress.postValue(UploadProgress(
+                        currentStep = 1,
+                        progress = progress.toDouble()
+                    ))
+                }
+
+                result.fold(
+                    onSuccess = { imageIds ->
                         _uploadStatus.postValue(UploadStatus.SUCCESS)
-                        onSuccess(urls)
-                        cleanupTempFiles(compressedImages)
+                        onSuccess(imageIds)
                     },
-                    onFailure = { exception ->
-                        _uploadStatus.postValue(UploadStatus.FAILED)
+                    onFailure = { throwable ->
+                        val exception = if (throwable is Exception) throwable else Exception(throwable)
+                        Log.e(TAG, "Erro no upload: ${exception.message}", exception)
+                        _uploadStatus.postValue(UploadStatus.ERROR)
                         onFailure(exception)
-                        cleanupTempFiles(compressedImages)
                     }
                 )
-                
+
             } catch (e: Exception) {
-                _uploadStatus.postValue(UploadStatus.FAILED)
+                Log.e(TAG, "Erro geral: ${e.message}", e)
+                _uploadStatus.postValue(UploadStatus.ERROR)
                 onFailure(e)
             }
         }
     }
-    
-    /**
-     * Compress images to optimize upload size and quality
-     */
-    private suspend fun compressImages(context: Context, imageUris: List<Uri>): List<Uri> {
-        return withContext(Dispatchers.IO) {
-            val compressedUris = mutableListOf<Uri>()
-            
-            imageUris.forEachIndexed { index, uri ->
-                try {
-                    _uploadProgress.postValue(
-                        UploadProgress(
-                            currentStep = "Comprimindo imagem ${index + 1}/${imageUris.size}",
-                            progress = ((index.toFloat() / imageUris.size) * 50).toInt() // 50% for compression
-                        )
-                    )
-                    
-                    val compressedUri = compressImage(context, uri)
-                    compressedUris.add(compressedUri)
-                    
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to compress image: ${e.message}")
-                    // Fallback: copy original URI to a temp file to ensure file:// scheme for upload
-                    try {
-                        val copied = copyUriToTempFile(context, uri)
-                        compressedUris.add(copied)
-                    } catch (e2: Exception) {
-                        Log.e(TAG, "Failed to copy image to temp file: ${e2.message}")
-                        // As a last resort, keep original URI
-                        compressedUris.add(uri)
-                    }
-                }
-            }
-            
-            compressedUris
-        }
-    }
-    
-    /**
-     * Compress a single image
-     */
-    private fun compressImage(context: Context, imageUri: Uri): Uri {
-        val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
-        val originalBitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-        
-        // Rotate image if needed based on EXIF data
-        val rotatedBitmap = rotateImageIfRequired(context, originalBitmap, imageUri)
-        
-        // Resize image if too large
-        val resizedBitmap = resizeImage(rotatedBitmap)
-        
-        // Compress to JPEG
-        val outputStream = ByteArrayOutputStream()
-        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
-        val compressedData = outputStream.toByteArray()
-        
-        // Save compressed image to temp file
-        val tempFile = File(context.cacheDir, "compressed_${System.currentTimeMillis()}.jpg")
-        val fileOutputStream = FileOutputStream(tempFile)
-        fileOutputStream.write(compressedData)
-        fileOutputStream.close()
-        
-        // Clean up bitmaps
-        if (rotatedBitmap != originalBitmap) {
-            originalBitmap.recycle()
-        }
-        resizedBitmap.recycle()
-        
-        return Uri.fromFile(tempFile)
-    }
-    
-    /**
-     * Copy the source URI to a temp file to guarantee a file:// URI for upload
-     */
-    private fun copyUriToTempFile(context: Context, sourceUri: Uri): Uri {
-        val input = context.contentResolver.openInputStream(sourceUri)
-            ?: throw IllegalStateException("Unable to open source URI")
-        val mime = context.contentResolver.getType(sourceUri) ?: "image/jpeg"
-        val ext = when {
-            mime.contains("heic", true) -> ".heic"
-            mime.contains("heif", true) -> ".heif"
-            mime.contains("png", true) -> ".png"
-            mime.contains("webp", true) -> ".webp"
-            else -> ".jpg"
-        }
-        val outFile = File(context.cacheDir, "copied_${System.currentTimeMillis()}${ext}")
-        val output = FileOutputStream(outFile)
-        input.use { i ->
-            output.use { o ->
-                val buffer = ByteArray(8 * 1024)
-                var read: Int
-                while (true) {
-                    read = i.read(buffer)
-                    if (read == -1) break
-                    o.write(buffer, 0, read)
-                }
-                o.flush()
-            }
-        }
-        return Uri.fromFile(outFile)
-    }
-    
-    /**
-     * Rotate image based on EXIF orientation data
-     */
-    private fun rotateImageIfRequired(context: Context, bitmap: Bitmap, imageUri: Uri): Bitmap {
-        try {
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-            inputStream?.use {
-                val exif = ExifInterface(it)
-                val orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL
-                )
-                
-                return when (orientation) {
-                    ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
-                    ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
-                    ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
-                    else -> bitmap
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to read EXIF data: ${e.message}")
-        }
-        
-        return bitmap
-    }
-    
-    /**
-     * Rotate bitmap by degrees
-     */
-    private fun rotateImage(bitmap: Bitmap, degrees: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(degrees)
-        
-        return Bitmap.createBitmap(
-            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
-        )
-    }
-    
-    /**
-     * Resize image if it exceeds maximum dimensions
-     */
-    private fun resizeImage(bitmap: Bitmap): Bitmap {
-        val width = bitmap.width
-        val height = bitmap.height
-        
-        if (width <= MAX_IMAGE_WIDTH && height <= MAX_IMAGE_HEIGHT) {
-            return bitmap
-        }
-        
-        val aspectRatio = width.toFloat() / height.toFloat()
-        
-        val (newWidth, newHeight) = if (aspectRatio > 1) {
-            // Landscape
-            MAX_IMAGE_WIDTH to (MAX_IMAGE_WIDTH / aspectRatio).toInt()
-        } else {
-            // Portrait or square
-            (MAX_IMAGE_HEIGHT * aspectRatio).toInt() to MAX_IMAGE_HEIGHT
-        }
-        
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-    }
-    
-    /**
-     * Upload compressed images with progress tracking
-     */
-    private fun uploadCompressedImages(
-        images: List<Uri>,
-        uploadFunction: (List<Uri>, (List<String>) -> Unit, (Exception) -> Unit, (Double) -> Unit) -> Unit,
-        onSuccess: (List<String>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-        uploadFunction(
-            images,
-            onSuccess,
-            onFailure
-        ) { progress ->
-            // Combine compression progress (50%) with upload progress (50%)
-            val totalProgress = 50 + (progress * 0.5).toInt()
-            _uploadProgress.postValue(
-                UploadProgress(
-                    currentStep = "Fazendo upload das imagens...",
-                    progress = totalProgress
-                )
-            )
-        }
-    }
-    
-    /**
-     * Clean up temporary compressed files
-     */
-    private fun cleanupTempFiles(compressedUris: List<Uri>) {
-        compressedUris.forEach { uri ->
-            try {
-                if (uri.scheme == "file") {
-                    val file = File(uri.path ?: return@forEach)
-                    if (file.exists() && (file.name.startsWith("compressed_") || file.name.startsWith("copied_"))) {
-                        file.delete()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to cleanup temp file: ${e.message}")
-            }
-        }
-    }
-    
-    /**
-     * Cancel ongoing uploads
-     */
-    fun cancelUploads() {
-        uploadScope.coroutineContext.cancelChildren()
-        _uploadStatus.postValue(UploadStatus.CANCELLED)
-    }
-    
-    /**
-     * Check if image needs compression
-     */
-    fun needsCompression(context: Context, imageUri: Uri): Boolean {
-        try {
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-            BitmapFactory.decodeStream(inputStream, null, options)
-            inputStream?.close()
-            
-            val width = options.outWidth
-            val height = options.outHeight
-            val fileSize = getImageFileSize(context, imageUri)
-            
-            return width > MAX_IMAGE_WIDTH || 
-                   height > MAX_IMAGE_HEIGHT || 
-                   fileSize > MAX_FILE_SIZE
-                   
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to check compression needs: ${e.message}")
-            return true // Assume compression is needed if we can't determine
-        }
-    }
-    
-    /**
-     * Get image file size
-     */
-    private fun getImageFileSize(context: Context, imageUri: Uri): Long {
-        return try {
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-            val size = inputStream?.available()?.toLong() ?: 0L
-            inputStream?.close()
-            size
-        } catch (e: Exception) {
-            0L
-        }
-    }
-}
 
-/**
- * Upload progress data class
- */
-data class UploadProgress(
-    val currentStep: String,
-    val progress: Int // 0-100
-)
-
-/**
- * Upload status enum
- */
-enum class UploadStatus {
-    IDLE,
-    STARTING,
-    COMPRESSING,
-    UPLOADING,
-    SUCCESS,
-    FAILED,
-    CANCELLED
+    enum class UploadStatus {
+        STARTING,
+        UPLOADING,
+        SUCCESS,
+        ERROR
+    }
 }

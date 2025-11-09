@@ -32,13 +32,23 @@
         
         "plantas": {
           "$plantId": {
-            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'PLANTA' && newData.child('userId').val() == auth.uid"
+            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'PLANTA' && newData.child('userId').val() == auth.uid",
+            "imagens": {
+              "$imageId": {
+                ".validate": "newData.isString() && newData.val().length < 5000000" // Limite de ~5MB por imagem Base64
+              }
+            }
           }
         },
         
         "insetos": {
           "$insectId": {
-            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'INSETO' && newData.child('userId').val() == auth.uid"
+            ".validate": "newData.hasChildren(['id', 'nome', 'data', 'local', 'categoria', 'timestamp', 'tipo']) && newData.child('tipo').val() == 'INSETO' && newData.child('userId').val() == auth.uid",
+            "imagens": {
+              "$imageId": {
+                ".validate": "newData.isString() && newData.val().length < 5000000"
+              }
+            }
           }
         },
         

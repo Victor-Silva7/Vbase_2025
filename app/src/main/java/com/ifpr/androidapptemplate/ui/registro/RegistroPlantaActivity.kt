@@ -148,8 +148,11 @@ class RegistroPlantaActivity : AppCompatActivity() {
         
         viewModel.saveSuccess.observe(this) { success ->
             if (success) {
-                Toast.makeText(this, "Registro salvo com sucesso!", Toast.LENGTH_SHORT).show()
-                finish()
+                Toast.makeText(this, "Registro salvo com sucesso!", Toast.LENGTH_LONG).show()
+                // Fechar a activity após 2 segundos para dar tempo ao usuário de ver a mensagem
+                binding.root.postDelayed({
+                    finish()
+                }, 2000)
             }
         }
         
@@ -576,5 +579,11 @@ class RegistroPlantaActivity : AppCompatActivity() {
             binding.cardSaudavel.strokeWidth = 0
             binding.cardDoente.strokeWidth = 0
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Garante que a Activity fecha quando o botão voltar é pressionado
+        finish()
     }
 }

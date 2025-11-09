@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.data.repository.RegistrationStats
 import com.ifpr.androidapptemplate.data.model.Planta
@@ -240,6 +241,8 @@ class MeusRegistrosViewModel : ViewModel() {
         val insects = userInsects.value ?: emptyList()
         val currentFilter = _currentFilter.value ?: FiltroCategoria.TODOS
         
+        Log.d("MeusRegistrosVM", "Combinando registros: ${plants.size} plantas + ${insects.size} insetos, filtro: $currentFilter")
+        
         val combinedList = mutableListOf<RegistrationItem>()
         
         // Add based on current filter
@@ -270,6 +273,8 @@ class MeusRegistrosViewModel : ViewModel() {
         
         // Sort by timestamp (most recent first)
         combinedList.sortByDescending { it.commonTimestamp }
+        
+        Log.d("MeusRegistrosVM", "Lista final de registros: ${combinedList.size}")
         
         _combinedRegistrations.postValue(combinedList)
         _filteredCombinedRegistrations.postValue(combinedList)

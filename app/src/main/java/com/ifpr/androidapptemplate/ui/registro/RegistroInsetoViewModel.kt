@@ -14,6 +14,7 @@ import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Inseto
 import com.ifpr.androidapptemplate.data.model.InsectCategory
+import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
 import java.io.File
@@ -46,6 +47,7 @@ class RegistroInsetoViewModel : ViewModel() {
     private val storageManager = FirebaseConfig.getStorageManager()
     private val databaseService = FirebaseConfig.getDatabaseService()
     private val imageUploadManager = ImageUploadManager.getInstance()
+    private val repository = RegistroRepository.getInstance()
     
     fun setContext(context: Context) {
         this.context = context
@@ -160,7 +162,9 @@ class RegistroInsetoViewModel : ViewModel() {
             local = local,
             categoria = category,
             observacao = observacao,
-            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            imagens = emptyList(), // Will be populated after image upload
+            userId = getCurrentUserId(),
+            userName = getCurrentUserName(),
             timestamp = System.currentTimeMillis(),
             tipo = "INSETO"
         )
@@ -172,9 +176,9 @@ class RegistroInsetoViewModel : ViewModel() {
                 context = context,
                 insectId = registro.id,
                 imageUris = images,
-                onSuccess = { downloadUrls ->
-                    // Save registration with image URLs
-                    val updatedRegistro = registro.copy(imagens = downloadUrls)
+                onSuccess = { imageIds ->
+                    // Save registration with image IDs from Base64 upload
+                    val updatedRegistro = registro.copy(imagens = imageIds)
                     saveRegistrationToDatabase(updatedRegistro)
                 },
                 onFailure = { exception ->
@@ -195,6 +199,8 @@ class RegistroInsetoViewModel : ViewModel() {
                 val result = databaseService.saveInsect(registration)
                 
                 result.onSuccess { insectId ->
+                    // Force refresh repository to load newly saved registration
+                    repository.getUserInsects(forceRefresh = true)
                     _isLoading.value = false
                     _saveSuccess.value = true
                     clearForm()
@@ -217,6 +223,14 @@ class RegistroInsetoViewModel : ViewModel() {
         } catch (e: Exception) {
             System.currentTimeMillis()
         }
+    }
+    
+    private fun getCurrentUserId(): String {
+        return FirebaseConfig.getAuth().currentUser?.uid ?: "user_placeholder"
+    }
+    
+    private fun getCurrentUserName(): String {
+        return FirebaseConfig.getAuth().currentUser?.displayName ?: "Usuario Anonimo"
     }
     
     private fun clearForm() {

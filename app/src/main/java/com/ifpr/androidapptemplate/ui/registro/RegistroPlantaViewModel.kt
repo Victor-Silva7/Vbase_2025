@@ -11,6 +11,7 @@ import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Planta
 import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
+import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
 import java.io.File
@@ -43,6 +44,7 @@ class RegistroPlantaViewModel : ViewModel() {
     private val storageManager = FirebaseConfig.getStorageManager()
     private val databaseService = FirebaseConfig.getDatabaseService()
     private val imageUploadManager = ImageUploadManager.getInstance()
+    private val repository = RegistroRepository.getInstance()
     
     // Maximum number of images allowed
     private val maxImages = 5
@@ -178,7 +180,7 @@ class RegistroPlantaViewModel : ViewModel() {
             local = local.trim(),
             categoria = _selectedCategory.value!!,
             observacao = observacao.trim(),
-            imagens = _selectedImages.value?.map { it.toString() } ?: emptyList(),
+            imagens = emptyList(), // Will be populated after image upload
             userId = getCurrentUserId(),
             userName = getCurrentUserName(),
             timestamp = System.currentTimeMillis(),
@@ -192,7 +194,7 @@ class RegistroPlantaViewModel : ViewModel() {
     private fun saveToFirebase(registration: Planta) {
         try {
             val plantId = registration.id
-            val imageUris = registration.imagens.map { Uri.parse(it) }
+            val imageUris = _selectedImages.value ?: emptyList()
             val context = appContext ?: throw IllegalStateException("Context not set")
             
             // Use enhanced ImageUploadManager for better compression and progress tracking
@@ -201,9 +203,9 @@ class RegistroPlantaViewModel : ViewModel() {
                     context = context,
                     plantId = plantId,
                     imageUris = imageUris,
-                    onSuccess = { downloadUrls ->
-                        // Save registration with image URLs
-                        val updatedRegistration = registration.copy(imagens = downloadUrls)
+                    onSuccess = { imageIds ->
+                        // Save registration with image IDs from Base64 upload
+                        val updatedRegistration = registration.copy(imagens = imageIds)
                         saveRegistrationToDatabase(updatedRegistration)
                     },
                     onFailure = { exception ->
@@ -229,6 +231,8 @@ class RegistroPlantaViewModel : ViewModel() {
                 val result = databaseService.savePlant(registration)
                 
                 result.onSuccess { plantId ->
+                    // Force refresh repository to load newly saved registration
+                    repository.getUserPlants(forceRefresh = true)
                     _isLoading.value = false
                     _saveSuccess.value = true
                     clearFormData()
@@ -252,13 +256,11 @@ class RegistroPlantaViewModel : ViewModel() {
     }
 
     private fun getCurrentUserId(): String {
-        // TODO: Get from Firebase Auth
-        return "user_placeholder"
+        return FirebaseConfig.getAuth().currentUser?.uid ?: "user_placeholder"
     }
     
     private fun getCurrentUserName(): String {
-        // TODO: Get from Firebase Auth
-        return "Usuario Anonimo"
+        return FirebaseConfig.getAuth().currentUser?.displayName ?: "Usuario Anonimo"
     }
     
     private fun convertDateToTimestamp(dateString: String): Long {

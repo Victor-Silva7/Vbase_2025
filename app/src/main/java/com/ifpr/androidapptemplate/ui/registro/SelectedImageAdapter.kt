@@ -26,8 +26,7 @@ class SelectedImageAdapter(
             SelectedImage(
                 uri = uri,
                 isUploading = false,
-                uploadProgress = 0,
-                needsCompression = uploadManager.needsCompression(context, uri)
+                uploadProgress = 0
             )
         }
         
@@ -84,13 +83,6 @@ class SelectedImageAdapter(
                 .apply(requestOptions)
                 .into(binding.imageView)
             
-            // Show compression indicator
-            if (selectedImage.needsCompression) {
-                binding.compressionIndicator.visibility = android.view.View.VISIBLE
-            } else {
-                binding.compressionIndicator.visibility = android.view.View.GONE
-            }
-            
             // Show upload progress
             if (selectedImage.isUploading) {
                 binding.uploadProgressBar.visibility = android.view.View.VISIBLE
@@ -126,8 +118,7 @@ class SelectedImageAdapter(
 data class SelectedImage(
     val uri: Uri,
     val isUploading: Boolean = false,
-    val uploadProgress: Int = 0,
-    val needsCompression: Boolean = false
+    val uploadProgress: Int = 0
 )
 
 /**
