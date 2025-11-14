@@ -144,12 +144,12 @@ class PostagemCardAdapter(
                 if (usuario.avatarUrl.isNotEmpty()) {
                     Glide.with(itemView.context)
                         .load(usuario.avatarUrl)
-                        .placeholder(R.drawable.ic_person_24dp)
-                        .error(R.drawable.ic_person_24dp)
+                        .placeholder(R.drawable.ic_user_placeholder)
+                        .error(R.drawable.ic_user_placeholder)
                         .transform(CircleCrop())
                         .into(imageViewUserAvatar)
                 } else {
-                    imageViewUserAvatar.setImageResource(R.drawable.ic_person_24dp)
+                    imageViewUserAvatar.setImageResource(R.drawable.ic_user_placeholder)
                 }
                 
                 // Verificação do usuário

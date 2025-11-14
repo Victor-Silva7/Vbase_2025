@@ -14,15 +14,15 @@
         <item name="android:colorBackground">@color/background_dark</item>
         <item name="android:navigationBarColor">@color/background_dark</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?android:attr/statusBarColor</item>
+        <item name="android:statusBarColor">#1a1a1a</item>
         
-        <!-- Configurações para remover ActionBar e título -->
+        <!-- Remover ActionBar completamente -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">false</item>
+        <item name="android:windowActionBarOverlay">false</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="android:fitsSystemWindows">false</item>
         
         <!-- Customize your theme here. -->
     </style>

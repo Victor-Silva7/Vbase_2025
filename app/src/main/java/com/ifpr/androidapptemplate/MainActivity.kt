@@ -5,8 +5,6 @@ import android.content.Intent
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.ifpr.androidapptemplate.databinding.ActivityMainBinding
 
@@ -25,14 +23,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        // Configuração sem ActionBar
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications,
-                R.id.navigation_profile
-            )
-        )
-        // Removido setupActionBarWithNavController para remover os títulos
         navView.setupWithNavController(navController)
         
         // Verificar se foi solicitada navegação para um fragmento específico

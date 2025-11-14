@@ -3,7 +3,7 @@
     <string name="title_home">Registro</string>
     <string name="title_dashboard">Postagens</string>
     <string name="title_notifications">Usuário</string>
-    <string name="title_profile">Profile</string>
+    <string name="title_profile">Usuário</string>
     <string name="title_itens">Itens</string>
     
     <!-- Feed de Postagens -->
@@ -141,8 +141,8 @@
     <string name="insetos">Insetos</string>
     <string name="total">Total</string>
     <string name="empty_state_icon">Ícone de estado vazio</string>
-    <string name="no_plants_registered">Nenhuma planta registrada</string>
-    <string name="no_plants_message">Você ainda não registrou nenhuma planta.</string>
+    <string name="no_registrations_title">Nenhum registro encontrado</string>
+    <string name="no_registrations_message">Faça alguns registros para serem exibidos aqui!</string>
     <string name="add_first_registration">Adicionar primeiro registro</string>
     <string name="add_registration">Adicionar registro</string>
     

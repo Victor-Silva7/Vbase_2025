@@ -40,7 +40,7 @@
                 app:shapeAppearanceOverlay="@style/CircularImageView"
                 app:strokeColor="@color/divider"
                 app:strokeWidth="1dp"
-                tools:src="@drawable/ic_person_24dp" />
+                tools:src="@drawable/ic_user_placeholder" />
 
             <LinearLayout
                 android:layout_width="0dp"

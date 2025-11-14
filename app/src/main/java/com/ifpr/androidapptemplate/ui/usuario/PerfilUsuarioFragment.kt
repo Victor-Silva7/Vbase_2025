@@ -30,7 +30,6 @@ class PerfilUsuarioFragment : Fragment() {
     private lateinit var userProfileImageView: ImageView
     private lateinit var registerNameEditText: EditText
     private lateinit var registerEmailEditText: EditText
-    private lateinit var registerEnderecoEditText: EditText
     private lateinit var registerPasswordEditText: EditText
     private lateinit var registerConfirmPasswordEditText: EditText
     private lateinit var registerButton: Button
@@ -56,7 +55,6 @@ class PerfilUsuarioFragment : Fragment() {
         userProfileImageView = view.findViewById(R.id.userProfileImageView)
         registerNameEditText = view.findViewById(R.id.registerNameEditText)
         registerEmailEditText = view.findViewById(R.id.registerEmailEditText)
-        registerEnderecoEditText = view.findViewById(R.id.registerEnderecoEditText)
         registerPasswordEditText = view.findViewById(R.id.registerPasswordEditText)
         registerConfirmPasswordEditText = view.findViewById(R.id.registerConfirmPasswordEditText)
         registerButton = view.findViewById(R.id.salvarButton)
@@ -86,7 +84,7 @@ class PerfilUsuarioFragment : Fragment() {
                 try {
                     Glide.with(requireContext())
                         .load(photoUrl)
-                        .placeholder(R.drawable.ic_profile_placeholder) // Adicione um placeholder padrão
+                        .placeholder(R.drawable.ic_user_placeholder) // Adicione um placeholder padrão
                         .error(R.drawable.ic_error_placeholder) // Adicione um placeholder de erro
                         .into(userProfileImageView)
                 } catch (e: Exception) {
@@ -147,7 +145,7 @@ class PerfilUsuarioFragment : Fragment() {
                 if (snapshot.exists()) {
                     val usuario = snapshot.getValue(Usuario::class.java)
                     usuario?.let {
-                        registerEnderecoEditText.setText(it.endereco ?: "")
+                        // Dados do usuário já são carregados do Firebase Auth
                     }
                 }
             }
@@ -160,7 +158,6 @@ class PerfilUsuarioFragment : Fragment() {
 
     private fun updateUser() {
         val name = registerNameEditText.text.toString().trim()
-        val endereco = registerEnderecoEditText.text.toString().trim()
 
         // Acessar currentUser
         val user = auth.currentUser
@@ -168,18 +165,18 @@ class PerfilUsuarioFragment : Fragment() {
         // Verifica se o usuário atual já está definido
         if (user != null) {
             // Se o usuário já existe, atualiza os dados
-            updateProfile(user, name, endereco)
+            updateProfile(user, name)
         } else {
             Toast.makeText(context, "Não foi possível encontrar o usuário logado", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun updateProfile(user: FirebaseUser?, displayName: String, endereco: String) {
+    private fun updateProfile(user: FirebaseUser?, displayName: String) {
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(displayName)
             .build()
 
-        val usuario = Usuario(user?.uid.toString() , displayName, user?.email, endereco, )
+        val usuario = Usuario(user?.uid.toString() , displayName, user?.email, null, )
 
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener { task ->

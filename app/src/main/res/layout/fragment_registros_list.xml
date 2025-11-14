@@ -1,130 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1a1a1a"
+    tools:context=".ui.registro.RegistrosListFragment">
 
-    <FrameLayout
+    <!-- Header -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#029e5a"
+        android:padding="16dp">
 
-        <!-- RecyclerView for registrations -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_registro_card" />
+            android:layout_height="wrap_content"
+            android:text="@string/meus_registros_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center" />
 
-        <!-- Loading indicator -->
-        <ProgressBar
-            android:id="@+id/progressBar"
+    </LinearLayout>
+
+    <!-- Filters -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFilters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp">
 
-        <!-- Empty state -->
-        <LinearLayout
-            android:id="@+id/layoutEmptyState"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAll"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_all"
+                android:checked="true" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPlants"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_plants"
+                app:chipIcon="@drawable/ic_planta_24dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipInsects"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_insects"
+                app:chipIcon="@drawable/ic_inseto_24dp" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <!-- RecyclerView wrapped in SwipeRefreshLayout -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="32dp"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/ivEmptyIcon"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@drawable/ic_planta_24dp"
-                android:alpha="0.3"
-                android:contentDescription="@string/empty_state_icon" />
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="4dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/item_registro_card" />
 
-            <TextView
-                android:id="@+id/tvEmptyTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_plants_registered"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="16dp"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tvEmptyMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_plants_message"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="8dp"
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layoutEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:lineSpacingExtra="4dp" />
+                android:padding="32dp"
+                android:visibility="gone">
 
-            <Button
-                android:id="@+id/btnAddFirst"
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/ic_planta_24dp"
+                    android:alpha="0.3"
+                    android:contentDescription="@string/empty_state_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_registrations_title"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_registrations_message"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+            <!-- Loading Indicator -->
+            <ProgressBar
+                android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add_first_registration"
-                android:layout_marginTop="24dp"
-                android:backgroundTint="@color/primary_green" />
+                android:layout_gravity="center"
+                android:visibility="gone" />
 
-        </LinearLayout>
+        </FrameLayout>
 
-        <!-- Error state -->
-        <LinearLayout
-            android:id="@+id/layoutErrorState"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="32dp"
-            android:visibility="gone">
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_error_24dp"
-                android:alpha="0.5"
-                android:contentDescription="@string/error_icon" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/error_loading_registrations"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="16dp"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tvErrorMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_connection_try_again"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="8dp"
-                android:gravity="center" />
-
-            <Button
-                android:id="@+id/btnRetry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/try_again"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="@color/primary_green" />
-
-        </LinearLayout>
-
-    </FrameLayout>
-
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>

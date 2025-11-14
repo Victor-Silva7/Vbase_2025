@@ -113,7 +113,7 @@ class SearchResultsAdapter(
         private fun bindUser(user: PublicUser) {
             binding.apply {
                 // Ícone do tipo
-                ivTypeBadge.setImageResource(R.drawable.ic_person_24dp)
+                ivTypeBadge.setImageResource(R.drawable.ic_user_placeholder)
                 
                 // Informações principais
                 tvResultTitle.text = user.nome
@@ -128,8 +128,8 @@ class SearchResultsAdapter(
                     ivResultImage.visibility = View.VISIBLE
                     Glide.with(itemView.context)
                         .load(user.avatarUrl)
-                        .placeholder(R.drawable.ic_person_24dp)
-                        .error(R.drawable.ic_person_24dp)
+                        .placeholder(R.drawable.ic_user_placeholder)
+                        .error(R.drawable.ic_user_placeholder)
                         .transform(CircleCrop())
                         .into(ivResultImage)
                 } else {

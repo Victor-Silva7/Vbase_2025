@@ -130,8 +130,8 @@ class ComentariosFragment : Fragment() {
             // Carregar avatar do usuário (mock)
             Glide.with(this@ComentariosFragment)
                 .load("https://example.com/current_user.jpg")
-                .placeholder(R.drawable.ic_person_24dp)
-                .error(R.drawable.ic_person_24dp)
+                .placeholder(R.drawable.ic_user_placeholder)
+                .error(R.drawable.ic_user_placeholder)
                 .transform(CircleCrop())
                 .into(imageViewUserAvatar)
         }

@@ -64,7 +64,7 @@ class SearchSuggestionsAdapter(
                 SuggestionType.PLANT_NAME -> R.drawable.ic_planta_24dp
                 SuggestionType.INSECT_NAME -> R.drawable.ic_inseto_24dp
                 SuggestionType.LOCATION -> R.drawable.ic_location_on_24dp
-                SuggestionType.USER_NAME -> R.drawable.ic_person_24dp
+                SuggestionType.USER_NAME -> R.drawable.ic_user_placeholder
                 SuggestionType.FAMILY -> R.drawable.ic_filter_list_24dp
                 SuggestionType.STATUS -> R.drawable.ic_verified_24dp
                 SuggestionType.POPULAR -> R.drawable.ic_star_border_24dp

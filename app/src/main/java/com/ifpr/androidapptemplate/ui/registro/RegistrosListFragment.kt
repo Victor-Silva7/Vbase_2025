@@ -12,9 +12,20 @@ import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.FragmentRegistrosListBinding
 import com.ifpr.androidapptemplate.data.model.Planta
 import com.ifpr.androidapptemplate.data.model.Inseto
+import com.ifpr.androidapptemplate.data.repository.RegistrationStats
+import android.text.TextWatcher
+import android.text.Editable
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.content.Context
+import android.content.Intent
+import androidx.appcompat.app.AlertDialog
+import com.google.android.material.snackbar.Snackbar
+import android.util.Log
 
 /**
- * Fragment para exibir lista de registros (plantas ou insetos)
+ * Fragment para exibir lista completa de registros (plantas e insetos)
+ * Consolidado com filtros, busca e FAB do MeusRegistrosFragment
  */
 class RegistrosListFragment : Fragment() {
 
@@ -59,36 +70,75 @@ class RegistrosListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        setupRecyclerView()
-        setupSwipeRefresh()
-        setupEmptyState()
-        observeViewModel()
+        try {
+            Log.d("RegistrosListFragment", "onViewCreated iniciado")
+            setupRecyclerView()
+            Log.d("RegistrosListFragment", "setupRecyclerView OK")
+            setupSwipeRefresh()
+            Log.d("RegistrosListFragment", "setupSwipeRefresh OK")
+            setupFilters()
+            Log.d("RegistrosListFragment", "setupFilters OK")
+            observeViewModel()
+            Log.d("RegistrosListFragment", "observeViewModel OK")
+            
+            // Load initial data
+            try {
+                sharedViewModel.loadRegistrations()
+                Log.d("RegistrosListFragment", "loadRegistrations OK")
+            } catch (e: Exception) {
+                Log.e("RegistrosListFragment", "Erro ao carregar registros: ${e.message}", e)
+                e.printStackTrace()
+                showError("Erro ao carregar registros: ${e.message}")
+            }
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "Erro em onViewCreated", e)
+            e.printStackTrace()
+            showError("Erro ao inicializar tela: ${e.message}")
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Recarrega dados toda vez que o fragment é exibido (ao voltar do Registro Activity)
+        sharedViewModel.loadRegistrations()
     }
 
     /**
      * Configura o RecyclerView
      */
     private fun setupRecyclerView() {
-        registrosAdapter = RegistrosAdapter(
-            onItemClick = { registration ->
-                // Handle item click (open details)
-                openRegistrationDetails(registration)
-            },
-            onEditClick = { registration ->
-                // Handle edit click
-                editRegistration(registration)
-            },
-            onShareClick = { registration ->
-                // Handle share click
-                shareRegistration(registration)
-            }
-        )
+        try {
+            registrosAdapter = RegistrosAdapter(
+                onItemClick = { registration ->
+                    // Handle item click (open details)
+                    openRegistrationDetails(registration)
+                },
+                onEditClick = { registration ->
+                    // Handle edit click
+                    editRegistration(registration)
+                },
+                onShareClick = { registration ->
+                    // Handle share click
+                    shareRegistration(registration)
+                }
+            )
 
-        // Use StaggeredGrid for better visual presentation
-        binding.recyclerView.apply {
-            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            adapter = registrosAdapter
-            setHasFixedSize(true)
+            val recyclerView = binding?.recyclerView ?: run {
+                Log.w("RegistrosListFragment", "RecyclerView is null")
+                return
+            }
+
+            // Use StaggeredGrid for better visual presentation
+            recyclerView.apply {
+                layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                adapter = registrosAdapter
+                setHasFixedSize(true)
+            }
+            
+            Log.d("RegistrosListFragment", "setupRecyclerView - RecyclerView configured")
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "setupRecyclerView error", e)
+            e.printStackTrace()
         }
     }
 
@@ -96,95 +146,138 @@ class RegistrosListFragment : Fragment() {
      * Configura o SwipeRefreshLayout
      */
     private fun setupSwipeRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            sharedViewModel.refreshData()
+        try {
+            val swipeLayout = binding?.swipeRefreshLayout ?: run {
+                Log.w("RegistrosListFragment", "SwipeRefreshLayout is null")
+                return
+            }
+            
+            swipeLayout.setOnRefreshListener {
+                sharedViewModel.refreshData()
+            }
+            
+            // Set color scheme for refresh indicator
+            swipeLayout.setColorSchemeResources(
+                R.color.primary_green,
+                R.color.secondary_green
+            )
+            
+            Log.d("RegistrosListFragment", "setupSwipeRefresh - SwipeRefresh configured")
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "setupSwipeRefresh error", e)
+            e.printStackTrace()
         }
-        
-        // Set color scheme for refresh indicator
-        binding.swipeRefreshLayout.setColorSchemeResources(
-            com.ifpr.androidapptemplate.R.color.primary_green,
-            com.ifpr.androidapptemplate.R.color.secondary_green
-        )
     }
 
     /**
-     * Configura o estado vazio baseado no tipo de lista
+     * Configura os filtros de categoria
      */
-    private fun setupEmptyState() {
-        when (listType) {
-            TYPE_PLANTS -> {
-                binding.ivEmptyIcon.setImageResource(com.ifpr.androidapptemplate.R.drawable.ic_planta_24dp)
-                binding.tvEmptyTitle.text = getString(com.ifpr.androidapptemplate.R.string.no_plants_registered)
-                binding.tvEmptyMessage.text = getString(com.ifpr.androidapptemplate.R.string.no_plants_message)
+    private fun setupFilters() {
+        try {
+            val chipGroup = binding?.chipGroupFilters ?: run {
+                Log.w("RegistrosListFragment", "chipGroupFilters is null")
+                return
             }
-            TYPE_INSECTS -> {
-                binding.ivEmptyIcon.setImageResource(com.ifpr.androidapptemplate.R.drawable.ic_inseto_24dp)
-                binding.tvEmptyTitle.text = getString(com.ifpr.androidapptemplate.R.string.no_insects_registered)
-                binding.tvEmptyMessage.text = getString(com.ifpr.androidapptemplate.R.string.no_insects_message)
+            
+            Log.d("RegistrosListFragment", "setupFilters - chipGroup found, setting listener")
+            
+            chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+                Log.d("RegistrosListFragment", "setupFilters - chip checked, ids: $checkedIds")
+                try {
+                    if (checkedIds.isNotEmpty()) {
+                        val filter = when (checkedIds.first()) {
+                            R.id.chipAll -> FiltroCategoria.TODOS
+                            R.id.chipPlants -> FiltroCategoria.PLANTAS
+                            R.id.chipInsects -> FiltroCategoria.INSETOS
+                            else -> FiltroCategoria.TODOS
+                        }
+                        sharedViewModel.applyFilter(filter)
+                        updateFilterCounts()
+                    }
+                } catch (e: Exception) {
+                    Log.e("RegistrosListFragment", "Error in chip listener", e)
+                }
             }
+            
+            Log.d("RegistrosListFragment", "setupFilters - listener set, attempting to check chipAll")
+            
+            // Set initial selection - use post to ensure view is fully ready
+            view?.post {
+                try {
+                    binding?.chipAll?.isChecked = true
+                    Log.d("RegistrosListFragment", "setupFilters - chipAll checked successfully")
+                } catch (e: Exception) {
+                    Log.e("RegistrosListFragment", "Error checking chipAll", e)
+                }
+            }
+            
+            Log.d("RegistrosListFragment", "setupFilters - filters configured")
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "setupFilters error", e)
+            e.printStackTrace()
         }
+    }
 
-        binding.btnAddFirst.setOnClickListener {
-            when (listType) {
-                TYPE_PLANTS -> navigateToPlantRegistration()
-                TYPE_INSECTS -> navigateToInsectRegistration()
+    /**
+     * Atualiza contadores nos chips
+     */
+    private fun updateFilterCounts() {
+        try {
+            val (total, plants, insects) = sharedViewModel.getFilterCounts()
+            
+            Log.d("RegistrosListFragment", "updateFilterCounts - total:$total, plants:$plants, insects:$insects")
+            
+            binding?.chipAll?.apply {
+                text = "Todos ($total)"
             }
+            binding?.chipPlants?.apply {
+                text = "Plantas ($plants)"
+            }
+            binding?.chipInsects?.apply {
+                text = "Insetos ($insects)"
+            }
+            
+            Log.d("RegistrosListFragment", "updateFilterCounts - chips updated")
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "updateFilterCounts error", e)
+            e.printStackTrace()
         }
+    }
 
-        binding.btnRetry.setOnClickListener {
-            sharedViewModel.refreshData()
-        }
+    /**
+     * Configura a funcionalidade de busca
+     */
+    private fun setupSearch() {
+        // Busca removida do novo layout - foi simplificado
+        Log.d("RegistrosListFragment", "setupSearch - não está no novo layout")
     }
 
     /**
      * Observa mudanças no ViewModel
      */
     private fun observeViewModel() {
-        // Observe the appropriate filtered data based on list type
-        when (listType) {
-            TYPE_PLANTS -> {
-                sharedViewModel.filteredPlants.observe(viewLifecycleOwner) { plantas ->
-                    updatePlantsList(plantas)
-                }
-                // Also observe original data as fallback
-                sharedViewModel.userPlants.observe(viewLifecycleOwner) { plantas ->
-                    // Only update if no search is active
-                    if (sharedViewModel.searchQuery.value.isNullOrEmpty()) {
-                        updatePlantsList(plantas)
-                    }
-                }
-            }
-            TYPE_INSECTS -> {
-                sharedViewModel.filteredInsects.observe(viewLifecycleOwner) { insetos ->
-                    updateInsectsList(insetos)
-                }
-                // Also observe original data as fallback
-                sharedViewModel.userInsects.observe(viewLifecycleOwner) { insetos ->
-                    // Only update if no search is active
-                    if (sharedViewModel.searchQuery.value.isNullOrEmpty()) {
-                        updateInsectsList(insetos)
-                    }
-                }
-            }
+        // Observe combined registrations with filters
+        sharedViewModel.filteredCombinedRegistrations.observe(viewLifecycleOwner) { registrations ->
+            updateRegistrationsList(registrations)
         }
-
+        
         // Observe loading state
         sharedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.swipeRefreshLayout.isRefreshing = isLoading
         }
         
-        // Observe searching state
-        sharedViewModel.isSearching.observe(viewLifecycleOwner) { isSearching ->
-            if (isSearching) {
-                binding.progressBar.visibility = View.VISIBLE
+        // Observe error messages
+        sharedViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            if (errorMessage.isNotEmpty()) {
+                showError(errorMessage)
+                sharedViewModel.clearError()
             }
         }
-
-        // Observe search query changes
-        sharedViewModel.searchQuery.observe(viewLifecycleOwner) { query ->
-            // Update empty state message based on search
-            updateEmptyStateForSearch(query)
+        
+        // Observe current filter
+        sharedViewModel.currentFilter.observe(viewLifecycleOwner) { filter ->
+            updateEmptyStateForFilter(filter)
         }
     }
 
@@ -219,25 +312,21 @@ class RegistrosListFragment : Fragment() {
     }
     
     /**
+     * Atualiza o estado vazio baseado no filtro atual
+     */
+    private fun updateEmptyStateForFilter(filter: FiltroCategoria) {
+        // Empty state agora é simples - só mudar visibilidade
+        val isEmpty = sharedViewModel.filteredCombinedRegistrations.value?.isEmpty() ?: true
+        binding.layoutEmptyState.visibility = if (isEmpty) View.VISIBLE else View.GONE
+    }
+
+    /**
      * Atualiza o estado vazio baseado na busca
      */
     private fun updateEmptyStateForSearch(query: String) {
-        if (query.isNotEmpty()) {
-            // Update empty state for search
-            binding.tvEmptyTitle.text = "Nenhum resultado encontrado"
-            binding.tvEmptyMessage.text = "Não encontramos registros para \"$query\".\nTente uma busca diferente."
-            binding.btnAddFirst.text = "Nova busca"
-            binding.btnAddFirst.setOnClickListener {
-                // Clear search
-                sharedViewModel.clearSearch()
-            }
-        } else {
-            // Reset to normal empty state
-            setupEmptyState()
-        }
+        val isEmpty = sharedViewModel.filteredCombinedRegistrations.value?.isEmpty() ?: true
+        binding.layoutEmptyState.visibility = if (isEmpty && query.isEmpty()) View.VISIBLE else View.GONE
     }
-
-
 
     /**
      * Mostra o estado vazio
@@ -245,7 +334,6 @@ class RegistrosListFragment : Fragment() {
     private fun showEmptyState() {
         binding.layoutEmptyState.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        binding.layoutErrorState.visibility = View.GONE
     }
 
     /**
@@ -254,7 +342,29 @@ class RegistrosListFragment : Fragment() {
     private fun hideEmptyState() {
         binding.layoutEmptyState.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
-        binding.layoutErrorState.visibility = View.GONE
+    }
+
+    /**
+     * Atualiza as estatísticas exibidas
+     */
+    private fun updateStatistics(stats: RegistrationStats) {
+        // Stats não está no novo layout simplificado
+        Log.d("RegistrosListFragment", "Stats não exibidas no novo layout")
+    }
+
+    /**
+     * Atualiza estatísticas baseadas nos resultados da busca
+     */
+    private fun updateSearchResultsStats(searchResults: SearchResults) {
+        // Search stats não está no novo layout
+        Log.d("RegistrosListFragment", "Search stats não exibidas no novo layout")
+    }
+
+    /**
+     * Executa a busca com o texto atual (não usado no novo layout)
+     */
+    private fun performSearch() {
+        Log.d("RegistrosListFragment", "performSearch - não está no novo layout simplificado")
     }
 
     /**
@@ -303,31 +413,55 @@ class RegistrosListFragment : Fragment() {
             }
         }
 
-        val shareIntent = android.content.Intent().apply {
-            action = android.content.Intent.ACTION_SEND
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
             type = "text/plain"
-            putExtra(android.content.Intent.EXTRA_TEXT, shareText)
+            putExtra(Intent.EXTRA_TEXT, shareText)
         }
 
-        startActivity(android.content.Intent.createChooser(shareIntent, "Compartilhar registro"))
+        startActivity(Intent.createChooser(shareIntent, "Compartilhar registro"))
     }
 
     /**
-     * Navega para registro de plantas
+     * Mostra diálogo para escolher tipo de registro
+     */
+    private fun showRegistrationTypeDialog() {
+        val items = arrayOf(
+            getString(R.string.filter_plants),
+            getString(R.string.filter_insects)
+        )
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Escolher tipo de registro")
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Navigate to plant registration
+                        navigateToPlantRegistration()
+                    }
+                    1 -> {
+                        // Navigate to insect registration
+                        navigateToInsectRegistration()
+                    }
+                }
+            }
+            .show()
+    }
+
+    /**
+     * Navega para o registro de plantas
      */
     private fun navigateToPlantRegistration() {
-        // TODO: Implement navigation
-        // val intent = android.content.Intent(requireContext(), RegistroPlantaActivity::class.java)
-        // startActivity(intent)
+        val intent = Intent(requireContext(), RegistroPlantaActivity::class.java)
+        startActivity(intent)
     }
 
     /**
-     * Navega para registro de insetos
+     * Navega para o registro de insetos
      */
     private fun navigateToInsectRegistration() {
-        // TODO: Implement navigation
-        // val intent = android.content.Intent(requireContext(), RegistroInsetoActivity::class.java)
-        // startActivity(intent)
+        val intent = Intent(requireContext(), RegistroInsetoActivity::class.java)
+        startActivity(intent)
     }
 
     /**
@@ -335,11 +469,11 @@ class RegistrosListFragment : Fragment() {
      */
     private fun navigateToPlantEdit(planta: Planta) {
         // TODO: Implement navigation
-        // val intent = android.content.Intent(requireContext(), RegistroPlantaActivity::class.java).apply {
-        //     putExtra("PLANT_ID", planta.id)
-        //     putExtra("EDIT_MODE", true)
-        // }
-        // startActivity(intent)
+        val intent = Intent(requireContext(), RegistroPlantaActivity::class.java).apply {
+            putExtra("PLANT_ID", planta.id)
+            putExtra("EDIT_MODE", true)
+        }
+        startActivity(intent)
     }
 
     /**
@@ -347,11 +481,22 @@ class RegistrosListFragment : Fragment() {
      */
     private fun navigateToInsectEdit(inseto: Inseto) {
         // TODO: Implement navigation
-        // val intent = android.content.Intent(requireContext(), RegistroInsetoActivity::class.java).apply {
-        //     putExtra("INSECT_ID", inseto.id)
-        //     putExtra("EDIT_MODE", true)
-        // }
-        // startActivity(intent)
+        val intent = Intent(requireContext(), RegistroInsetoActivity::class.java).apply {
+            putExtra("INSECT_ID", inseto.id)
+            putExtra("EDIT_MODE", true)
+        }
+        startActivity(intent)
+    }
+
+    /**
+     * Exibe mensagem de erro
+     */
+    private fun showError(message: String) {
+        Snackbar.make(
+            binding.root,
+            message,
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 
     override fun onDestroyView() {
