@@ -56,6 +56,12 @@ class RegistroFragment : Fragment() {
             // Navegar para lista de registros do usuário (fragment interno)
             findNavController().navigate(R.id.navigation_registros_list)
         }
+
+        // FAB para AI Logic
+        binding.fabAi.setOnClickListener {
+            val intent = Intent(requireContext(), com.ifpr.androidapptemplate.ui.ai.AiLogicActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {

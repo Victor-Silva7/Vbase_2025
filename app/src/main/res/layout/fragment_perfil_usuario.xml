@@ -31,8 +31,8 @@
         android:hint="Nome"
         android:padding="16dp"
         android:background="@drawable/rounded_edit_text"
-        android:textColor="#1a1a1a"
-        android:textColorHint="#1a1a1a"
+        android:textColor="#999999"
+        android:textColorHint="#999999"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/userProfileImageView" />
@@ -48,8 +48,8 @@
         android:inputType="textEmailAddress"
         android:padding="16dp"
         android:background="@drawable/rounded_edit_text"
-        android:textColor="#1a1a1a"
-        android:textColorHint="#1a1a1a"
+        android:textColor="#999999"
+        android:textColorHint="#999999"
         app:layout_constraintTop_toBottomOf="@id/registerNameEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -65,8 +65,8 @@
         android:inputType="textPassword"
         android:padding="16dp"
         android:background="@drawable/rounded_edit_text"
-        android:textColor="#1a1a1a"
-        android:textColorHint="#1a1a1a"
+        android:textColor="#999999"
+        android:textColorHint="#999999"
         app:layout_constraintTop_toBottomOf="@id/registerEmailEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -82,8 +82,8 @@
         android:inputType="textPassword"
         android:padding="16dp"
         android:background="@drawable/rounded_edit_text"
-        android:textColor="#1a1a1a"
-        android:textColorHint="#1a1a1a"
+        android:textColor="#999999"
+        android:textColorHint="#999999"
         app:layout_constraintTop_toBottomOf="@id/registerPasswordEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -108,16 +108,17 @@
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="12dp"
         android:layout_marginBottom="24dp"
+        android:backgroundTint="#c40404"
         android:text="Sair"
-        android:textStyle="bold"
         android:textSize="16sp"
-        android:backgroundTint="#1a1a1a"
-        app:layout_constraintTop_toBottomOf="@id/salvarButton"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/salvarButton"
+        app:layout_constraintVertical_bias="0.096" />
 </androidx.constraintlayout.widget.ConstraintLayout>

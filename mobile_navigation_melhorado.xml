@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_home">
+
+    <!-- ========== ABAS PRINCIPAIS ========== -->
+
+    <!-- TELA INICIAL - REGISTRO -->
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.ifpr.androidapptemplate.ui.registro.RegistroFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_registro">
+        
+        <!-- Navegar para lista de registros do usuário -->
+        <action
+            android:id="@+id/action_home_to_meus_registros"
+            app:destination="@id/navigation_registros_list"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        
+        <!-- Navegar para editar registro existente -->
+        <action
+            android:id="@+id/action_home_to_edit_registro"
+            app:destination="@id/navigation_edit_registro"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+
+    <!-- POSTAGENS/FEED PÚBLICO -->
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.ifpr.androidapptemplate.ui.postagens.PostagensFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_postagens">
+        
+        <!-- Navegar para comentários de uma postagem -->
+        <action
+            android:id="@+id/action_postagens_to_comentarios"
+            app:destination="@id/navigation_comentarios"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        
+        <!-- Navegar para perfil do autor -->
+        <action
+            android:id="@+id/action_postagens_to_profile"
+            app:destination="@id/navigation_profile"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out" />
+    </fragment>
+
+    <!-- NOTIFICAÇÕES -->
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <!-- PERFIL DO USUÁRIO -->
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.ifpr.androidapptemplate.ui.usuario.PerfilUsuarioFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_perfil_usuario">
+        
+        <!-- Editar perfil -->
+        <action
+            android:id="@+id/action_profile_to_edit_profile"
+            app:destination="@id/navigation_edit_profile"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+
+    <!-- ========== FRAGMENTOS SECUNDÁRIOS (NAV INTERNA) ========== -->
+
+    <!-- LISTA DE REGISTROS DO USUÁRIO (Seu Registros) -->
+    <fragment
+        android:id="@+id/navigation_registros_list"
+        android:name="com.ifpr.androidapptemplate.ui.registro.RegistrosListFragment"
+        android:label="@string/meus_registros_title"
+        tools:layout="@layout/fragment_registros_list">
+        
+        <!-- Voltar para home com pop -->
+        <action
+            android:id="@+id/action_registros_list_to_home"
+            app:destination="@id/navigation_home"
+            app:popUpTo="@id/navigation_home"
+            app:popUpToInclusive="false"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        
+        <!-- Editar registro individual -->
+        <action
+            android:id="@+id/action_registros_list_to_edit"
+            app:destination="@id/navigation_edit_registro"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+        
+        <!-- Visualizar detalhes do registro -->
+        <action
+            android:id="@+id/action_registros_list_to_detail"
+            app:destination="@id/navigation_registro_detail"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+
+    <!-- COMENTÁRIOS DE POSTAGEM -->
+    <fragment
+        android:id="@+id/navigation_comentarios"
+        android:name="com.ifpr.androidapptemplate.ui.comentarios.ComentariosFragment"
+        android:label="@string/comments_title"
+        tools:layout="@layout/fragment_comentarios">
+        
+        <argument
+            android:name="postId"
+            app:argType="string" />
+        
+        <!-- Voltar para postagens -->
+        <action
+            android:id="@+id/action_comentarios_to_postagens"
+            app:destination="@id/navigation_dashboard"
+            app:popUpTo="@id/navigation_dashboard"
+            app:popUpToInclusive="false"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+        
+        <!-- Navegar para perfil do autor do comentário -->
+        <action
+            android:id="@+id/action_comentarios_to_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
+
+    <!-- DETALHES DE UM REGISTRO -->
+    <fragment
+        android:id="@+id/navigation_registro_detail"
+        android:name="com.ifpr.androidapptemplate.ui.registro.RegistroDetailFragment"
+        android:label="Detalhes do Registro"
+        tools:layout="@layout/fragment_registro_detail">
+        
+        <argument
+            android:name="registroId"
+            app:argType="string" />
+        
+        <argument
+            android:name="registroTipo"
+            app:argType="string"
+            android:defaultValue="PLANTA" />
+        
+        <!-- Voltar para lista -->
+        <action
+            android:id="@+id/action_registro_detail_to_list"
+            app:destination="@id/navigation_registros_list"
+            app:popUpTo="@id/navigation_registros_list"
+            app:popUpToInclusive="false" />
+        
+        <!-- Editar registro -->
+        <action
+            android:id="@+id/action_registro_detail_to_edit"
+            app:destination="@id/navigation_edit_registro"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+    </fragment>
+
+    <!-- EDITAR REGISTRO -->
+    <fragment
+        android:id="@+id/navigation_edit_registro"
+        android:name="com.ifpr.androidapptemplate.ui.registro.EditRegistroFragment"
+        android:label="Editar Registro"
+        tools:layout="@layout/fragment_edit_registro">
+        
+        <argument
+            android:name="registroId"
+            app:argType="string" />
+        
+        <argument
+            android:name="registroTipo"
+            app:argType="string" />
+        
+        <!-- Voltar para detalhes -->
+        <action
+            android:id="@+id/action_edit_registro_to_detail"
+            app:destination="@id/navigation_registro_detail"
+            app:popUpTo="@id/navigation_registro_detail"
+            app:popUpToInclusive="false" />
+        
+        <!-- Voltar para lista -->
+        <action
+            android:id="@+id/action_edit_registro_to_list"
+            app:destination="@id/navigation_registros_list"
+            app:popUpTo="@id/navigation_registros_list"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <!-- EDITAR PERFIL DO USUÁRIO -->
+    <fragment
+        android:id="@+id/navigation_edit_profile"
+        android:name="com.ifpr.androidapptemplate.ui.usuario.EditProfileFragment"
+        android:label="Editar Perfil"
+        tools:layout="@layout/fragment_edit_profile">
+        
+        <!-- Voltar para perfil -->
+        <action
+            android:id="@+id/action_edit_profile_to_profile"
+            app:destination="@id/navigation_profile"
+            app:popUpTo="@id/navigation_profile"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <!-- ========== AÇÕES GLOBAIS ========== -->
+    <!-- Podem ser chamadas de QUALQUER fragment -->
+
+    <!-- Volta para Home -->
+    <action
+        android:id="@+id/action_global_to_home"
+        app:destination="@id/navigation_home"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true" />
+
+    <!-- Vai para Postagens -->
+    <action
+        android:id="@+id/action_global_to_postagens"
+        app:destination="@id/navigation_dashboard"
+        app:launchSingleTop="true" />
+
+    <!-- Vai para Notificações -->
+    <action
+        android:id="@+id/action_global_to_notifications"
+        app:destination="@id/navigation_notifications"
+        app:launchSingleTop="true" />
+
+    <!-- Vai para Perfil -->
+    <action
+        android:id="@+id/action_global_to_perfil"
+        app:destination="@id/navigation_profile"
+        app:launchSingleTop="true" />
+
+    <!-- Vai para Meus Registros -->
+    <action
+        android:id="@+id/action_global_to_meus_registros"
+        app:destination="@id/navigation_registros_list"
+        app:launchSingleTop="true" />
+
+</navigation>

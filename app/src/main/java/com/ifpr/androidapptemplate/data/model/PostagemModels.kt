@@ -143,6 +143,185 @@ data class PostagemFeed(
             TipoPostagem.INSETO -> "ic_inseto_24dp"
         }
     }
+    
+    /**
+     * Converte para Map para salvar no Firebase
+     */
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+            "id" to id,
+            "tipo" to tipo.name,
+            "usuario" to mapOf(
+                "id" to usuario.id,
+                "nome" to usuario.nome,
+                "nomeExibicao" to usuario.nomeExibicao,
+                "avatarUrl" to usuario.avatarUrl,
+                "isVerificado" to usuario.isVerificado,
+                "nivel" to usuario.nivel.name,
+                "localizacao" to usuario.localizacao,
+                "biografia" to usuario.biografia,
+                "dataRegistro" to usuario.dataRegistro,
+                "totalRegistros" to usuario.totalRegistros,
+                "totalCurtidas" to usuario.totalCurtidas
+            ),
+            "titulo" to titulo,
+            "descricao" to descricao,
+            "imageUrl" to imageUrl,
+            "localizacao" to localizacao,
+            "dataPostagem" to dataPostagem,
+            "detalhesPlanta" to detalhesPlanta?.let {
+                mapOf(
+                    "nomeComum" to it.nomeComum,
+                    "nomeCientifico" to it.nomeCientifico,
+                    "familia" to it.familia,
+                    "altura" to it.altura,
+                    "status" to it.status.name,
+                    "estagio" to it.estagio.name,
+                    "cuidadosEspeciais" to it.cuidadosEspeciais
+                )
+            },
+            "detalhesInseto" to detalhesInseto?.let {
+                mapOf(
+                    "nomeComum" to it.nomeComum,
+                    "nomeCientifico" to it.nomeCientifico,
+                    "familia" to it.familia,
+                    "tamanho" to it.tamanho,
+                    "tipo" to it.tipo.name,
+                    "habitat" to it.habitat,
+                    "comportamento" to it.comportamento
+                )
+            },
+            "interacoes" to mapOf(
+                "curtidas" to interacoes.curtidas,
+                "comentarios" to interacoes.comentarios,
+                "compartilhamentos" to interacoes.compartilhamentos,
+                "visualizacoes" to interacoes.visualizacoes,
+                "curtidoPeloUsuario" to interacoes.curtidoPeloUsuario,
+                "salvosPeloUsuario" to interacoes.salvosPeloUsuario,
+                "ultimaInteracao" to interacoes.ultimaInteracao
+            ),
+            "comentarioStats" to mapOf(
+                "totalComentarios" to comentarioStats.totalComentarios,
+                "totalReplies" to comentarioStats.totalReplies,
+                "comentariosHoje" to comentarioStats.comentariosHoje,
+                "usuariosAtivos" to comentarioStats.usuariosAtivos
+            ),
+            "isPublico" to isPublico,
+            "isVerificado" to isVerificado,
+            "tags" to tags
+        )
+    }
+    
+    companion object {
+        /**
+         * Cria PostagemFeed a partir de um Map do Firebase
+         */
+        fun fromMap(map: Map<String, Any?>): PostagemFeed {
+            @Suppress("UNCHECKED_CAST")
+            val usuarioMap = map["usuario"] as? Map<String, Any?> ?: emptyMap()
+            
+            val usuario = UsuarioPostagem(
+                id = usuarioMap["id"] as? String ?: "",
+                nome = usuarioMap["nome"] as? String ?: "",
+                nomeExibicao = usuarioMap["nomeExibicao"] as? String ?: "",
+                avatarUrl = usuarioMap["avatarUrl"] as? String ?: "",
+                isVerificado = usuarioMap["isVerificado"] as? Boolean ?: false,
+                nivel = try {
+                    NivelUsuario.valueOf(usuarioMap["nivel"] as? String ?: "INICIANTE")
+                } catch (e: Exception) {
+                    NivelUsuario.INICIANTE
+                },
+                localizacao = usuarioMap["localizacao"] as? String ?: "",
+                biografia = usuarioMap["biografia"] as? String ?: "",
+                dataRegistro = (usuarioMap["dataRegistro"] as? Number)?.toLong() ?: 0L,
+                totalRegistros = (usuarioMap["totalRegistros"] as? Number)?.toInt() ?: 0,
+                totalCurtidas = (usuarioMap["totalCurtidas"] as? Number)?.toInt() ?: 0
+            )
+            
+            @Suppress("UNCHECKED_CAST")
+            val detalhesPlantaMap = map["detalhesPlanta"] as? Map<String, Any?>
+            val detalhesPlanta = detalhesPlantaMap?.let {
+                DetalhesPlanta(
+                    nomeComum = it["nomeComum"] as? String ?: "",
+                    nomeCientifico = it["nomeCientifico"] as? String ?: "",
+                    familia = it["familia"] as? String ?: "",
+                    altura = it["altura"] as? String ?: "",
+                    status = try {
+                        StatusPlanta.valueOf(it["status"] as? String ?: "SAUDAVEL")
+                    } catch (e: Exception) {
+                        StatusPlanta.SAUDAVEL
+                    },
+                    estagio = try {
+                        EstagioPlanta.valueOf(it["estagio"] as? String ?: "ADULTO")
+                    } catch (e: Exception) {
+                        EstagioPlanta.ADULTO
+                    },
+                    cuidadosEspeciais = (it["cuidadosEspeciais"] as? List<*>)?.mapNotNull { c -> c as? String } ?: emptyList()
+                )
+            }
+            
+            @Suppress("UNCHECKED_CAST")
+            val detalhesInsetoMap = map["detalhesInseto"] as? Map<String, Any?>
+            val detalhesInseto = detalhesInsetoMap?.let {
+                DetalhesInseto(
+                    nomeComum = it["nomeComum"] as? String ?: "",
+                    nomeCientifico = it["nomeCientifico"] as? String ?: "",
+                    familia = it["familia"] as? String ?: "",
+                    tamanho = it["tamanho"] as? String ?: "",
+                    tipo = try {
+                        TipoInseto.valueOf(it["tipo"] as? String ?: "NEUTRO")
+                    } catch (e: Exception) {
+                        TipoInseto.NEUTRO
+                    },
+                    habitat = it["habitat"] as? String ?: "",
+                    comportamento = it["comportamento"] as? String ?: ""
+                )
+            }
+            
+            @Suppress("UNCHECKED_CAST")
+            val interacoesMap = map["interacoes"] as? Map<String, Any?> ?: emptyMap()
+            val interacoes = InteracoesPostagem(
+                curtidas = (interacoesMap["curtidas"] as? Number)?.toInt() ?: 0,
+                comentarios = (interacoesMap["comentarios"] as? Number)?.toInt() ?: 0,
+                compartilhamentos = (interacoesMap["compartilhamentos"] as? Number)?.toInt() ?: 0,
+                visualizacoes = (interacoesMap["visualizacoes"] as? Number)?.toInt() ?: 0,
+                curtidoPeloUsuario = interacoesMap["curtidoPeloUsuario"] as? Boolean ?: false,
+                salvosPeloUsuario = interacoesMap["salvosPeloUsuario"] as? Boolean ?: false,
+                ultimaInteracao = (interacoesMap["ultimaInteracao"] as? Number)?.toLong() ?: 0L
+            )
+            
+            @Suppress("UNCHECKED_CAST")
+            val comentarioStatsMap = map["comentarioStats"] as? Map<String, Any?> ?: emptyMap()
+            val comentarioStats = ComentarioStats(
+                totalComentarios = (comentarioStatsMap["totalComentarios"] as? Number)?.toInt() ?: 0,
+                totalReplies = (comentarioStatsMap["totalReplies"] as? Number)?.toInt() ?: 0,
+                comentariosHoje = (comentarioStatsMap["comentariosHoje"] as? Number)?.toInt() ?: 0,
+                usuariosAtivos = (comentarioStatsMap["usuariosAtivos"] as? Number)?.toInt() ?: 0
+            )
+            
+            return PostagemFeed(
+                id = map["id"] as? String ?: "",
+                tipo = try {
+                    TipoPostagem.valueOf(map["tipo"] as? String ?: "PLANTA")
+                } catch (e: Exception) {
+                    TipoPostagem.PLANTA
+                },
+                usuario = usuario,
+                titulo = map["titulo"] as? String ?: "",
+                descricao = map["descricao"] as? String ?: "",
+                imageUrl = map["imageUrl"] as? String ?: "",
+                localizacao = map["localizacao"] as? String ?: "",
+                dataPostagem = (map["dataPostagem"] as? Number)?.toLong() ?: System.currentTimeMillis(),
+                detalhesPlanta = detalhesPlanta,
+                detalhesInseto = detalhesInseto,
+                interacoes = interacoes,
+                comentarioStats = comentarioStats,
+                isPublico = map["isPublico"] as? Boolean ?: true,
+                isVerificado = map["isVerificado"] as? Boolean ?: false,
+                tags = (map["tags"] as? List<*>)?.mapNotNull { t -> t as? String } ?: emptyList()
+            )
+        }
+    }
 }
 
 /**

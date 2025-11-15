@@ -138,6 +138,12 @@ class FeedFragment : Fragment() {
         // Botões de refresh nos estados vazios
         binding.btnRefreshFeed.setOnClickListener { viewModel.refreshFeed() }
         binding.btnRetry.setOnClickListener { viewModel.refreshFeed() }
+        
+        // Botão flutuante para abrir IA
+        binding.fabAi.setOnClickListener {
+            val intent = android.content.Intent(requireContext(), com.ifpr.androidapptemplate.ui.ai.AiLogicActivity::class.java)
+            startActivity(intent)
+        }
     }
     
     private fun observeViewModel() {

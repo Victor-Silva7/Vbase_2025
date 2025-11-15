@@ -67,4 +67,7 @@
     <color name="secondary_green">#81C784</color>
     <color name="sick_color">#FF5722</color>
     <color name="neutral_color">#2196F3</color>
+    
+    <!-- Cor para fundo claro de stats -->
+    <color name="light_background">#F5F5F5</color>
 </resources>

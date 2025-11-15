@@ -81,6 +81,11 @@ class FirebaseDatabaseService private constructor() {
         return try {
             val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
             
+            android.util.Log.d("FirebaseDB", "💾 saveInsect() chamado")
+            android.util.Log.d("FirebaseDB", "💾 userId: $userId")
+            android.util.Log.d("FirebaseDB", "💾 inseto.id: ${inseto.id}")
+            android.util.Log.d("FirebaseDB", "💾 inseto.nome: ${inseto.nome}")
+            
             // Update insect with current user info
             val updatedInseto = inseto.copy(
                 userId = userId,
@@ -88,11 +93,18 @@ class FirebaseDatabaseService private constructor() {
                 timestamp = System.currentTimeMillis()
             )
             
+            android.util.Log.d("FirebaseDB", "💾 updatedInseto.userId: ${updatedInseto.userId}")
+            android.util.Log.d("FirebaseDB", "💾 updatedInseto.userName: ${updatedInseto.userName}")
+            
             val insectData = updatedInseto.toFirebaseMap()
+            
+            android.util.Log.d("FirebaseDB", "💾 Enviando para: usuarios/$userId/insetos/${inseto.id}")
             
             // Save to user's personal collection
             val userInsectsRef = usuariosRef.child(userId).child("insetos")
             userInsectsRef.child(inseto.id).setValue(insectData).await()
+            
+            android.util.Log.d("FirebaseDB", "✅ Inseto salvo com sucesso no Firebase!")
             
             // Save to public collection for community features
             if (inseto.visibilidade == VisibilidadeRegistro.PUBLICO) {
@@ -105,9 +117,11 @@ class FirebaseDatabaseService private constructor() {
             // Update global statistics
             updateGlobalStatistics("insetos", incrementBy = 1)
             
+            android.util.Log.d("FirebaseDB", "✅ saveInsect() completo!")
             Result.success(inseto.id)
             
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseDB", "❌ Erro em saveInsect: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -445,14 +459,18 @@ class FirebaseDatabaseService private constructor() {
      * Get current authenticated user ID
      */
     fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
+        val uid = auth.currentUser?.uid
+        android.util.Log.d("FirebaseDB", "🔑 getCurrentUserId() -> $uid (email: ${auth.currentUser?.email})")
+        return uid
     }
     
     /**
      * Get current authenticated user name
      */
     fun getCurrentUserName(): String? {
-        return auth.currentUser?.displayName
+        val name = auth.currentUser?.displayName
+        android.util.Log.d("FirebaseDB", "👤 getCurrentUserName() -> $name")
+        return name
     }
     
     /**
@@ -549,5 +567,95 @@ class FirebaseDatabaseService private constructor() {
         }
         
         ref.removeEventListener(listener)
+    }
+    
+    /**
+     * Save post to Postagens collection (public feed)
+     */
+    suspend fun savePostagem(postagem: PostagemFeed): Result<String> {
+        return try {
+            val postagensRef = database.reference.child(FirebaseConfig.DatabasePaths.POSTAGENS)
+            val postagemData = postagem.toMap()
+            
+            postagensRef.child(postagem.id).setValue(postagemData).await()
+            
+            Log.d("FirebaseDB", "Postagem salva com sucesso: ${postagem.id}")
+            Result.success(postagem.id)
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao salvar postagem: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get all postagens from feed
+     */
+    suspend fun getAllPostagens(): Result<List<PostagemFeed>> {
+        return try {
+            val postagensRef = database.reference.child(FirebaseConfig.DatabasePaths.POSTAGENS)
+            val snapshot = postagensRef.get().await()
+            
+            val postagens = mutableListOf<PostagemFeed>()
+            snapshot.children.forEach { childSnapshot ->
+                try {
+                    val postagemData = childSnapshot.value as? Map<String, Any?> ?: return@forEach
+                    val postagem = PostagemFeed.fromMap(postagemData)
+                    postagens.add(postagem)
+                } catch (e: Exception) {
+                    Log.e("FirebaseDB", "Erro ao desserializar postagem: ${e.message}")
+                }
+            }
+            
+            // Sort by date (most recent first)
+            val sorted = postagens.sortedByDescending { it.dataPostagem }
+            Result.success(sorted)
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao carregar postagens: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Listen to all postagens in real-time
+     */
+    fun listenToAllPostagens(callback: (List<PostagemFeed>) -> Unit): ValueEventListener? {
+        return try {
+            val postagensRef = database.reference.child(FirebaseConfig.DatabasePaths.POSTAGENS)
+            
+            val listener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val postagens = mutableListOf<PostagemFeed>()
+                    var errorCount = 0
+                    
+                    snapshot.children.forEach { childSnapshot ->
+                        try {
+                            val postagemData = childSnapshot.value as? Map<String, Any?> ?: return@forEach
+                            val postagem = PostagemFeed.fromMap(postagemData)
+                            postagens.add(postagem)
+                        } catch (e: Exception) {
+                            errorCount++
+                            Log.e("FirebaseDB", "Erro ao desserializar postagem: ${e.message}")
+                        }
+                    }
+                    
+                    val sorted = postagens.sortedByDescending { it.dataPostagem }
+                    Log.d("FirebaseDB", "Carregadas ${sorted.size} postagens (${errorCount} erros)")
+                    callback(sorted)
+                }
+                
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("FirebaseDB", "Listener cancelado para postagens: ${error.message}")
+                }
+            }
+            
+            postagensRef.addValueEventListener(listener)
+            listener
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao configurar listener de postagens: ${e.message}", e)
+            null
+        }
     }
 }

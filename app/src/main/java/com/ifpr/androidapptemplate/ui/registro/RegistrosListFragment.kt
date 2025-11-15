@@ -256,28 +256,37 @@ class RegistrosListFragment : Fragment() {
      * Observa mudanças no ViewModel
      */
     private fun observeViewModel() {
-        // Observe combined registrations with filters
-        sharedViewModel.filteredCombinedRegistrations.observe(viewLifecycleOwner) { registrations ->
-            updateRegistrationsList(registrations)
-        }
-        
-        // Observe loading state
-        sharedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-            binding.swipeRefreshLayout.isRefreshing = isLoading
-        }
-        
-        // Observe error messages
-        sharedViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
-            if (errorMessage.isNotEmpty()) {
-                showError(errorMessage)
-                sharedViewModel.clearError()
+        try {
+            // Observe combined registrations with filters
+            sharedViewModel.filteredCombinedRegistrations.observe(viewLifecycleOwner) { registrations ->
+                if (registrations != null) {
+                    updateRegistrationsList(registrations)
+                } else {
+                    showEmptyState()
+                }
             }
-        }
-        
-        // Observe current filter
-        sharedViewModel.currentFilter.observe(viewLifecycleOwner) { filter ->
-            updateEmptyStateForFilter(filter)
+            
+            // Observe loading state
+            sharedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+                binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+                binding.swipeRefreshLayout.isRefreshing = isLoading
+            }
+            
+            // Observe error messages
+            sharedViewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+                if (errorMessage.isNotEmpty()) {
+                    showError(errorMessage)
+                    sharedViewModel.clearError()
+                }
+            }
+            
+            // Observe current filter
+            sharedViewModel.currentFilter.observe(viewLifecycleOwner) { filter ->
+                updateEmptyStateForFilter(filter)
+            }
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "Erro em observeViewModel: ${e.message}", e)
+            showError("Erro ao observar dados: ${e.message}")
         }
     }
 
@@ -301,13 +310,21 @@ class RegistrosListFragment : Fragment() {
      * Atualiza a lista de registros
      */
     private fun updateRegistrationsList(registrations: List<RegistrationItem>) {
-        registrosAdapter.submitList(registrations)
-        
-        // Show/hide empty state
-        if (registrations.isEmpty()) {
-            showEmptyState()
-        } else {
-            hideEmptyState()
+        try {
+            if (!::registrosAdapter.isInitialized) {
+                Log.w("RegistrosListFragment", "Adapter não inicializado")
+                return
+            }
+            registrosAdapter.submitList(registrations)
+            
+            // Show/hide empty state
+            if (registrations.isEmpty()) {
+                showEmptyState()
+            } else {
+                hideEmptyState()
+            }
+        } catch (e: Exception) {
+            Log.e("RegistrosListFragment", "Erro ao atualizar lista: ${e.message}", e)
         }
     }
     

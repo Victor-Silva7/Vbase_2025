@@ -11,6 +11,9 @@ import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Planta
 import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
+import com.ifpr.androidapptemplate.data.model.PostagemFeed
+import com.ifpr.androidapptemplate.data.model.TipoPostagem
+import com.ifpr.androidapptemplate.data.model.UsuarioPostagem
 import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
@@ -228,9 +231,16 @@ class RegistroPlantaViewModel : ViewModel() {
         // Use coroutines for async database operations
         viewModelScope.launch {
             try {
+                android.util.Log.d("RegistroPlantaVM", "🔥 SALVANDO PLANTA: ${registration.id}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 USER ID: ${registration.userId}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 USER NAME: ${registration.userName}")
+                
                 val result = databaseService.savePlant(registration)
                 
                 result.onSuccess { plantId ->
+                    // Criar postagem após salvar o registro
+                    criarPostagemDoRegistro(registration)
+                    
                     // Force refresh repository to load newly saved registration
                     repository.getUserPlants(forceRefresh = true)
                     _isLoading.value = false
@@ -244,6 +254,49 @@ class RegistroPlantaViewModel : ViewModel() {
             } catch (e: Exception) {
                 _isLoading.value = false
                 _errorMessage.value = "Erro inesperado: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Cria uma PostagemFeed a partir de um registro de Planta
+     * A postagem é automaticamente compartilhada no feed público
+     */
+    private fun criarPostagemDoRegistro(registration: Planta) {
+        viewModelScope.launch {
+            try {
+                val usuario = UsuarioPostagem(
+                    id = registration.userId,
+                    nome = registration.userName,
+                    nomeExibicao = registration.userName,
+                    avatarUrl = "", // TODO: Buscar avatar do usuário se disponível
+                    isVerificado = false,
+                    totalRegistros = 0,
+                    totalCurtidas = 0
+                )
+                
+                val postagem = PostagemFeed(
+                    id = registration.id, // Usar mesmo ID para rastreamento
+                    tipo = TipoPostagem.PLANTA,
+                    usuario = usuario,
+                    titulo = registration.nome,
+                    descricao = registration.observacao,
+                    imageUrl = registration.imagens.firstOrNull() ?: "",
+                    localizacao = registration.local,
+                    dataPostagem = registration.timestamp
+                )
+                
+                // Salvar postagem no feed público
+                val result = databaseService.savePostagem(postagem)
+                
+                result.onSuccess {
+                    android.util.Log.d("RegistroPlantaVM", "Postagem criada com sucesso: ${postagem.id}")
+                }.onFailure { exception ->
+                    android.util.Log.e("RegistroPlantaVM", "Erro ao criar postagem", exception)
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("RegistroPlantaVM", "Erro ao criar postagem", e)
             }
         }
     }

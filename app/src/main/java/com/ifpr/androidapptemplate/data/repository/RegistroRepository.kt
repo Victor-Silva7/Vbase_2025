@@ -104,8 +104,10 @@ class RegistroRepository private constructor() {
     fun getUserPlants(userId: String? = null, forceRefresh: Boolean = false) {
         if (forceRefresh || _userPlants.value.isNullOrEmpty()) {
             repositoryScope.launch {
+                android.util.Log.d("RegistroRepository", "🔄 Buscando plantas... forceRefresh=$forceRefresh")
                 val result = databaseService.getUserPlants(userId)
                 result.onSuccess { plantas ->
+                    android.util.Log.d("RegistroRepository", "✅ Plantas carregadas: ${plantas.size}")
                     _userPlants.postValue(plantas)
                     // Apply current search filter if any
                     if (currentPlantQuery.isNotEmpty()) {
@@ -113,6 +115,8 @@ class RegistroRepository private constructor() {
                     } else {
                         _filteredPlants.postValue(plantas)
                     }
+                }.onFailure { exception ->
+                    android.util.Log.e("RegistroRepository", "❌ Erro ao carregar plantas: ${exception.message}", exception)
                 }
             }
         }
@@ -124,8 +128,10 @@ class RegistroRepository private constructor() {
     fun getUserInsects(userId: String? = null, forceRefresh: Boolean = false) {
         if (forceRefresh || _userInsects.value.isNullOrEmpty()) {
             repositoryScope.launch {
+                android.util.Log.d("RegistroRepository", "🔄 Buscando insetos... forceRefresh=$forceRefresh")
                 val result = databaseService.getUserInsects(userId)
                 result.onSuccess { insetos ->
+                    android.util.Log.d("RegistroRepository", "✅ Insetos carregados: ${insetos.size}")
                     _userInsects.postValue(insetos)
                     // Apply current search filter if any
                     if (currentInsectQuery.isNotEmpty()) {
@@ -133,6 +139,8 @@ class RegistroRepository private constructor() {
                     } else {
                         _filteredInsects.postValue(insetos)
                     }
+                }.onFailure { exception ->
+                    android.util.Log.e("RegistroRepository", "❌ Erro ao carregar insetos: ${exception.message}", exception)
                 }
             }
         }

@@ -35,7 +35,7 @@
             android:layout_marginTop="16dp"
             android:hint="Nome do Inseto"
             app:boxStrokeColor="#029e5a"
-            app:hintTextColor="#1a1a1a"
+            app:hintTextColor="#9E9E9E"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/icon_insect_header">
@@ -45,8 +45,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
-                android:textColor="#1a1a1a"
-                android:textColorHint="#1a1a1a"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9E9E9E"
                 android:maxLength="50" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:hint="Data do Registro"
             app:boxStrokeColor="#029e5a"
-            app:hintTextColor="#1a1a1a"
+            app:hintTextColor="#9E9E9E"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_calendar"
             app:endIconTint="#029e5a"
@@ -73,8 +73,8 @@
                 android:inputType="none"
                 android:focusable="false"
                 android:clickable="true"
-                android:textColor="#1a1a1a"
-                android:textColorHint="#1a1a1a" />
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9E9E9E" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Local Input -->
@@ -86,7 +86,7 @@
             android:layout_marginTop="16dp"
             android:hint="Local (Cidade)"
             app:boxStrokeColor="#029e5a"
-            app:hintTextColor="#1a1a1a"
+            app:hintTextColor="#9E9E9E"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/input_layout_data">
@@ -96,8 +96,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
-                android:textColor="#1a1a1a"
-                android:textColorHint="#1a1a1a"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9E9E9E"
                 android:maxLength="30" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -128,7 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0/5"
-                android:textColor="#1a1a1a"
+                android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:background="@drawable/counter_background"
                 android:padding="8dp" />
@@ -202,7 +202,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/category_tooltip_hint"
-            android:textColor="#1a1a1a"
+            android:textColor="#9E9E9E"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text_categoria_title" />
@@ -228,11 +228,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="#262626"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:strokeColor="@color/transparent"
-                app:strokeWidth="2dp">
+                app:strokeColor="#333333"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -264,7 +264,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Benéfico"
-                        android:textColor="#1a1a1a"
+                        android:textColor="#FFFFFF"
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -281,11 +281,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="#262626"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:strokeColor="@color/transparent"
-                app:strokeWidth="2dp">
+                app:strokeColor="#333333"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -317,7 +317,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Neutro"
-                        android:textColor="#1a1a1a"
+                        android:textColor="#FFFFFF"
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -333,11 +333,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="#262626"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
-                app:strokeColor="@color/transparent"
-                app:strokeWidth="2dp">
+                app:strokeColor="#333333"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -369,7 +369,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Praga"
-                        android:textColor="#1a1a1a"
+                        android:textColor="#FFFFFF"
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -385,7 +385,7 @@
             android:layout_marginTop="32dp"
             android:hint="Observação"
             app:boxStrokeColor="#029e5a"
-            app:hintTextColor="#1a1a1a"
+            app:hintTextColor="#9E9E9E"
             app:counterEnabled="true"
             app:counterMaxLength="300"
             app:layout_constraintEnd_toEndOf="parent"
@@ -402,8 +402,8 @@
                 android:minLines="4"
                 android:imeOptions="actionDone"
                 android:scrollbars="vertical"
-                android:textColor="#1a1a1a"
-                android:textColorHint="#1a1a1a"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#9E9E9E"
                 android:maxLength="300"
                 android:gravity="top" />
         </com.google.android.material.textfield.TextInputLayout>

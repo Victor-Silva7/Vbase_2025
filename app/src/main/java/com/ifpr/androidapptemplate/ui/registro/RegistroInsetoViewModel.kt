@@ -14,6 +14,9 @@ import com.ifpr.androidapptemplate.data.firebase.FirebaseStorageManager
 import com.ifpr.androidapptemplate.data.firebase.FirebaseDatabaseService
 import com.ifpr.androidapptemplate.data.model.Inseto
 import com.ifpr.androidapptemplate.data.model.InsectCategory
+import com.ifpr.androidapptemplate.data.model.PostagemFeed
+import com.ifpr.androidapptemplate.data.model.TipoPostagem
+import com.ifpr.androidapptemplate.data.model.UsuarioPostagem
 import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
@@ -196,9 +199,16 @@ class RegistroInsetoViewModel : ViewModel() {
         // Use coroutines for async database operations
         viewModelScope.launch {
             try {
+                android.util.Log.d("RegistroInsetoVM", "🔥 SALVANDO INSETO: ${registration.id}")
+                android.util.Log.d("RegistroInsetoVM", "🔥 USER ID: ${registration.userId}")
+                android.util.Log.d("RegistroInsetoVM", "🔥 USER NAME: ${registration.userName}")
+                
                 val result = databaseService.saveInsect(registration)
                 
                 result.onSuccess { insectId ->
+                    // Criar postagem após salvar o registro
+                    criarPostagemDoRegistro(registration)
+                    
                     // Force refresh repository to load newly saved registration
                     repository.getUserInsects(forceRefresh = true)
                     _isLoading.value = false
@@ -212,6 +222,49 @@ class RegistroInsetoViewModel : ViewModel() {
             } catch (e: Exception) {
                 _isLoading.value = false
                 _errorMessage.value = "Erro inesperado: ${e.message}"
+            }
+        }
+    }
+    
+    /**
+     * Cria uma PostagemFeed a partir de um registro de Inseto
+     * A postagem é automaticamente compartilhada no feed público
+     */
+    private fun criarPostagemDoRegistro(registration: Inseto) {
+        viewModelScope.launch {
+            try {
+                val usuario = UsuarioPostagem(
+                    id = registration.userId,
+                    nome = registration.userName,
+                    nomeExibicao = registration.userName,
+                    avatarUrl = "", // TODO: Buscar avatar do usuário se disponível
+                    isVerificado = false,
+                    totalRegistros = 0,
+                    totalCurtidas = 0
+                )
+                
+                val postagem = PostagemFeed(
+                    id = registration.id, // Usar mesmo ID para rastreamento
+                    tipo = TipoPostagem.INSETO,
+                    usuario = usuario,
+                    titulo = registration.nome,
+                    descricao = registration.observacao,
+                    imageUrl = registration.imagens.firstOrNull() ?: "",
+                    localizacao = registration.local,
+                    dataPostagem = registration.timestamp
+                )
+                
+                // Salvar postagem no feed público
+                val result = databaseService.savePostagem(postagem)
+                
+                result.onSuccess {
+                    android.util.Log.d("RegistroInsetoVM", "Postagem criada com sucesso: ${postagem.id}")
+                }.onFailure { exception ->
+                    android.util.Log.e("RegistroInsetoVM", "Erro ao criar postagem", exception)
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("RegistroInsetoVM", "Erro ao criar postagem", e)
             }
         }
     }

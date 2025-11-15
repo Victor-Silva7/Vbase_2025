@@ -47,6 +47,9 @@ class LoginActivity : AppCompatActivity() {
 
         // Inicializa o Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance()
+        
+        // Verificar se usuário já está logado
+        checkUserLoggedIn()
 
         emailEditText = findViewById(R.id.edit_text_email)
         passwordEditText = findViewById(R.id.edit_text_password)
@@ -188,5 +191,20 @@ class LoginActivity : AppCompatActivity() {
                     updateUI(null)
                 }
             }
+    }
+
+    /**
+     * Verifica se há um usuário já logado no Firebase
+     * Se houver, navega direto para MainActivity
+     */
+    private fun checkUserLoggedIn() {
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser != null) {
+            // Usuário já está logado, ir direto para MainActivity
+            Log.d(TAG, "Usuário já logado: ${currentUser.email}")
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 }

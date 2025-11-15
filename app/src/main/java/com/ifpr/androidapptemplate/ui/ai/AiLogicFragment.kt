@@ -1,6 +1,8 @@
 package com.ifpr.androidapptemplate.ui.ai
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +15,6 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.drawToBitmap
 import com.bumptech.glide.Glide
 import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
@@ -22,6 +23,7 @@ import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.content
 import com.ifpr.androidapptemplate.R
 import kotlinx.coroutines.launch
+import java.io.InputStream
 
 class AiLogicFragment : Fragment() {
 
@@ -46,7 +48,7 @@ class AiLogicFragment : Fragment() {
         generateButton = view.findViewById(R.id.btn_generate)
         
         model = Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel("gemini-2.0-flash")
+            .generativeModel("gemini-2.5-flash")
             
         // Vincule o botão e configure o seletor de imagem (adicione logo ACIMA de generateButton.setOnClickListener):
         imageButton = view.findViewById(R.id.btn_select_image)
@@ -69,19 +71,20 @@ class AiLogicFragment : Fragment() {
         // Atualize generateButton.setOnClickListener, substitua pela implementação:
         generateButton.setOnClickListener {
             val prompt = promptInput.text.toString().trim()
-            if (prompt.isNotEmpty()) {
+            if (prompt.isNotEmpty() && imageUri != null) {
                 resultText.text = "Aguardando resposta..."
-                val drawable = itemImageView.drawable
-                if (drawable != null) {
-                    try {
-                        val bitmap = itemImageView.drawToBitmap()
+                try {
+                    val bitmap = uriToBitmap(imageUri!!)
+                    if (bitmap != null) {
                         generateFromPrompt(prompt, bitmap)
-                    } catch (e: Exception) {
-                        resultText.text = "Erro ao processar imagem: ${e.message}"
+                    } else {
+                        resultText.text = "Erro ao carregar a imagem."
                     }
-                } else {
-                    resultText.text = "Selecione uma imagem."
+                } catch (e: Exception) {
+                    resultText.text = "Erro ao processar imagem: ${e.message}"
                 }
+            } else if (imageUri == null) {
+                resultText.text = "Selecione uma imagem."
             } else {
                 resultText.text = "Digite um prompt para continuar."
             }
@@ -104,6 +107,18 @@ class AiLogicFragment : Fragment() {
             } catch (e: Exception) {
                 resultText.text = "Erro ao gerar resposta: ${e.message}"
             }
+        }
+    }
+
+    // Função para converter URI em Bitmap
+    private fun uriToBitmap(uri: Uri): Bitmap? {
+        return try {
+            val inputStream: InputStream? = requireContext().contentResolver.openInputStream(uri)
+            inputStream?.use { stream ->
+                BitmapFactory.decodeStream(stream)
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }
