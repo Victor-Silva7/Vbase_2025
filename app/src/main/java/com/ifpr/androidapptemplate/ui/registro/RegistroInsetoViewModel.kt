@@ -20,6 +20,8 @@ import com.ifpr.androidapptemplate.data.model.UsuarioPostagem
 import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,11 +46,15 @@ class RegistroInsetoViewModel : ViewModel() {
     val errorMessage: LiveData<String> = _errorMessage
     
     private var currentPhotoPath: String? = null
+    private var imagePickerManager: ImagePickerManager? = null
     
     // Firebase references
     private val database = FirebaseConfig.getDatabase()
     private val storageManager = FirebaseConfig.getStorageManager()
     private val databaseService = FirebaseConfig.getDatabaseService()
+    
+    // Serviço simplificado de rede social
+    private val socialService = com.ifpr.androidapptemplate.data.firebase.SimpleSocialService.getInstance()
     private val imageUploadManager = ImageUploadManager.getInstance()
     private val repository = RegistroRepository.getInstance()
     
@@ -56,20 +62,30 @@ class RegistroInsetoViewModel : ViewModel() {
         this.context = context
     }
     
+    fun setImagePickerManager(manager: ImagePickerManager) {
+        imagePickerManager = manager
+    }
+    
     fun selectCategory(category: InsectCategory) {
         _selectedCategory.value = category
     }
     
     fun addImageFromCamera() {
-        currentPhotoPath?.let { path ->
-            val file = File(path)
-            if (file.exists()) {
-                val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-                addImageToList(uri)
+        val uri = imagePickerManager?.getCurrentPhotoUri()
+        uri?.let {
+            addImageToList(it)
+        } ?: run {
+            // Fallback to old method
+            currentPhotoPath?.let { path ->
+                val file = File(path)
+                if (file.exists()) {
+                    val fallbackUri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        file
+                    )
+                    addImageToList(fallbackUri)
+                }
             }
         }
     }
@@ -174,54 +190,105 @@ class RegistroInsetoViewModel : ViewModel() {
         
         // Upload images first, then save registration
         val images = _selectedImages.value ?: mutableListOf()
+        android.util.Log.d("RegistroInsetoVM", "📸 Número de imagens: ${images.size}")
+        
         if (images.isNotEmpty()) {
+            android.util.Log.d("RegistroInsetoVM", "📤 Iniciando upload de ${images.size} imagens...")
             imageUploadManager.uploadInsectImages(
                 context = context,
                 insectId = registro.id,
                 imageUris = images,
                 onSuccess = { imageIds ->
-                    // Save registration with image IDs from Base64 upload
+                    android.util.Log.d("RegistroInsetoVM", "✅ Upload concluído! ${imageIds.size} imagens salvas")
+                    // NÃO salvar os IDs no registro - as imagens ficam em nó separado
+                    // Mas passar os IDs para controle interno
                     val updatedRegistro = registro.copy(imagens = imageIds)
-                    saveRegistrationToDatabase(updatedRegistro)
+                    saveRegistrationToDatabase(updatedRegistro, hasUploadedImages = true)
                 },
                 onFailure = { exception ->
-                    _isLoading.value = false
-                    _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                    android.util.Log.e("RegistroInsetoVM", "❌ ERRO no upload: ${exception.message}", exception)
+                    viewModelScope.launch(Dispatchers.Main) {
+                        _isLoading.value = false
+                        _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                    }
                 }
             )
         } else {
+            android.util.Log.d("RegistroInsetoVM", "⚠️ Nenhuma imagem selecionada, salvando sem imagens")
             // Save registration without images
-            saveRegistrationToDatabase(registro)
+            saveRegistrationToDatabase(registro, hasUploadedImages = false)
         }
     }
     
-    private fun saveRegistrationToDatabase(registration: Inseto) {
+    private fun saveRegistrationToDatabase(registration: Inseto, hasUploadedImages: Boolean = false) {
         // Use coroutines for async database operations
         viewModelScope.launch {
             try {
                 android.util.Log.d("RegistroInsetoVM", "🔥 SALVANDO INSETO: ${registration.id}")
                 android.util.Log.d("RegistroInsetoVM", "🔥 USER ID: ${registration.userId}")
                 android.util.Log.d("RegistroInsetoVM", "🔥 USER NAME: ${registration.userName}")
+                android.util.Log.d("RegistroInsetoVM", "🔥 Tem imagens: $hasUploadedImages")
+                android.util.Log.d("RegistroInsetoVM", "🔥 IDs das imagens: ${registration.imagens}")
                 
+                // ✅ CORREÇÃO: Salvar COM a lista de imagens
                 val result = databaseService.saveInsect(registration)
                 
                 result.onSuccess { insectId ->
-                    // Criar postagem após salvar o registro
-                    criarPostagemDoRegistro(registration)
+                    android.util.Log.d("RegistroInsetoVM", "✅ INSETO SALVO COM SUCESSO! ID: $insectId")
+                    
+                    // Criar postagem após salvar o registro (com try-catch)
+                    try {
+                        criarPostagemDoRegistro(registration, hasUploadedImages)
+                    } catch (e: Exception) {
+                        android.util.Log.e("RegistroInsetoVM", "⚠️ Erro ao criar postagem (não crítico): ${e.message}", e)
+                    }
                     
                     // Force refresh repository to load newly saved registration
-                    repository.getUserInsects(forceRefresh = true)
-                    _isLoading.value = false
-                    _saveSuccess.value = true
+                    try {
+                        repository.getUserInsects(forceRefresh = true)
+                    } catch (e: Exception) {
+                        android.util.Log.e("RegistroInsetoVM", "⚠️ Erro ao atualizar repositório: ${e.message}", e)
+                    }
+                    
+                    android.util.Log.d("RegistroInsetoVM", "✅ SALVAMENTO COMPLETO!")
+                    
+                    // IMPORTANTE: Garantir que o sucesso seja notificado
+                    withContext(Dispatchers.Main) {
+                        _isLoading.value = false
+                        _saveSuccess.value = true
+                    }
                     clearForm()
                 }.onFailure { exception ->
-                    _isLoading.value = false
-                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                    android.util.Log.e("RegistroInsetoVM", "❌ ERRO AO SALVAR: ${exception.message}", exception)
+                    exception.printStackTrace()
+                    
+                    // Garantir que erro seja exibido na UI thread
+                    withContext(Dispatchers.Main) {
+                        _isLoading.value = false
+                        
+                        val errorMsg = when {
+                            exception.message?.contains("auth") == true || 
+                            exception.message?.contains("authenticated") == true -> 
+                                "❌ Erro de autenticação: Faça login novamente"
+                            exception.message?.contains("permission") == true || 
+                            exception.message?.contains("denied") == true -> 
+                                "❌ Sem permissão: Verifique as regras do Firebase"
+                            exception.message?.contains("network") == true -> 
+                                "❌ Erro de conexão: Verifique sua internet"
+                            else -> 
+                                "❌ Erro ao salvar: ${exception.message}"
+                        }
+                        
+                        _errorMessage.value = errorMsg
+                    }
                 }
                 
             } catch (e: Exception) {
-                _isLoading.value = false
-                _errorMessage.value = "Erro inesperado: ${e.message}"
+                android.util.Log.e("RegistroInsetoVM", "❌ ERRO INESPERADO: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _errorMessage.value = "❌ Erro inesperado: ${e.message}"
+                }
             }
         }
     }
@@ -230,14 +297,59 @@ class RegistroInsetoViewModel : ViewModel() {
      * Cria uma PostagemFeed a partir de um registro de Inseto
      * A postagem é automaticamente compartilhada no feed público
      */
-    private fun criarPostagemDoRegistro(registration: Inseto) {
-        viewModelScope.launch {
+    private fun criarPostagemDoRegistro(registration: Inseto, hasUploadedImages: Boolean = false) {
+        // Usar GlobalScope para não cancelar quando sair da tela
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
             try {
+                // Buscar foto do usuário do Firebase Auth
+                val currentUser = FirebaseConfig.getAuth().currentUser
+                val userPhotoUrl = currentUser?.photoUrl?.toString() ?: ""
+                
+                // Buscar a primeira imagem Base64 do inseto (se houver)
+                var imageBase64 = ""
+                if (hasUploadedImages && registration.imagens.isNotEmpty()) {
+                    android.util.Log.d("RegistroInsetoVM", "🖼️ Inseto tem ${registration.imagens.size} imagens")
+                    android.util.Log.d("RegistroInsetoVM", "🖼️ Primeira imagem ID: ${registration.imagens.firstOrNull()}")
+                    android.util.Log.d("RegistroInsetoVM", "🖼️ Buscando primeira imagem do inseto no Firebase...")
+                    
+                    val realtimeManager = FirebaseConfig.getRealtimeDatabaseImageManager()
+                    
+                    // Tentar buscar a imagem com retry (máximo 3 tentativas)
+                    var tentativas = 0
+                    while (tentativas < 3 && imageBase64.isEmpty()) {
+                        if (tentativas > 0) {
+                            android.util.Log.d("RegistroInsetoVM", "⏳ Tentativa ${tentativas + 1}/3...")
+                            kotlinx.coroutines.delay(500)
+                        }
+                        
+                        android.util.Log.d("RegistroInsetoVM", "📞 CHAMANDO getFirstInsectImage(${registration.id})")
+                        val imageResult = realtimeManager.getFirstInsectImage(registration.id)
+                        android.util.Log.d("RegistroInsetoVM", "📦 Result recebido: success=${imageResult.isSuccess}, failure=${imageResult.isFailure}")
+                        
+                        imageResult.onSuccess { base64 ->
+                            android.util.Log.d("RegistroInsetoVM", "📦 onSuccess chamado: isEmpty=${base64.isEmpty()}, length=${base64.length}")
+                            if (base64.isNotEmpty()) {
+                                imageBase64 = base64
+                                android.util.Log.d("RegistroInsetoVM", "✅ Imagem Base64 recuperada (${base64.length} chars)")
+                            }
+                        }.onFailure { exception ->
+                            android.util.Log.e("RegistroInsetoVM", "⚠️ Erro na tentativa ${tentativas + 1}: ${exception.message}")
+                        }
+                        tentativas++
+                    }
+                    
+                    if (imageBase64.isEmpty()) {
+                        android.util.Log.e("RegistroInsetoVM", "❌ Não foi possível recuperar imagem após 3 tentativas")
+                    }
+                } else {
+                    android.util.Log.d("RegistroInsetoVM", "⚠️ Registro sem imagens (hasUploadedImages=$hasUploadedImages)")
+                }
+                
                 val usuario = UsuarioPostagem(
                     id = registration.userId,
                     nome = registration.userName,
                     nomeExibicao = registration.userName,
-                    avatarUrl = "", // TODO: Buscar avatar do usuário se disponível
+                    avatarUrl = userPhotoUrl,
                     isVerificado = false,
                     totalRegistros = 0,
                     totalCurtidas = 0
@@ -249,18 +361,18 @@ class RegistroInsetoViewModel : ViewModel() {
                     usuario = usuario,
                     titulo = registration.nome,
                     descricao = registration.observacao,
-                    imageUrl = registration.imagens.firstOrNull() ?: "",
-                    localizacao = registration.local,
+                    imageUrl = imageBase64, // Usar Base64 em vez de ID
+                    localizacao = "", // Localização removida para privacidade
                     dataPostagem = registration.timestamp
                 )
                 
-                // Salvar postagem no feed público
-                val result = databaseService.savePostagem(postagem)
+                // Salvar postagem no feed público usando serviço simplificado
+                val result = socialService.salvarPostagem(postagem)
                 
                 result.onSuccess {
-                    android.util.Log.d("RegistroInsetoVM", "Postagem criada com sucesso: ${postagem.id}")
+                    android.util.Log.d("RegistroInsetoVM", "✅ Postagem criada com sucesso: ${postagem.id}")
                 }.onFailure { exception ->
-                    android.util.Log.e("RegistroInsetoVM", "Erro ao criar postagem", exception)
+                    android.util.Log.e("RegistroInsetoVM", "❌ Erro ao criar postagem", exception)
                 }
                 
             } catch (e: Exception) {

@@ -44,7 +44,7 @@
                 android:id="@+id/edit_text_nome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"
+                android:inputType="textNoSuggestions"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#9E9E9E"
                 android:maxLength="50" />
@@ -95,7 +95,7 @@
                 android:id="@+id/edit_text_local"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"
+                android:inputType="textNoSuggestions"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#9E9E9E"
                 android:maxLength="30" />
@@ -396,7 +396,7 @@
                 android:id="@+id/edit_text_observacao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapSentences|textMultiLine"
+                android:inputType="textNoSuggestions|textMultiLine"
                 android:lines="4"
                 android:maxLines="6"
                 android:minLines="4"

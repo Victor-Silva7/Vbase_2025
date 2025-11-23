@@ -6,6 +6,8 @@ import com.google.firebase.database.*
 import com.ifpr.androidapptemplate.data.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Firebase Realtime Database Service for V Group - Manejo Verde
@@ -43,6 +45,9 @@ class FirebaseDatabaseService private constructor() {
         return try {
             val userId = getCurrentUserId() ?: return Result.failure(Exception("User not authenticated"))
             
+            Log.d("FirebaseDB", "💾 savePlant() - userId: $userId")
+            Log.d("FirebaseDB", "💾 savePlant() - plantId: ${planta.id}")
+            
             // Update plant with current user info
             val updatedPlanta = planta.copy(
                 userId = userId,
@@ -52,24 +57,57 @@ class FirebaseDatabaseService private constructor() {
             
             val plantData = updatedPlanta.toFirebaseMap()
             
+            Log.d("FirebaseDB", "💾 Salvando no caminho: usuarios/$userId/plantas/${planta.id}")
+            
             // Save to user's personal collection
             val userPlantsRef = usuariosRef.child(userId).child("plantas")
-            userPlantsRef.child(planta.id).setValue(plantData).await()
+            
+            try {
+                // ✅ CORRIGIDO: Salvar metadados SEM o array "imagens"
+                // O nó "imagens" será usado apenas para Base64
+                // Salvar os UUIDs separadamente em "imagensIds" para referência
+                val plantDataModified = plantData.toMutableMap()
+                val imagensIds = plantDataModified["imagens"] as? List<*> ?: emptyList<String>()
+                plantDataModified.remove("imagens")  // Remove para não conflitar com Base64
+                plantDataModified["imagensIds"] = imagensIds  // Salva UUIDs em campo separado
+                
+                userPlantsRef.child(planta.id).updateChildren(plantDataModified).await()
+                Log.d("FirebaseDB", "✅ Salvo com sucesso! imagensIds: $imagensIds")
+            } catch (saveError: Exception) {
+                Log.e("FirebaseDB", "❌ ERRO AO SALVAR: ${saveError.message}", saveError)
+                Log.e("FirebaseDB", "❌ Tipo de erro: ${saveError.javaClass.simpleName}")
+                return Result.failure(Exception("Erro ao salvar no Firebase: ${saveError.message}"))
+            }
             
             // Save to public collection for community features
             if (planta.visibilidade == VisibilidadeRegistro.PUBLICO) {
-                publicPlantasRef.child(planta.id).setValue(plantData).await()
+                try {
+                    Log.d("FirebaseDB", "💾 Salvando também em public_plantas...")
+                    publicPlantasRef.child(planta.id).setValue(plantData).await()
+                    Log.d("FirebaseDB", "✅ Salvo em public_plantas!")
+                } catch (publicError: Exception) {
+                    Log.e("FirebaseDB", "⚠️ Erro ao salvar em public (não crítico): ${publicError.message}")
+                }
             }
             
             // Update user statistics
-            updateUserPlantStatistics(userId, incrementBy = 1)
+            try {
+                updateUserPlantStatistics(userId, incrementBy = 1)
+            } catch (statsError: Exception) {
+                Log.e("FirebaseDB", "⚠️ Erro ao atualizar estatísticas (não crítico): ${statsError.message}")
+            }
             
             // Update global statistics
-            updateGlobalStatistics("plantas", incrementBy = 1)
+            try {
+                updateGlobalStatistics("plantas", incrementBy = 1)
+            } catch (globalError: Exception) {
+                Log.e("FirebaseDB", "⚠️ Erro ao atualizar stats globais (não crítico): ${globalError.message}")
+            }
             
             Result.success(planta.id)
             
         } catch (e: Exception) {
+            Log.e("FirebaseDB", "❌ ERRO GERAL: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -102,9 +140,18 @@ class FirebaseDatabaseService private constructor() {
             
             // Save to user's personal collection
             val userInsectsRef = usuariosRef.child(userId).child("insetos")
-            userInsectsRef.child(inseto.id).setValue(insectData).await()
             
-            android.util.Log.d("FirebaseDB", "✅ Inseto salvo com sucesso no Firebase!")
+            // ✅ CORRIGIDO: Salvar metadados SEM o array "imagens"
+            // O nó "imagens" será usado apenas para Base64
+            // Salvar os UUIDs separadamente em "imagensIds" para referência
+            val insectDataModified = insectData.toMutableMap()
+            val imagensIds = insectDataModified["imagens"] as? List<*> ?: emptyList<String>()
+            insectDataModified.remove("imagens")  // Remove para não conflitar com Base64
+            insectDataModified["imagensIds"] = imagensIds  // Salva UUIDs em campo separado
+            
+            userInsectsRef.child(inseto.id).updateChildren(insectDataModified).await()
+            
+            android.util.Log.d("FirebaseDB", "✅ Inseto salvo com sucesso! imagensIds: $imagensIds")
             
             // Save to public collection for community features
             if (inseto.visibilidade == VisibilidadeRegistro.PUBLICO) {
@@ -656,6 +703,172 @@ class FirebaseDatabaseService private constructor() {
         } catch (e: Exception) {
             Log.e("FirebaseDB", "Erro ao configurar listener de postagens: ${e.message}", e)
             null
+        }
+    }
+    
+    /**
+     * Curtir/descurtir uma postagem
+     */
+    suspend fun toggleCurtida(postagemId: String, userId: String): Result<Boolean> {
+        return try {
+            val postagemRef = database.reference
+                .child(FirebaseConfig.DatabasePaths.POSTAGENS)
+                .child(postagemId)
+            
+            val curtidasRef = postagemRef.child("interacoes").child("curtidas")
+            val curtidoPorRef = database.reference
+                .child("curtidas")
+                .child(postagemId)
+                .child(userId)
+            
+            // Verificar se já curtiu
+            val jaCurtiu = curtidoPorRef.get().await().exists()
+            
+            if (jaCurtiu) {
+                // Remover curtida
+                curtidoPorRef.removeValue().await()
+                
+                // Decrementar contador com suspendCoroutine
+                suspendCancellableCoroutine<Unit> { continuation ->
+                    curtidasRef.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(currentData: MutableData): Transaction.Result {
+                            val curtidas = (currentData.value as? Long) ?: 0L
+                            currentData.value = maxOf(0L, curtidas - 1)
+                            return Transaction.success(currentData)
+                        }
+                        override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+                            if (error != null) {
+                                continuation.cancel(Exception(error.message))
+                            } else {
+                                continuation.resume(Unit) {}
+                            }
+                        }
+                    })
+                }
+                
+                Result.success(false) // Descurtiu
+            } else {
+                // Adicionar curtida
+                curtidoPorRef.setValue(System.currentTimeMillis()).await()
+                
+                // Incrementar contador com suspendCoroutine
+                suspendCancellableCoroutine<Unit> { continuation ->
+                    curtidasRef.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(currentData: MutableData): Transaction.Result {
+                            val curtidas = (currentData.value as? Long) ?: 0L
+                            currentData.value = curtidas + 1
+                            return Transaction.success(currentData)
+                        }
+                        override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+                            if (error != null) {
+                                continuation.cancel(Exception(error.message))
+                            } else {
+                                continuation.resume(Unit) {}
+                            }
+                        }
+                    })
+                }
+                
+                Result.success(true) // Curtiu
+            }
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao curtir postagem: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Adicionar comentário a uma postagem
+     */
+    suspend fun adicionarComentario(
+        postagemId: String,
+        userId: String,
+        userName: String,
+        texto: String
+    ): Result<String> {
+        return try {
+            val comentariosRef = database.reference
+                .child("comentarios")
+                .child(postagemId)
+            
+            val comentarioId = comentariosRef.push().key ?: throw Exception("Erro ao gerar ID")
+            
+            val comentario = mapOf(
+                "id" to comentarioId,
+                "userId" to userId,
+                "userName" to userName,
+                "texto" to texto,
+                "timestamp" to System.currentTimeMillis(),
+                "curtidas" to 0
+            )
+            
+            comentariosRef.child(comentarioId).setValue(comentario).await()
+            
+            // Atualizar contador de comentários na postagem
+            val postagemRef = database.reference
+                .child(FirebaseConfig.DatabasePaths.POSTAGENS)
+                .child(postagemId)
+                .child("interacoes")
+                .child("comentarios")
+            
+            suspendCancellableCoroutine<Unit> { continuation ->
+                postagemRef.runTransaction(object : Transaction.Handler {
+                    override fun doTransaction(currentData: MutableData): Transaction.Result {
+                        val comentarios = (currentData.value as? Long) ?: 0L
+                        currentData.value = comentarios + 1
+                        return Transaction.success(currentData)
+                    }
+                    override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
+                        if (error != null) {
+                            continuation.cancel(Exception(error.message))
+                        } else {
+                            continuation.resume(Unit) {}
+                        }
+                    }
+                })
+            }
+            
+            Log.d("FirebaseDB", "Comentário adicionado: $comentarioId")
+            Result.success(comentarioId)
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao adicionar comentário: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Buscar comentários de uma postagem
+     */
+    suspend fun getComentarios(postagemId: String): Result<List<Map<String, Any?>>> {
+        return try {
+            val comentariosRef = database.reference
+                .child("comentarios")
+                .child(postagemId)
+            
+            val snapshot = comentariosRef.get().await()
+            
+            val comentarios = mutableListOf<Map<String, Any?>>()
+            snapshot.children.forEach { childSnapshot ->
+                try {
+                    val comentario = childSnapshot.value as? Map<String, Any?> ?: return@forEach
+                    comentarios.add(comentario)
+                } catch (e: Exception) {
+                    Log.e("FirebaseDB", "Erro ao desserializar comentário: ${e.message}")
+                }
+            }
+            
+            // Ordenar por timestamp (mais recentes primeiro)
+            val sorted = comentarios.sortedByDescending { 
+                (it["timestamp"] as? Long) ?: 0L 
+            }
+            
+            Result.success(sorted)
+            
+        } catch (e: Exception) {
+            Log.e("FirebaseDB", "Erro ao buscar comentários: ${e.message}", e)
+            Result.failure(e)
         }
     }
 }

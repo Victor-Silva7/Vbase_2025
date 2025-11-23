@@ -2,8 +2,8 @@
     <string name="app_name">V Group</string>
     <string name="title_home">Registro</string>
     <string name="title_dashboard">Postagens</string>
-    <string name="title_notifications">Usuário</string>
-    <string name="title_profile">Usuário</string>
+    <string name="title_notifications">Notificações</string>
+    <string name="title_profile">Perfil</string>
     <string name="title_itens">Itens</string>
     
     <!-- Feed de Postagens -->
@@ -19,16 +19,10 @@
     <!-- Interações das Postagens -->
     <string name="like_post">Curtir</string>
     <string name="comment_post">Comentar</string>
-    <string name="share_post">Compartilhar</string>
-    <string name="save_post">Salvar</string>
     <string name="likes_count">%d curtidas</string>
     <string name="comments_count">%d comentários</string>
-    <string name="shares_count">%d compartilhamentos</string>
     <string name="post_liked">Curtido!</string>
     <string name="post_unliked">Descurtido</string>
-    <string name="post_saved">Salvo nos favoritos!</string>
-    <string name="post_unsaved">Removido dos favoritos</string>
-    <string name="share_post_title">Compartilhar postagem</string>
     
     <!-- Informações do Usuário -->
     <string name="posted_by">Postado por</string>
@@ -116,7 +110,6 @@
     
     <!-- Strings para atividades de registro -->
     <string name="back_button">Voltar</string>
-    <string name="share_registration">Compartilhar registro</string>
     <string name="category_icon">Ícone da categoria</string>
     <string name="healthy">Saudável</string>
     <string name="registration_type">Tipo de registro</string>
@@ -153,7 +146,6 @@
     <string name="try_again">Tentar novamente</string>
     <string name="registration_image">Imagem do registro</string>
     <string name="multiple_images">Múltiplas imagens</string>
-    <string name="share">Compartilhar</string>
     
     <!-- Strings para Google Sign-In -->
     <string name="button_google_login">Entrar com Google</string>

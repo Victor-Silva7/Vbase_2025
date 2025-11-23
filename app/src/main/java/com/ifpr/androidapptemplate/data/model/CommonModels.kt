@@ -38,8 +38,6 @@ enum class VisibilidadeRegistro {
 interface BaseRegistration {
     val id: String
     val nome: String
-    val nomePopular: String
-    val nomeCientifico: String
     val data: String
     val dataTimestamp: Long
     val local: String
@@ -119,80 +117,6 @@ data class Coordenadas(
 }
 
 /**
- * Weather conditions during observation
- */
-@Parcelize
-data class ClimaObservacao(
-    val temperatura: Float = 0f,
-    val umidade: Int = 0,
-    val condicao: CondicaoClimatica = CondicaoClimatica.DESCONHECIDO,
-    val vento: String = "",
-    val precipitacao: String = "",
-    val pressaoAtmosferica: String = "",
-    val visibilidade: String = "",
-    val observacoes: String = ""
-) : Parcelable {
-    
-    /**
-     * Get temperature display string
-     */
-    fun getTemperaturaDisplay(): String {
-        return if (temperatura > 0) "${temperatura}°C" else "N/A"
-    }
-    
-    /**
-     * Get humidity display string
-     */
-    fun getUmidadeDisplay(): String {
-        return if (umidade > 0) "$umidade%" else "N/A"
-    }
-    
-    fun toMap(): Map<String, Any> {
-        return mapOf(
-            "temperatura" to temperatura,
-            "umidade" to umidade,
-            "condicao" to condicao.name,
-            "vento" to vento,
-            "precipitacao" to precipitacao,
-            "pressaoAtmosferica" to pressaoAtmosferica,
-            "visibilidade" to visibilidade,
-            "observacoes" to observacoes
-        )
-    }
-    
-    companion object {
-        fun fromMap(map: Map<String, Any?>): ClimaObservacao {
-            return ClimaObservacao(
-                temperatura = (map["temperatura"] as? Number)?.toFloat() ?: 0f,
-                umidade = (map["umidade"] as? Number)?.toInt() ?: 0,
-                condicao = CondicaoClimatica.valueOf(
-                    map["condicao"] as? String ?: CondicaoClimatica.DESCONHECIDO.name
-                ),
-                vento = map["vento"] as? String ?: "",
-                precipitacao = map["precipitacao"] as? String ?: "",
-                pressaoAtmosferica = map["pressaoAtmosferica"] as? String ?: "",
-                visibilidade = map["visibilidade"] as? String ?: "",
-                observacoes = map["observacoes"] as? String ?: ""
-            )
-        }
-    }
-}
-
-/**
- * Weather conditions enum
- */
-enum class CondicaoClimatica {
-    ENSOLARADO,
-    PARCIALMENTE_NUBLADO,
-    NUBLADO,
-    CHUVOSO,
-    TEMPESTUOSO,
-    NEBLINA,
-    VENTO_FORTE,
-    DESCONHECIDO
-}
-
-/**
  * Registration status for content moderation
  */
 enum class StatusRegistro {
@@ -259,66 +183,40 @@ enum class NivelConfianca {
 
 /**
  * Interaction statistics for social features
+ * Simplified to only likes and comments
  */
 @Parcelize
 data class EstatisticasInteracao(
-    val visualizacoes: Int = 0,
     val curtidas: Int = 0,
-    val comentarios: Int = 0,
-    val compartilhamentos: Int = 0,
-    val favoritado: Int = 0,
-    val denuncias: Int = 0,
-    val pontuacaoQualidade: Float = 0f,
-    val engajamento: Float = 0f
+    val comentarios: Int = 0
 ) : Parcelable {
-    
-    /**
-     * Calculate engagement rate
-     */
-    fun calcularEngajamento(): Float {
-        if (visualizacoes == 0) return 0f
-        val interacoes = curtidas + comentarios + compartilhamentos + favoritado
-        return (interacoes.toFloat() / visualizacoes.toFloat()) * 100
-    }
     
     /**
      * Check if content is popular
      */
     fun isPopular(): Boolean {
-        return curtidas >= 10 && engajamento >= 5.0f
+        return curtidas >= 10
     }
     
     /**
-     * Check if content needs review (high reports)
+     * Get total interactions
      */
-    fun needsReview(): Boolean {
-        return denuncias >= 3 || (denuncias > 0 && visualizacoes > 0 && (denuncias.toFloat() / visualizacoes.toFloat()) > 0.1f)
+    fun getTotalInteracoes(): Int {
+        return curtidas + comentarios
     }
     
     fun toMap(): Map<String, Any> {
         return mapOf(
-            "visualizacoes" to visualizacoes,
             "curtidas" to curtidas,
-            "comentarios" to comentarios,
-            "compartilhamentos" to compartilhamentos,
-            "favoritado" to favoritado,
-            "denuncias" to denuncias,
-            "pontuacaoQualidade" to pontuacaoQualidade,
-            "engajamento" to engajamento
+            "comentarios" to comentarios
         )
     }
     
     companion object {
         fun fromMap(map: Map<String, Any?>): EstatisticasInteracao {
             return EstatisticasInteracao(
-                visualizacoes = (map["visualizacoes"] as? Number)?.toInt() ?: 0,
                 curtidas = (map["curtidas"] as? Number)?.toInt() ?: 0,
-                comentarios = (map["comentarios"] as? Number)?.toInt() ?: 0,
-                compartilhamentos = (map["compartilhamentos"] as? Number)?.toInt() ?: 0,
-                favoritado = (map["favoritado"] as? Number)?.toInt() ?: 0,
-                denuncias = (map["denuncias"] as? Number)?.toInt() ?: 0,
-                pontuacaoQualidade = (map["pontuacaoQualidade"] as? Number)?.toFloat() ?: 0f,
-                engajamento = (map["engajamento"] as? Number)?.toFloat() ?: 0f
+                comentarios = (map["comentarios"] as? Number)?.toInt() ?: 0
             )
         }
     }
@@ -331,7 +229,6 @@ enum class TipoRegistro {
     PLANTA,
     INSETO,
     OBSERVACAO_GERAL,
-    EVENTO_CLIMATICO,
     PRATICA_SUSTENTAVEL
 }
 

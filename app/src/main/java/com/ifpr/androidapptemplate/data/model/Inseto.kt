@@ -13,8 +13,6 @@ import java.util.*
 data class Inseto(
     override val id: String = generateId(),
     override val nome: String = "",
-    override val nomePopular: String = "",
-    override val nomeCientifico: String = "",
     override val data: String = "",
     override val dataTimestamp: Long = System.currentTimeMillis(),
     override val local: String = "",
@@ -32,9 +30,6 @@ data class Inseto(
     val status: StatusRegistro = StatusRegistro.ATIVO,
     override val visibilidade: VisibilidadeRegistro = VisibilidadeRegistro.PRIVADO,
     val tags: List<String> = emptyList(),
-    val clima: ClimaObservacao? = null,
-    val caracteristicas: CaracteristicasInseto? = null,
-    val impactoObservado: ImpactoInseto? = null,
     val validacao: ValidacaoRegistro? = null,
     val estatisticas: EstatisticasInteracao = EstatisticasInteracao()
 ) : Parcelable, BaseRegistration {
@@ -54,8 +49,6 @@ data class Inseto(
             return Inseto(
                 id = map["id"] as? String ?: generateId(),
                 nome = map["nome"] as? String ?: "",
-                nomePopular = map["nomePopular"] as? String ?: "",
-                nomeCientifico = map["nomeCientifico"] as? String ?: "",
                 data = map["data"] as? String ?: "",
                 dataTimestamp = (map["dataTimestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
                 local = map["local"] as? String ?: "",
@@ -68,7 +61,7 @@ data class Inseto(
                     InsectCategory.NEUTRAL
                 },
                 observacao = map["observacao"] as? String ?: "",
-                imagens = (map["imagens"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                imagens = (map["imagensIds"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
                 thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
                 userId = map["userId"] as? String ?: "",
                 userName = map["userName"] as? String ?: "",
@@ -85,15 +78,6 @@ data class Inseto(
                     VisibilidadeRegistro.PRIVADO
                 },
                 tags = (map["tags"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                clima = (map["clima"] as? Map<String, Any?>)?.let { 
-                    ClimaObservacao.fromMap(it) 
-                },
-                caracteristicas = (map["caracteristicas"] as? Map<String, Any?>)?.let { 
-                    CaracteristicasInseto.fromMap(it) 
-                },
-                impactoObservado = (map["impactoObservado"] as? Map<String, Any?>)?.let { 
-                    ImpactoInseto.fromMap(it) 
-                },
                 validacao = (map["validacao"] as? Map<String, Any?>)?.let { 
                     ValidacaoRegistro.fromMap(it) 
                 },
@@ -111,8 +95,6 @@ data class Inseto(
         return mapOf(
             "id" to id,
             "nome" to nome,
-            "nomePopular" to nomePopular,
-            "nomeCientifico" to nomeCientifico,
             "data" to data,
             "dataTimestamp" to dataTimestamp,
             "local" to local,
@@ -130,9 +112,6 @@ data class Inseto(
             "status" to status.name,
             "visibilidade" to visibilidade.name,
             "tags" to tags,
-            "clima" to clima?.toMap(),
-            "caracteristicas" to caracteristicas?.toMap(),
-            "impactoObservado" to impactoObservado?.toMap(),
             "validacao" to validacao?.toMap(),
             "estatisticas" to estatisticas.toMap()
         )
@@ -261,8 +240,6 @@ data class Inseto(
      */
     fun getSummary(): String {
         val parts = mutableListOf<String>()
-        if (nomePopular.isNotEmpty()) parts.add(nomePopular)
-        if (nomeCientifico.isNotEmpty()) parts.add("($nomeCientifico)")
         if (local.isNotEmpty()) parts.add("em $local")
         return parts.joinToString(" ")
     }
@@ -276,108 +253,4 @@ data class Inseto(
      * Verifica se é benéfico
      */
     fun isBeneficial(): Boolean = categoria == InsectCategory.BENEFICIAL
-}
-
-
-/**
- * Insect characteristics data class
- */
-@Parcelize
-data class CaracteristicasInseto(
-    val tamanho: String = "",
-    val cor: String = "",
-    val formato: String = "",
-    val tipoAsa: String = "",
-    val tipoAntena: String = "",
-    val numeroSegmentos: String = "",
-    val habitat: String = "",
-    val comportamento: String = "",
-    val estagioCicloVida: String = "",
-    val observacoesAdicionais: String = ""
-) : Parcelable {
-    
-    fun toMap(): Map<String, Any> {
-        return mapOf(
-            "tamanho" to tamanho,
-            "cor" to cor,
-            "formato" to formato,
-            "tipoAsa" to tipoAsa,
-            "tipoAntena" to tipoAntena,
-            "numeroSegmentos" to numeroSegmentos,
-            "habitat" to habitat,
-            "comportamento" to comportamento,
-            "estagioCicloVida" to estagioCicloVida,
-            "observacoesAdicionais" to observacoesAdicionais
-        )
-    }
-    
-    companion object {
-        fun fromMap(map: Map<String, Any?>): CaracteristicasInseto {
-            return CaracteristicasInseto(
-                tamanho = map["tamanho"] as? String ?: "",
-                cor = map["cor"] as? String ?: "",
-                formato = map["formato"] as? String ?: "",
-                tipoAsa = map["tipoAsa"] as? String ?: "",
-                tipoAntena = map["tipoAntena"] as? String ?: "",
-                numeroSegmentos = map["numeroSegmentos"] as? String ?: "",
-                habitat = map["habitat"] as? String ?: "",
-                comportamento = map["comportamento"] as? String ?: "",
-                estagioCicloVida = map["estagioCicloVida"] as? String ?: "",
-                observacoesAdicionais = map["observacoesAdicionais"] as? String ?: ""
-            )
-        }
-    }
-}
-
-/**
- * Impact observed from insect (especially for pest category)
- */
-@Parcelize
-data class ImpactoInseto(
-    val tipoDano: String = "",
-    val nivelSeveridade: NivelSeveridade = NivelSeveridade.BAIXO,
-    val areaAfetada: String = "",
-    val plantasAfetadas: List<String> = emptyList(),
-    val acaoTomada: String = "",
-    val efetividadeControle: String = "",
-    val observacoes: String = ""
-) : Parcelable {
-    
-    fun toMap(): Map<String, Any> {
-        return mapOf(
-            "tipoDano" to tipoDano,
-            "nivelSeveridade" to nivelSeveridade.name,
-            "areaAfetada" to areaAfetada,
-            "plantasAfetadas" to plantasAfetadas,
-            "acaoTomada" to acaoTomada,
-            "efetividadeControle" to efetividadeControle,
-            "observacoes" to observacoes
-        )
-    }
-    
-    companion object {
-        fun fromMap(map: Map<String, Any?>): ImpactoInseto {
-            return ImpactoInseto(
-                tipoDano = map["tipoDano"] as? String ?: "",
-                nivelSeveridade = NivelSeveridade.valueOf(
-                    map["nivelSeveridade"] as? String ?: NivelSeveridade.BAIXO.name
-                ),
-                areaAfetada = map["areaAfetada"] as? String ?: "",
-                plantasAfetadas = (map["plantasAfetadas"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                acaoTomada = map["acaoTomada"] as? String ?: "",
-                efetividadeControle = map["efetividadeControle"] as? String ?: "",
-                observacoes = map["observacoes"] as? String ?: ""
-            )
-        }
-    }
-}
-
-/**
- * Severity levels for pest impact
- */
-enum class NivelSeveridade {
-    BAIXO,      // Low impact
-    MEDIO,      // Medium impact
-    ALTO,       // High impact
-    CRITICO     // Critical impact requiring immediate action
 }

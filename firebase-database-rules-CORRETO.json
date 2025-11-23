@@ -1,0 +1,76 @@
+{
+  "rules": {
+    "postagens": {
+      ".read": true,
+      ".indexOn": ["dataPostagem", "tipo", "usuario/id"],
+      "$postagemId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['id', 'tipo', 'usuario', 'titulo', 'dataPostagem'])",
+        "interacoes": {
+          "curtidas": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "comentarios": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
+      }
+    },
+    "curtidas": {
+      "$postagemId": {
+        ".read": true,
+        "$userId": {
+          ".write": "auth != null && auth.uid == $userId",
+          ".validate": "newData.isNumber()"
+        }
+      }
+    },
+    "comentarios": {
+      "$postagemId": {
+        ".read": true,
+        ".indexOn": ["timestamp"],
+        "$comentarioId": {
+          ".write": "auth != null",
+          ".validate": "newData.hasChildren(['id', 'userId', 'userName', 'conteudo', 'timestamp'])"
+        }
+      }
+    },
+    "usuarios": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId",
+        "nome": {
+          ".read": true
+        },
+        "plantas": {
+          "$plantaId": {
+            ".write": "auth != null && auth.uid == $userId",
+            ".validate": "newData.hasChild('id') && newData.hasChild('nome') && newData.hasChild('userId') && newData.hasChild('timestamp')"
+          }
+        },
+        "insetos": {
+          "$insetoId": {
+            ".write": "auth != null && auth.uid == $userId",
+            ".validate": "newData.hasChild('id') && newData.hasChild('nome') && newData.hasChild('userId') && newData.hasChild('timestamp')"
+          }
+        }
+      }
+    },
+    "public_plantas": {
+      ".read": true,
+      "$plantaId": {
+        ".write": "auth != null"
+      }
+    },
+    "public_insetos": {
+      ".read": true,
+      "$insetoId": {
+        ".write": "auth != null"
+      }
+    },
+    "estatisticas": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

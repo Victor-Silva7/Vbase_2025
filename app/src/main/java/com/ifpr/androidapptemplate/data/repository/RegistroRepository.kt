@@ -167,8 +167,6 @@ class RegistroRepository private constructor() {
                 val filteredPlants = allPlants.filter { planta ->
                     val matchesQuery = query.isEmpty() || 
                         planta.nome.contains(query, ignoreCase = true) ||
-                        planta.nomePopular.contains(query, ignoreCase = true) ||
-                        planta.nomeCientifico.contains(query, ignoreCase = true) ||
                         planta.observacao.contains(query, ignoreCase = true) ||
                         planta.local.contains(query, ignoreCase = true)
                     
@@ -213,8 +211,6 @@ class RegistroRepository private constructor() {
                 val filteredInsects = allInsects.filter { inseto ->
                     val matchesQuery = query.isEmpty() || 
                         inseto.nome.contains(query, ignoreCase = true) ||
-                        inseto.nomePopular.contains(query, ignoreCase = true) ||
-                        inseto.nomeCientifico.contains(query, ignoreCase = true) ||
                         inseto.observacao.contains(query, ignoreCase = true) ||
                         inseto.local.contains(query, ignoreCase = true)
                     
@@ -252,8 +248,6 @@ class RegistroRepository private constructor() {
         
         val filtered = currentPlants.filter { planta ->
             planta.nome.contains(query, ignoreCase = true) ||
-            planta.nomePopular.contains(query, ignoreCase = true) ||
-            planta.nomeCientifico.contains(query, ignoreCase = true) ||
             planta.observacao.contains(query, ignoreCase = true) ||
             planta.local.contains(query, ignoreCase = true)
         }
@@ -275,8 +269,6 @@ class RegistroRepository private constructor() {
         
         val filtered = currentInsects.filter { inseto ->
             inseto.nome.contains(query, ignoreCase = true) ||
-            inseto.nomePopular.contains(query, ignoreCase = true) ||
-            inseto.nomeCientifico.contains(query, ignoreCase = true) ||
             inseto.observacao.contains(query, ignoreCase = true) ||
             inseto.local.contains(query, ignoreCase = true)
         }

@@ -92,20 +92,27 @@ class MeusRegistrosViewModel : ViewModel() {
      * Carrega os registros do usuário
      */
     fun loadRegistrations() {
+        Log.d("MeusRegistrosVM", "🔄 loadRegistrations() iniciado")
         _isLoading.value = true
         
         viewModelScope.launch {
             try {
+                Log.d("MeusRegistrosVM", "🔄 Chamando repository.getUserPlants...")
                 // Force refresh of user data
                 repository.getUserPlants(forceRefresh = true)
+                
+                Log.d("MeusRegistrosVM", "🔄 Chamando repository.getUserInsects...")
                 repository.getUserInsects(forceRefresh = true)
                 
+                Log.d("MeusRegistrosVM", "🔄 Atualizando estatísticas...")
                 // Update statistics
                 updateStatistics()
                 
                 _isLoading.value = false
+                Log.d("MeusRegistrosVM", "✅ loadRegistrations() completo")
                 
             } catch (e: Exception) {
+                Log.e("MeusRegistrosVM", "❌ Erro em loadRegistrations: ${e.message}", e)
                 _isLoading.value = false
                 _errorMessage.value = "Erro ao carregar registros: ${e.message}"
             }

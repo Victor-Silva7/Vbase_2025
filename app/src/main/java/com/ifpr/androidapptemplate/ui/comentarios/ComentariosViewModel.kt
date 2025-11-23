@@ -1,202 +1,107 @@
-package com.ifpr.androidapptemplate.ui.comentarios
+﻿package com.ifpr.androidapptemplate.ui.comentarios
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ifpr.androidapptemplate.data.model.*
-import com.ifpr.androidapptemplate.data.repository.ComentariosRepository
-import com.ifpr.androidapptemplate.data.repository.ComentariosSort
+import com.google.firebase.auth.FirebaseAuth
+import com.ifpr.androidapptemplate.data.repository.SimpleComentariosRepository
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel para gerenciar a interface de comentários
- * Controla estado, interações e dados dos comentários
- */
 class ComentariosViewModel : ViewModel() {
     
-    private val repository = ComentariosRepository()
+    private val repository = SimpleComentariosRepository.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     
-    // Estados observáveis
-    val loadingState: LiveData<LoadingState> = repository.loadingState
-    val currentComments: LiveData<List<Comentario>> = repository.currentComments
+    private val _comentarios = MutableLiveData<List<ComentarioSimples>>()
+    val comentarios: LiveData<List<ComentarioSimples>> = _comentarios
     
-    private val _postId = MutableLiveData<String>()
-    val postId: LiveData<String> = _postId
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
     
-    private val _errorMessage = MutableLiveData<String?>(null)
+    private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
     
-    private val _sortBy = MutableLiveData<ComentariosSort>(ComentariosSort.MOST_RECENT)
-    val sortBy: LiveData<ComentariosSort> = _sortBy
-    
-    private var currentPage = 1
-    private var hasMorePages = true
-    
-    /**
-     * Inicializa o ViewModel com uma postagem específica
-     */
-    fun initForPost(postId: String) {
-        _postId.value = postId
-        loadComments(postId, 1)
-    }
-    
-    /**
-     * Carrega comentários (paginação)
-     */
-    fun loadComments(postId: String, page: Int = 1) {
-        if (page > 1 && !hasMorePages) return
+    fun carregarComentarios(postagemId: String) {
+        _isLoading.value = true
         
         viewModelScope.launch {
-            val result = repository.loadComments(postId, page, _sortBy.value ?: ComentariosSort.MOST_RECENT)
+            val result = repository.buscarComentarios(postagemId)
             
-            result.onSuccess { comentariosResult ->
-                hasMorePages = comentariosResult.hasNextPage
-                currentPage = comentariosResult.currentPage
-            }.onFailure { exception ->
-                _errorMessage.value = exception.message
-            }
-        }
-    }
-    
-    /**
-     * Carrega mais comentários (scroll infinito)
-     */
-    fun loadMoreComments() {
-        val currentPostId = _postId.value ?: return
-        if (hasMorePages) {
-            loadComments(currentPostId, currentPage + 1)
-        }
-    }
-    
-    /**
-     * Adiciona novo comentário ou resposta
-     */
-    fun addComment(conteudo: String, parentId: String? = null, attachments: List<String> = emptyList()) {
-        val currentPostId = _postId.value ?: return
-        
-        val novoComentario = NovoComentario(
-            postId = currentPostId,
-            parentId = parentId, // Passa o parentId para criar uma resposta
-            conteudo = conteudo,
-            attachments = attachments
-        )
-        
-        viewModelScope.launch {
-            val result = repository.addComment(novoComentario)
-            
-            result.onSuccess { comentario ->
-                // Atualiza a lista de comentários localmente
-                val currentList = repository.currentComments.value?.toMutableList() ?: mutableListOf()
-                
-                if (parentId == null) {
-                    // É um comentário principal, adiciona no início
-                    currentList.add(0, comentario)
-                } else {
-                    // É uma resposta, pode ser adicionada na posição apropriada
-                    // Em uma implementação completa, precisaríamos encontrar o comentário pai
-                    // e atualizar sua contagem de respostas
-                    currentList.add(comentario)
+            result.onSuccess { lista ->
+                val comentarios = lista.map { map ->
+                    ComentarioSimples(
+                        id = map["id"] as? String ?: "",
+                        userId = map["userId"] as? String ?: "",
+                        userName = map["userName"] as? String ?: "Usuario",
+                        userAvatar = map["userAvatar"] as? String ?: "",
+                        conteudo = map["conteudo"] as? String ?: "",
+                        timestamp = (map["timestamp"] as? Long) ?: 0L
+                    )
                 }
-                
-                // Atualiza o adapter com a nova lista
-                // Note: Em uma implementação real com repository real, isso seria automático
-            }.onFailure { exception ->
-                _errorMessage.value = "Erro ao adicionar comentário: ${exception.message}"
+                _comentarios.value = comentarios
+            }.onFailure { e ->
+                _errorMessage.value = "Erro ao carregar comentarios: ${e.message}"
             }
-        }
-    }
-    
-    /**
-     * Atualiza comentário existente
-     */
-    fun updateComment(comentarioId: String, novoConteudo: String, attachments: List<String> = emptyList()) {
-        val atualizacao = AtualizacaoComentario(
-            comentarioId = comentarioId,
-            novoConteudo = novoConteudo,
-            attachments = attachments
-        )
-        
-        viewModelScope.launch {
-            val result = repository.updateComment(atualizacao)
             
-            result.onSuccess { comentario ->
-                // Atualiza a lista de comentários localmente
-                // Note: Em uma implementação real, precisaríamos atualizar o adapter
-                
-            }.onFailure { exception ->
-                _errorMessage.value = "Erro ao atualizar comentário: ${exception.message}"
-            }
+            _isLoading.value = false
         }
     }
     
-    /**
-     * Remove comentário
-     */
-    fun deleteComment(comentarioId: String) {
-        val currentPostId = _postId.value ?: return
+    fun adicionarComentario(postagemId: String, texto: String) {
+        val userId = auth.currentUser?.uid ?: run {
+            _errorMessage.value = "Voce precisa estar logado para comentar"
+            return
+        }
+        
+        val userName = auth.currentUser?.displayName ?: "Usuario"
+        val userAvatar = auth.currentUser?.photoUrl?.toString() ?: ""
+        
+        _isLoading.value = true
         
         viewModelScope.launch {
-            val result = repository.deleteComment(comentarioId, currentPostId)
+            val result = repository.adicionarComentario(
+                postagemId = postagemId,
+                userId = userId,
+                userName = userName,
+                userAvatar = userAvatar,
+                texto = texto
+            )
             
             result.onSuccess {
-                // Remove da lista local
-                // Note: Em uma implementação real, precisaríamos atualizar o adapter
-                
-            }.onFailure { exception ->
-                _errorMessage.value = "Erro ao remover comentário: ${exception.message}"
+                carregarComentarios(postagemId)
+            }.onFailure { e ->
+                _errorMessage.value = "Erro ao adicionar comentario: ${e.message}"
+                _isLoading.value = false
             }
         }
     }
     
-    /**
-     * Curtir/descurtir comentário
-     */
-    fun toggleLike(comentarioId: String) {
-        val currentPostId = _postId.value ?: return
-        
-        viewModelScope.launch {
-            val result = repository.toggleLike(comentarioId, currentPostId)
-            
-            result.onSuccess { comentario ->
-                // Atualiza a lista de comentários localmente
-                // Note: Em uma implementação real, precisaríamos atualizar o adapter
-                
-            }.onFailure { exception ->
-                _errorMessage.value = "Erro ao curtir comentário: ${exception.message}"
-            }
-        }
-    }
-    
-    /**
-     * Altera ordenação dos comentários
-     */
-    fun changeSortOrder(sort: ComentariosSort) {
-        if (_sortBy.value != sort) {
-            _sortBy.value = sort
-            val currentPostId = _postId.value ?: return
-            loadComments(currentPostId, 1) // Recarrega com nova ordenação
-        }
-    }
-    
-    /**
-     * Verifica se pode carregar mais comentários
-     */
-    fun canLoadMore(): Boolean {
-        return hasMorePages
-    }
-    
-    /**
-     * Limpa mensagens de erro
-     */
     fun clearError() {
         _errorMessage.value = null
     }
-    
-    /**
-     * Limpa todos os caches
-     */
-    fun clearCache() {
-        repository.clearAllCache()
+}
+
+data class ComentarioSimples(
+    val id: String,
+    val userId: String,
+    val userName: String,
+    val userAvatar: String,
+    val conteudo: String,
+    val timestamp: Long
+) {
+    fun getTempoRelativo(): String {
+        val diff = System.currentTimeMillis() - timestamp
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        val hours = minutes / 60
+        val days = hours / 24
+        
+        return when {
+            days > 0 -> "${days}d"
+            hours > 0 -> "${hours}h"
+            minutes > 0 -> "${minutes}min"
+            else -> "agora"
+        }
     }
 }

@@ -27,7 +27,6 @@ class PostagemCardAdapter(
     private val onLikeClick: (PostagemFeed) -> Unit,
     private val onCommentClick: (PostagemFeed) -> Unit,
     private val onShareClick: (PostagemFeed) -> Unit,
-    private val onBookmarkClick: (PostagemFeed) -> Unit,
     private val onLoadMore: () -> Unit
 ) : ListAdapter<Any, RecyclerView.ViewHolder>(AdapterDiffCallback()) {
 
@@ -152,20 +151,8 @@ class PostagemCardAdapter(
                     imageViewUserAvatar.setImageResource(R.drawable.ic_user_placeholder)
                 }
                 
-                // Verificação do usuário
-                imageViewVerified.visibility = if (usuario.isVerificado) View.VISIBLE else View.GONE
-                
-                // Nível do usuário
-                textViewUserLevel.apply {
-                    text = usuario.getTextoNivel()
-                    setTextColor(Color.parseColor(usuario.getCorNivel()))
-                }
-                
-                // Localização do usuário
-                textViewUserLocation.apply {
-                    text = usuario.localizacao
-                    visibility = if (usuario.localizacao.isNotEmpty()) View.VISIBLE else View.GONE
-                }
+                // Elementos removidos do layout:
+                // imageViewVerified, textViewUserLevel, textViewUserLocation
             }
         }
 
@@ -174,21 +161,7 @@ class PostagemCardAdapter(
                 // Tempo da postagem
                 textViewPostTime.text = postagem.getTempoPostagem()
                 
-                // Ícone do tipo de postagem
-                when (postagem.tipo) {
-                    TipoPostagem.PLANTA -> {
-                        imageViewPostType.setImageResource(R.drawable.ic_planta_24dp)
-                        imageViewPostType.imageTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(itemView.context, R.color.healthy_color)
-                        )
-                    }
-                    TipoPostagem.INSETO -> {
-                        imageViewPostType.setImageResource(R.drawable.ic_inseto_24dp)
-                        imageViewPostType.imageTintList = ColorStateList.valueOf(
-                            ContextCompat.getColor(itemView.context, R.color.warning_color)
-                        )
-                    }
-                }
+                // imageViewPostType removido do layout
                 
                 // Título da postagem
                 textViewPostTitle.text = postagem.titulo
@@ -199,23 +172,35 @@ class PostagemCardAdapter(
                 // Imagem da postagem
                 if (postagem.imageUrl.isNotEmpty()) {
                     imageViewPostPhoto.visibility = View.VISIBLE
-                    Glide.with(itemView.context)
-                        .load(postagem.imageUrl)
-                        .placeholder(R.drawable.ic_planta_24dp)
-                        .error(R.drawable.ic_error_24dp)
-                        .transform(RoundedCorners(24))
-                        .into(imageViewPostPhoto)
+                    
+                    // Garantir que a imagem Base64 tem o prefixo correto
+                    val imageUrl = if (!postagem.imageUrl.startsWith("data:image") && 
+                                      !postagem.imageUrl.startsWith("http")) {
+                        // Se não tem prefixo, adiciona
+                        "data:image/jpeg;base64,${postagem.imageUrl}"
+                    } else {
+                        postagem.imageUrl
+                    }
+                    
+                    android.util.Log.d("PostagemCardAdapter", "🖼️ Carregando imagem (${imageUrl.take(50)}...)")
+                    try {
+                        Glide.with(itemView.context)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.ic_planta_24dp)
+                            .error(R.drawable.ic_error_24dp)
+                            .transform(RoundedCorners(24))
+                            .into(imageViewPostPhoto)
+                        android.util.Log.d("PostagemCardAdapter", "✅ Glide iniciou carregamento")
+                    } catch (e: Exception) {
+                        android.util.Log.e("PostagemCardAdapter", "❌ Erro ao carregar imagem: ${e.message}", e)
+                        imageViewPostPhoto.visibility = View.GONE
+                    }
                 } else {
                     imageViewPostPhoto.visibility = View.GONE
+                    android.util.Log.d("PostagemCardAdapter", "⚠️ Nenhuma imagem para exibir")
                 }
                 
-                // Localização da postagem
-                if (postagem.localizacao.isNotEmpty()) {
-                    layoutPostLocation.visibility = View.VISIBLE
-                    textViewPostLocation.text = postagem.localizacao
-                } else {
-                    layoutPostLocation.visibility = View.GONE
-                }
+                // layoutPostLocation e textViewPostLocation removidos do layout
             }
         }
 
@@ -225,45 +210,25 @@ class PostagemCardAdapter(
             when (postagem.tipo) {
                 TipoPostagem.PLANTA -> {
                     postagem.detalhesPlanta?.let { detalhes ->
-                        // Nome científico
-                        if (detalhes.nomeCientifico.isNotEmpty()) {
-                            addInfoChip(detalhes.nomeCientifico, R.color.text_secondary)
-                        }
-                        
-                        // Família
-                        if (detalhes.familia.isNotEmpty()) {
-                            addInfoChip(detalhes.familia, R.color.text_secondary)
+                        // Nome comum
+                        if (detalhes.nomeComum.isNotEmpty()) {
+                            addInfoChip(detalhes.nomeComum, R.color.text_secondary)
                         }
                         
                         // Status
                         addInfoChip(detalhes.getTextoStatus(), Color.parseColor(detalhes.getCorStatus()))
-                        
-                        // Altura se disponível
-                        if (detalhes.altura.isNotEmpty()) {
-                            addInfoChip("${detalhes.altura}", R.color.text_hint)
-                        }
                     }
                 }
                 
                 TipoPostagem.INSETO -> {
                     postagem.detalhesInseto?.let { detalhes ->
-                        // Nome científico
-                        if (detalhes.nomeCientifico.isNotEmpty()) {
-                            addInfoChip(detalhes.nomeCientifico, R.color.text_secondary)
-                        }
-                        
-                        // Família
-                        if (detalhes.familia.isNotEmpty()) {
-                            addInfoChip(detalhes.familia, R.color.text_secondary)
+                        // Nome comum
+                        if (detalhes.nomeComum.isNotEmpty()) {
+                            addInfoChip(detalhes.nomeComum, R.color.text_secondary)
                         }
                         
                         // Tipo
                         addInfoChip(detalhes.getTextoTipo(), Color.parseColor(detalhes.getCorTipo()))
-                        
-                        // Tamanho se disponível
-                        if (detalhes.tamanho.isNotEmpty()) {
-                            addInfoChip("${detalhes.tamanho}", R.color.text_hint)
-                        }
                     }
                 }
             }
@@ -276,11 +241,10 @@ class PostagemCardAdapter(
             chip.isClickable = false
             chip.isCheckable = false
             
-            if (colorRes is Int && colorRes > 0xFFFFFF) {
-                // É uma cor hex, usar diretamente
+            // Se colorRes é maior que 0xFFFFFF, é uma cor hex; senão, é um resource ID
+            if (colorRes > 0xFFFFFF) {
                 chip.setTextColor(colorRes)
             } else {
-                // É um resource ID
                 chip.setTextColor(ContextCompat.getColor(itemView.context, colorRes))
             }
             
@@ -309,23 +273,6 @@ class PostagemCardAdapter(
                     textViewLike.text = "Curtir"
                 }
                 
-                // Estado do botão salvar
-                if (postagem.interacoes.salvosPeloUsuario) {
-                    imageViewBookmark.setImageResource(R.drawable.ic_bookmark_24dp)
-                    imageViewBookmark.imageTintList = ColorStateList.valueOf(
-                        ContextCompat.getColor(itemView.context, R.color.primary_green)
-                    )
-                    textViewBookmark.setTextColor(ContextCompat.getColor(itemView.context, R.color.primary_green))
-                    textViewBookmark.text = "Salvo"
-                } else {
-                    imageViewBookmark.setImageResource(R.drawable.ic_bookmark_border_24dp)
-                    imageViewBookmark.imageTintList = ColorStateList.valueOf(
-                        ContextCompat.getColor(itemView.context, R.color.text_secondary)
-                    )
-                    textViewBookmark.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_secondary))
-                    textViewBookmark.text = "Salvar"
-                }
-                
                 // Contador de comentários
                 // Note: Esta informação já está incluída no getTextoInteracoes()
             }
@@ -351,15 +298,6 @@ class PostagemCardAdapter(
                 }
                 
                 buttonComment.setOnClickListener { onCommentClick(postagem) }
-                buttonShare.setOnClickListener { onShareClick(postagem) }
-                buttonBookmark.setOnClickListener { 
-                    onBookmarkClick(postagem)
-                    // Animação de clique
-                    it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100)
-                        .withEndAction { 
-                            it.animate().scaleX(1f).scaleY(1f).setDuration(100)
-                        }
-                }
                 
                 // Clique na imagem para visualização expandida
                 imageViewPostPhoto.setOnClickListener { 

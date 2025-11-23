@@ -3,6 +3,7 @@ package com.ifpr.androidapptemplate.ui.registro
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +15,10 @@ import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.ItemRegistroCardBinding
 import com.ifpr.androidapptemplate.data.model.PlantHealthCategory
 import com.ifpr.androidapptemplate.data.model.InsectCategory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Adapter simplificado e robusto para exibir registros (plantas e insetos)
@@ -76,29 +81,87 @@ class RegistrosAdapter(
 
         /**
          * Carrega a imagem do registro
+         * Busca o Base64 do Firebase usando o UUID da primeira imagem
          */
         private fun loadImage(item: RegistrationItem) {
             try {
-                val firstImage = item.commonImages.firstOrNull()
                 val context = binding.root.context
+                val firstImageId = item.commonImages.firstOrNull()
+                
+                android.util.Log.wtf("ADAPTER_IMG", "═══════════════════════════════════")
+                android.util.Log.wtf("ADAPTER_IMG", "loadImage() chamado")
+                android.util.Log.wtf("ADAPTER_IMG", "Tipo: ${item.commonType}")
+                android.util.Log.wtf("ADAPTER_IMG", "ID: ${item.commonId}")
+                android.util.Log.wtf("ADAPTER_IMG", "Imagens: ${item.commonImages}")
+                android.util.Log.wtf("ADAPTER_IMG", "firstImageId: $firstImageId")
 
-                if (!firstImage.isNullOrBlank()) {
+                if (!firstImageId.isNullOrBlank()) {
+                    android.util.Log.wtf("ADAPTER_IMG", "✅ TEM IMAGEM! Buscando Base64...")
+                    
+                    // Mostrar placeholder enquanto carrega
                     Glide.with(context)
-                        .load(firstImage)
-                        .apply(
-                            RequestOptions()
-                                .transform(CenterCrop(), RoundedCorners(8))
-                                .placeholder(R.drawable.ic_image_placeholder)
-                                .error(R.drawable.ic_image_placeholder)
-                        )
+                        .load(R.drawable.ic_image_placeholder)
                         .into(binding.ivRegistrationImage)
+                    
+                    // Buscar Base64 do Firebase em background
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            android.util.Log.wtf("ADAPTER_IMG", "🔥 Chamando Firebase...")
+                            val realtimeManager = com.ifpr.androidapptemplate.data.firebase.FirebaseConfig.getRealtimeDatabaseImageManager()
+                            
+                            val result = when (item) {
+                                is RegistrationItem.PlantItem -> {
+                                    android.util.Log.wtf("ADAPTER_IMG", "🌱 Buscando planta: ${item.id}")
+                                    realtimeManager.getFirstPlantImage(item.id)
+                                }
+                                is RegistrationItem.InsectItem -> {
+                                    android.util.Log.wtf("ADAPTER_IMG", "🦋 Buscando inseto: ${item.id}")
+                                    realtimeManager.getFirstInsectImage(item.id)
+                                }
+                            }
+                            
+                            android.util.Log.wtf("ADAPTER_IMG", "📦 Result: success=${result.isSuccess}")
+                            
+                            result.onSuccess { base64 ->
+                                android.util.Log.wtf("ADAPTER_IMG", "✅ Base64 recebido: ${base64.length} chars")
+                                android.util.Log.wtf("ADAPTER_IMG", "Primeiros 50 chars: ${base64.take(50)}")
+                                
+                                withContext(Dispatchers.Main) {
+                                    android.util.Log.wtf("ADAPTER_IMG", "🖼️ Carregando no Glide...")
+                                    Glide.with(context)
+                                        .load(base64)
+                                        .apply(
+                                            RequestOptions()
+                                                .transform(CenterCrop(), RoundedCorners(8))
+                                                .placeholder(R.drawable.ic_image_placeholder)
+                                                .error(R.drawable.ic_image_placeholder)
+                                        )
+                                        .into(binding.ivRegistrationImage)
+                                    android.util.Log.wtf("ADAPTER_IMG", "✅ Glide.into() chamado!")
+                                }
+                            }.onFailure { exception ->
+                                android.util.Log.wtf("ADAPTER_IMG", "❌ ERRO: ${exception.message}")
+                                // Se falhar, manter placeholder
+                                withContext(Dispatchers.Main) {
+                                    Glide.with(context)
+                                        .load(R.drawable.ic_image_placeholder)
+                                        .into(binding.ivRegistrationImage)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.wtf("ADAPTER_IMG", "❌ EXCEPTION: ${e.message}", e)
+                            e.printStackTrace()
+                        }
+                    }
                 } else {
+                    android.util.Log.wtf("ADAPTER_IMG", "⚠️ SEM IMAGEM! Mostrando placeholder")
                     // Se não houver imagem, exibe placeholder genérico
                     Glide.with(context)
                         .load(R.drawable.ic_image_placeholder)
                         .into(binding.ivRegistrationImage)
                 }
             } catch (e: Exception) {
+                android.util.Log.wtf("ADAPTER_IMG", "❌ ERRO GERAL: ${e.message}", e)
                 e.printStackTrace()
             }
         }
@@ -114,15 +177,17 @@ class RegistrosAdapter(
                     is RegistrationItem.PlantItem -> {
                         binding.tvTypeLabel.text = "PLANTA"
                         binding.ivTypeIcon.setImageResource(R.drawable.ic_planta_24dp)
+                        binding.ivTypeIcon.setColorFilter(android.graphics.Color.parseColor("#FFFFFF"))
                         binding.layoutTypeBadge.setBackgroundColor(
-                            context.getColor(R.color.primary_green)
+                            android.graphics.Color.parseColor("#029e5a")
                         )
                     }
                     is RegistrationItem.InsectItem -> {
                         binding.tvTypeLabel.text = "INSETO"
                         binding.ivTypeIcon.setImageResource(R.drawable.ic_inseto_24dp)
+                        binding.ivTypeIcon.setColorFilter(android.graphics.Color.parseColor("#FFFFFF"))
                         binding.layoutTypeBadge.setBackgroundColor(
-                            context.getColor(R.color.beneficial_color)
+                            android.graphics.Color.parseColor("#029e5a")
                         )
                     }
                 }

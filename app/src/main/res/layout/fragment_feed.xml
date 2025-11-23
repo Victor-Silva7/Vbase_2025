@@ -31,80 +31,13 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="8dp">
 
-                <EditText
-                    android:id="@+id/etSearchPosts"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:hint="Buscar postagens..."
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:textSize="14sp" />
 
-                <ImageView
-                    android:id="@+id/ivClearSearch"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_close"
-                    android:visibility="gone"
-                    app:tint="@color/text_hint"
-                    tools:visibility="visible" />
+
+
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Filtros por categoria -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:scrollbars="none">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupCategories"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                app:checkedChip="@id/chipAllPosts"
-                app:selectionRequired="true"
-                app:singleLine="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAllPosts"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Todas"
-                    app:chipBackgroundColor="@color/chip_background_color" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipPlantPosts"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Plantas"
-                    app:chipBackgroundColor="@color/chip_background_color" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipInsectPosts"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Insetos"
-                    app:chipBackgroundColor="@color/chip_background_color" />
-
-            </com.google.android.material.chip.ChipGroup>
-
-        </HorizontalScrollView>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -230,29 +163,14 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Botão de refresh flutuante -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- Botão refresh no estado vazio -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRefreshFeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_refresh_24dp"
-        app:backgroundTint="@color/primary_green"
-        app:tint="@android:color/white" />
-
-    <!-- Botão flutuante para abrir IA -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_ai"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:layout_marginEnd="88dp"
-        android:layout_marginBottom="80dp"
-        android:contentDescription="Abrir IA"
-        android:src="@drawable/ic_ai"
-        app:backgroundTint="@color/primary_green"
-        app:tint="@android:color/white" />
+        android:layout_gravity="center"
+        android:text="Atualizar Feed"
+        android:visibility="gone"
+        app:backgroundTint="@color/primary_green" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

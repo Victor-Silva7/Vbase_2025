@@ -8,8 +8,6 @@ import java.util.*
 data class Planta(
     override val id: String = generateId(),
     override val nome: String = "",
-    override val nomePopular: String = "",
-    override val nomeCientifico: String = "",
     override val data: String = "",
     override val dataTimestamp: Long = System.currentTimeMillis(),
     override val local: String = "",
@@ -39,8 +37,6 @@ data class Planta(
             return Planta(
                 id = map["id"] as? String ?: generateId(),
                 nome = map["nome"] as? String ?: "",
-                nomePopular = map["nomePopular"] as? String ?: "",
-                nomeCientifico = map["nomeCientifico"] as? String ?: "",
                 data = map["data"] as? String ?: "",
                 dataTimestamp = (map["dataTimestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
                 local = map["local"] as? String ?: "",
@@ -50,7 +46,7 @@ data class Planta(
                     PlantHealthCategory.HEALTHY
                 },
                 observacao = map["observacao"] as? String ?: "",
-                imagens = (map["imagens"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                imagens = (map["imagensIds"] as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
                 userId = map["userId"] as? String ?: "",
                 userName = map["userName"] as? String ?: "",
                 timestamp = (map["timestamp"] as? Number)?.toLong() ?: System.currentTimeMillis(),
@@ -72,8 +68,6 @@ data class Planta(
         return mapOf(
             "id" to id,
             "nome" to nome,
-            "nomePopular" to nomePopular,
-            "nomeCientifico" to nomeCientifico,
             "data" to data,
             "dataTimestamp" to dataTimestamp,
             "local" to local,
@@ -129,52 +123,7 @@ data class Planta(
      */
     fun getSummary(): String {
         val parts = mutableListOf<String>()
-        if (nomePopular.isNotEmpty()) parts.add(nomePopular)
-        if (nomeCientifico.isNotEmpty()) parts.add("($nomeCientifico)")
         if (local.isNotEmpty()) parts.add("em $local")
         return parts.joinToString(" ")
-    }
-}
-
-/**
- * Plant characteristics data class
- */
-data class CaracteristicasPlanta(
-    val altura: String = "",
-    val diametroTronco: String = "",
-    val tipoFolha: String = "",
-    val corFlor: String = "",
-    val tempoFlorada: String = "",
-    val tipoFruto: String = "",
-    val habitat: String = "",
-    val observacoesAdicionais: String = ""
-) {
-    
-    fun toMap(): Map<String, Any> {
-        return mapOf(
-            "altura" to altura,
-            "diametroTronco" to diametroTronco,
-            "tipoFolha" to tipoFolha,
-            "corFlor" to corFlor,
-            "tempoFlorada" to tempoFlorada,
-            "tipoFruto" to tipoFruto,
-            "habitat" to habitat,
-            "observacoesAdicionais" to observacoesAdicionais
-        )
-    }
-    
-    companion object {
-        fun fromMap(map: Map<String, Any?>): CaracteristicasPlanta {
-            return CaracteristicasPlanta(
-                altura = map["altura"] as? String ?: "",
-                diametroTronco = map["diametroTronco"] as? String ?: "",
-                tipoFolha = map["tipoFolha"] as? String ?: "",
-                corFlor = map["corFlor"] as? String ?: "",
-                tempoFlorada = map["tempoFlorada"] as? String ?: "",
-                tipoFruto = map["tipoFruto"] as? String ?: "",
-                habitat = map["habitat"] as? String ?: "",
-                observacoesAdicionais = map["observacoesAdicionais"] as? String ?: ""
-            )
-        }
     }
 }

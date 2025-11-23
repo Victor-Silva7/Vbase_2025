@@ -60,21 +60,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="Maria Silva" />
-
-                    <!-- Selo de verificação -->
-                    <ImageView
-                        android:id="@+id/imageViewVerified"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:layout_marginStart="4dp"
-                        android:src="@drawable/ic_verified_24dp"
-                        android:visibility="gone"
-                        app:tint="@color/primary_green"
-                        tools:visibility="visible" />
 
                 </LinearLayout>
 
@@ -85,17 +74,6 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:layout_marginTop="2dp">
-
-                    <!-- Nível do usuário -->
-                    <TextView
-                        android:id="@+id/textViewUserLevel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/primary_green"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        tools:text="Especialista"
-                        tools:ignore="SmallSp" />
 
                     <!-- Tempo do comentário -->
                     <TextView
@@ -130,22 +108,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
-            android:textColor="@color/text_primary"
+            android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:lineSpacingExtra="2dp"
             tools:text="Ótima observação! Eu também tenho notado isso no meu jardim." />
-
-        <!-- Indicador de edição -->
-        <TextView
-            android:id="@+id/textViewEdited"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
-            android:text="(editado)"
-            android:textColor="@color/text_hint"
-            android:textSize="12sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
 
         <!-- Anexos -->
         <androidx.recyclerview.widget.RecyclerView
@@ -225,16 +191,6 @@
 
             </LinearLayout>
 
-            <!-- Botão mais opções -->
-            <ImageButton
-                android:id="@+id/buttonMoreOptions"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_more_vert_24dp"
-                app:tint="@color/text_hint" />
-
         </LinearLayout>
 
     </LinearLayout>
@@ -262,28 +218,6 @@
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true">
-
-            <View
-                android:layout_width="24dp"
-                android:layout_height="1dp"
-                android:background="@color/divider"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/textViewRepliesCount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/primary_green"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                tools:text="3 respostas" />
-
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_expand_more_24dp"
-                app:tint="@color/primary_green" />
 
         </LinearLayout>
 

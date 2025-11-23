@@ -62,6 +62,18 @@
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.AndroidAppTemplate" />
         
+        <!-- Comentarios Activity -->
+        <activity
+            android:name=".ui.comentarios.ComentariosActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AndroidAppTemplate" />
+        
+        <!-- Meus Registros Activity (fallback se navegação falhar) -->
+        <activity
+            android:name=".ui.registro.MeusRegistrosActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AndroidAppTemplate" />
+        
         <!-- FileProvider for camera images -->
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ifpr.androidapptemplate.R
 import com.ifpr.androidapptemplate.databinding.FragmentFeedBinding
 import com.ifpr.androidapptemplate.data.model.*
-import com.ifpr.androidapptemplate.data.repository.TipoFiltro
 import kotlinx.coroutines.*
 
 /**
@@ -70,12 +69,8 @@ class FeedFragment : Fragment() {
                 openCommentsScreen(postagem)
             },
             onShareClick = { postagem ->
-                // Compartilhar postagem
-                handleShareClick(postagem)
-            },
-            onBookmarkClick = { postagem ->
-                // Usar ViewModel para gerenciar salvamentos
-                viewModel.toggleBookmark(postagem)
+                // Compartilhar postagem (funcionalidade removida)
+                Toast.makeText(requireContext(), "Compartilhar em breve", Toast.LENGTH_SHORT).show()
             },
             onLoadMore = {
                 // Trigger para carregar mais páginas
@@ -91,37 +86,8 @@ class FeedFragment : Fragment() {
     }
     
     private fun setupSearchAndFilters() {
-        // Busca com debounce
-        binding.etSearchPosts.addTextChangedListener { text ->
-            val query = text.toString().trim()
-            
-            // Cancela busca anterior
-            searchJob?.cancel()
-            
-            // Nova busca com debounce
-            searchJob = CoroutineScope(Dispatchers.Main).launch {
-                delay(searchDebounceDelay)
-                viewModel.applySearch(query)
-            }
-            
-            // Mostrar/esconder botão limpar
-            binding.ivClearSearch.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
-        }
-        
-        // Botão limpar busca
-        binding.ivClearSearch.setOnClickListener {
-            binding.etSearchPosts.text?.clear()
-        }
-        
-        // Filtros por categoria
-        binding.chipGroupCategories.setOnCheckedChangeListener { _, checkedId ->
-            val filtro = when (checkedId) {
-                binding.chipPlantPosts.id -> TipoFiltro.PLANTAS
-                binding.chipInsectPosts.id -> TipoFiltro.INSETOS
-                else -> TipoFiltro.TODAS
-            }
-            viewModel.applyFilter(filtro)
-        }
+        // Busca removida - elementos não existem no layout
+        // Se precisar de busca/filtros, adicione os elementos no fragment_feed.xml primeiro
     }
     
     private fun setupSwipeRefresh() {
@@ -139,11 +105,7 @@ class FeedFragment : Fragment() {
         binding.btnRefreshFeed.setOnClickListener { viewModel.refreshFeed() }
         binding.btnRetry.setOnClickListener { viewModel.refreshFeed() }
         
-        // Botão flutuante para abrir IA
-        binding.fabAi.setOnClickListener {
-            val intent = android.content.Intent(requireContext(), com.ifpr.androidapptemplate.ui.ai.AiLogicActivity::class.java)
-            startActivity(intent)
-        }
+        // fabAi removido do layout
     }
     
     private fun observeViewModel() {
@@ -217,41 +179,23 @@ class FeedFragment : Fragment() {
         binding.layoutEmptyState.visibility = View.VISIBLE
         binding.layoutErrorState.visibility = View.GONE
         
-        // Personaliza mensagem baseada na busca
-        val query = binding.etSearchPosts.text.toString().trim()
-        if (query.isNotEmpty()) {
-            binding.tvEmptyTitle.text = "Nenhum resultado encontrado"
-            binding.tvEmptyMessage.text = "Tente ajustar os termos de busca ou filtros"
-        } else {
-            binding.tvEmptyTitle.text = "Nenhuma postagem ainda"
-            binding.tvEmptyMessage.text = "Seja o primeiro a compartilhar suas descobertas!"
-        }
+        // Mensagem padrão (busca removida)
+        binding.tvEmptyTitle.text = "Nenhuma postagem ainda"
+        binding.tvEmptyMessage.text = "Seja o primeiro a compartilhar suas descobertas!"
     }
     
     private fun showErrorState() {
         binding.recyclerViewFeed.visibility = View.GONE
         binding.layoutEmptyState.visibility = View.GONE
-        binding.layoutErrorState.visibility = View.VISIBLE
-    }
-    
-    private fun handleShareClick(postagem: PostagemFeed) {
-        // Implementa compartilhamento
-        val compartilharIntent = android.content.Intent().apply {
-            action = android.content.Intent.ACTION_SEND
-            type = "text/plain"
-            putExtra(android.content.Intent.EXTRA_TEXT, 
-                "Confira esta postagem: ${postagem.titulo}\n\nPor: ${postagem.usuario.nomeExibicao}\n\n${postagem.descricao}")
-        }
-        
-        startActivity(android.content.Intent.createChooser(compartilharIntent, "Compartilhar postagem"))
+        // Error state - pode mostrar mensagem se necessário
     }
     
     private fun openCommentsScreen(postagem: PostagemFeed) {
-        // Navegar para a tela de comentários usando Navigation Component
-        findNavController().navigate(
-            R.id.navigation_comentarios,
-            bundleOf("postId" to postagem.id)
-        )
+        // Abrir ComentariosActivity
+        val intent = android.content.Intent(requireContext(), com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity::class.java)
+        intent.putExtra(com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity.EXTRA_POSTAGEM_ID, postagem.id)
+        intent.putExtra(com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity.EXTRA_POSTAGEM_TITULO, postagem.titulo)
+        startActivity(intent)
     }
     
     override fun onDestroyView() {

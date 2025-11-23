@@ -26,8 +26,6 @@ class FirebaseDatabaseServiceTest {
         val planta = Planta(
             id = "test_plant_001",
             nome = "Teste Planta",
-            nomePopular = "Planta de Teste",
-            nomeCientifico = "Testus plantus",
             data = "15/10/2024",
             dataTimestamp = System.currentTimeMillis(),
             local = "Jardim de Testes",
@@ -54,8 +52,6 @@ class FirebaseDatabaseServiceTest {
         val inseto = Inseto(
             id = "test_insect_001",
             nome = "Teste Inseto",
-            nomePopular = "Inseto de Teste",
-            nomeCientifico = "Testus insectus",
             data = "15/10/2024",
             dataTimestamp = System.currentTimeMillis(),
             local = "Laboratório de Testes",

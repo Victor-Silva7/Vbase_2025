@@ -20,7 +20,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.ifpr.androidapptemplate.R
-import com.ifpr.androidapptemplate.baseclasses.Usuario
+import com.ifpr.androidapptemplate.data.model.Usuario
 import com.ifpr.androidapptemplate.databinding.FragmentPerfilUsuarioBinding
 
 class PerfilUsuarioFragment : Fragment() {
@@ -61,7 +61,8 @@ class PerfilUsuarioFragment : Fragment() {
         sairButton = view.findViewById(R.id.sairButton)
 
         try {
-            usersReference = FirebaseDatabase.getInstance().getReference("users")
+            // CORRIGIDO: Usando "usuarios" ao invés de "users" para consistência
+            usersReference = FirebaseDatabase.getInstance().getReference("usuarios")
         } catch (e: Exception) {
             Log.e("DatabaseReference", "Erro ao obter referência para o Firebase DatabaseReference", e)
             // Trate o erro conforme necessário, por exemplo:
@@ -137,7 +138,8 @@ class PerfilUsuarioFragment : Fragment() {
 
 
     fun recuperarDadosUsuario(usuarioKey: String) {
-        val databaseReference = FirebaseDatabase.getInstance().getReference("users")
+        // CORRIGIDO: Usando "usuarios" ao invés de "users"
+        val databaseReference = FirebaseDatabase.getInstance().getReference("usuarios")
 
         databaseReference.child(usuarioKey).addListenerForSingleValueEvent(object :
             ValueEventListener {
@@ -176,7 +178,12 @@ class PerfilUsuarioFragment : Fragment() {
             .setDisplayName(displayName)
             .build()
 
-        val usuario = Usuario(user?.uid.toString() , displayName, user?.email, null, )
+        val usuario = Usuario(
+            id = user?.uid ?: "",
+            nome = displayName,
+            email = user?.email ?: "",
+            fotoPerfil = user?.photoUrl?.toString() ?: ""
+        )
 
         user?.updateProfile(profileUpdates)
             ?.addOnCompleteListener { task ->
@@ -192,8 +199,8 @@ class PerfilUsuarioFragment : Fragment() {
     }
 
     private fun saveUserToDatabase(usuario: Usuario) {
-        if (usuario.key != null) {
-            usersReference.child(usuario.key.toString()).setValue(usuario)
+        if (usuario.id.isNotEmpty()) {
+            usersReference.child(usuario.id).setValue(usuario.toFirebaseMap())
                 .addOnSuccessListener {
                     Toast.makeText(context, "Usuario atualizado com sucesso!", Toast.LENGTH_SHORT)
                         .show()

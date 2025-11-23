@@ -17,6 +17,8 @@ import com.ifpr.androidapptemplate.data.model.UsuarioPostagem
 import com.ifpr.androidapptemplate.data.repository.RegistroRepository
 import com.ifpr.androidapptemplate.utils.ImageUploadManager
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,6 +43,7 @@ class RegistroPlantaViewModel : ViewModel() {
     private var currentPhotoPath: String? = null
     private var currentPhotoUri: Uri? = null
     private var appContext: Context? = null
+    private var imagePickerManager: ImagePickerManager? = null
     
     // Firebase services
     private val database = FirebaseConfig.getDatabase()
@@ -48,6 +51,9 @@ class RegistroPlantaViewModel : ViewModel() {
     private val databaseService = FirebaseConfig.getDatabaseService()
     private val imageUploadManager = ImageUploadManager.getInstance()
     private val repository = RegistroRepository.getInstance()
+    
+    // Serviço simplificado de rede social
+    private val socialService = com.ifpr.androidapptemplate.data.firebase.SimpleSocialService.getInstance()
     
     // Maximum number of images allowed
     private val maxImages = 5
@@ -66,12 +72,22 @@ class RegistroPlantaViewModel : ViewModel() {
     fun setContext(context: Context) {
         appContext = context.applicationContext
     }
+    
+    fun setImagePickerManager(manager: ImagePickerManager) {
+        imagePickerManager = manager
+    }
 
     fun addImageFromCamera() {
-        currentPhotoUri?.let { uri ->
-            addImageToList(uri)
-            currentPhotoUri = null
-            currentPhotoPath = null
+        val uri = imagePickerManager?.getCurrentPhotoUri()
+        uri?.let {
+            addImageToList(it)
+        } ?: run {
+            // Fallback to old method
+            currentPhotoUri?.let { oldUri ->
+                addImageToList(oldUri)
+                currentPhotoUri = null
+                currentPhotoPath = null
+            }
         }
     }
 
@@ -159,20 +175,29 @@ class RegistroPlantaViewModel : ViewModel() {
     }
 
     fun saveRegistration(nome: String, data: String, local: String, observacao: String) {
+        android.util.Log.d("RegistroPlantaVM", "🔥 saveRegistration() CHAMADO!")
+        android.util.Log.d("RegistroPlantaVM", "🔥 nome: $nome")
+        android.util.Log.d("RegistroPlantaVM", "🔥 data: $data")
+        android.util.Log.d("RegistroPlantaVM", "🔥 local: $local")
+        
         _isLoading.value = true
         
         // Validate required fields
         if (nome.isEmpty() || data.isEmpty() || local.isEmpty()) {
-            _errorMessage.value = "Campos obrigatórios não preenchidos"
+            android.util.Log.e("RegistroPlantaVM", "❌ Validação falhou: campos vazios")
+            _errorMessage.value = "DEBUG: Campos obrigatórios vazios"
             _isLoading.value = false
             return
         }
         
         if (_selectedCategory.value == null) {
-            _errorMessage.value = "Selecione uma categoria"
+            android.util.Log.e("RegistroPlantaVM", "❌ Validação falhou: categoria não selecionada")
+            _errorMessage.value = "DEBUG: Selecione uma categoria (Saudável ou Doente)"
             _isLoading.value = false
             return
         }
+        
+        android.util.Log.d("RegistroPlantaVM", "✅ Validações OK, criando objeto Planta...")
         
         // Create plant registration object using new data model
         val plantRegistration = Planta(
@@ -196,64 +221,195 @@ class RegistroPlantaViewModel : ViewModel() {
 
     private fun saveToFirebase(registration: Planta) {
         try {
+            android.util.Log.d("RegistroPlantaVM", "🔥 saveToFirebase() INICIADO")
             val plantId = registration.id
             val imageUris = _selectedImages.value ?: emptyList()
             val context = appContext ?: throw IllegalStateException("Context not set")
             
-            // Use enhanced ImageUploadManager for better compression and progress tracking
+            android.util.Log.d("RegistroPlantaVM", "📸 Número de imagens: ${imageUris.size}")
+            
+            // ✅ CORRIGIDO: Salvar metadados PRIMEIRO, depois as imagens
             if (imageUris.isNotEmpty()) {
-                imageUploadManager.uploadPlantImages(
-                    context = context,
-                    plantId = plantId,
-                    imageUris = imageUris,
-                    onSuccess = { imageIds ->
-                        // Save registration with image IDs from Base64 upload
-                        val updatedRegistration = registration.copy(imagens = imageIds)
-                        saveRegistrationToDatabase(updatedRegistration)
-                    },
-                    onFailure = { exception ->
-                        _isLoading.value = false
-                        _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                android.util.Log.d("RegistroPlantaVM", "📤 Passo 1: Salvando metadados da planta...")
+                
+                // Salvar metadados primeiro (sem imagens)
+                viewModelScope.launch {
+                    val result = databaseService.savePlant(registration.copy(imagens = emptyList()))
+                    
+                    result.onSuccess {
+                        android.util.Log.d("RegistroPlantaVM", "✅ Metadados salvos! Passo 2: Uploading ${imageUris.size} imagens...")
+                        
+                        // Agora salvar as imagens Base64
+                        imageUploadManager.uploadPlantImages(
+                            context = context,
+                            plantId = plantId,
+                            imageUris = imageUris,
+                            onSuccess = { imageIds ->
+                                android.util.Log.d("RegistroPlantaVM", "✅ Upload concluído! ${imageIds.size} imagens salvas")
+                                android.util.Log.d("RegistroPlantaVM", "✅ IDs: $imageIds")
+                                
+                                // ✅ CORRIGIDO: Atualizar Firebase com os IDs das imagens
+                                val updatedRegistration = registration.copy(imagens = imageIds)
+                                viewModelScope.launch {
+                                    android.util.Log.d("RegistroPlantaVM", "📤 Passo 3: Atualizando Firebase com imagensIds...")
+                                    val updateResult = databaseService.savePlant(updatedRegistration)
+                                    
+                                    updateResult.onSuccess {
+                                        android.util.Log.d("RegistroPlantaVM", "✅ Firebase atualizado com imagensIds!")
+                                        // Agora finalizar
+                                        finalizarSalvamento(updatedRegistration, hasUploadedImages = true)
+                                    }.onFailure { ex ->
+                                        android.util.Log.e("RegistroPlantaVM", "❌ Erro ao atualizar IDs: ${ex.message}", ex)
+                                        // Mesmo com erro, tentar finalizar
+                                        finalizarSalvamento(updatedRegistration, hasUploadedImages = true)
+                                    }
+                                }
+                            },
+                            onFailure = { exception ->
+                                android.util.Log.e("RegistroPlantaVM", "❌ ERRO no upload: ${exception.message}", exception)
+                                viewModelScope.launch(Dispatchers.Main) {
+                                    _isLoading.value = false
+                                    _errorMessage.value = "Erro ao fazer upload das imagens: ${exception.message}"
+                                }
+                            }
+                        )
+                    }.onFailure { exception ->
+                        android.util.Log.e("RegistroPlantaVM", "❌ ERRO ao salvar metadados: ${exception.message}", exception)
+                        viewModelScope.launch(Dispatchers.Main) {
+                            _isLoading.value = false
+                            _errorMessage.value = "Erro ao salvar: ${exception.message}"
+                        }
                     }
-                )
+                }
             } else {
+                android.util.Log.d("RegistroPlantaVM", "⚠️ Nenhuma imagem selecionada, salvando sem imagens")
                 // Save registration without images
-                saveRegistrationToDatabase(registration)
+                saveRegistrationToDatabase(registration, hasUploadedImages = false)
             }
             
         } catch (e: Exception) {
+            android.util.Log.e("RegistroPlantaVM", "❌ ERRO FATAL em saveToFirebase: ${e.message}", e)
             _isLoading.value = false
             _errorMessage.value = "Erro ao salvar: ${e.message}"
         }
     }
     
-    private fun saveRegistrationToDatabase(registration: Planta) {
+    /**
+     * Finaliza o salvamento criando postagem e atualizando UI
+     */
+    private fun finalizarSalvamento(registration: Planta, hasUploadedImages: Boolean) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("RegistroPlantaVM", "✅ Finalizando salvamento...")
+                
+                // Criar postagem no feed
+                try {
+                    criarPostagemDoRegistro(registration, hasUploadedImages)
+                } catch (e: Exception) {
+                    android.util.Log.e("RegistroPlantaVM", "⚠️ Erro ao criar postagem (não crítico): ${e.message}", e)
+                }
+                
+                // Force refresh repository
+                android.util.Log.d("RegistroPlantaVM", "🔄 Forçando refresh do repositório...")
+                try {
+                    repository.getUserPlants(forceRefresh = true)
+                } catch (e: Exception) {
+                    android.util.Log.e("RegistroPlantaVM", "⚠️ Erro ao atualizar repositório: ${e.message}", e)
+                }
+                
+                android.util.Log.d("RegistroPlantaVM", "✅ SALVAMENTO COMPLETO!")
+                
+                // Notificar sucesso
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _saveSuccess.value = true
+                }
+                clearFormData()
+                
+            } catch (e: Exception) {
+                android.util.Log.e("RegistroPlantaVM", "❌ Erro ao finalizar: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _errorMessage.value = "Erro ao finalizar salvamento: ${e.message}"
+                }
+            }
+        }
+    }
+    
+    private fun saveRegistrationToDatabase(registration: Planta, hasUploadedImages: Boolean = false) {
         // Use coroutines for async database operations
         viewModelScope.launch {
             try {
                 android.util.Log.d("RegistroPlantaVM", "🔥 SALVANDO PLANTA: ${registration.id}")
                 android.util.Log.d("RegistroPlantaVM", "🔥 USER ID: ${registration.userId}")
                 android.util.Log.d("RegistroPlantaVM", "🔥 USER NAME: ${registration.userName}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 NOME: ${registration.nome}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 LOCAL: ${registration.local}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 CATEGORIA: ${registration.categoria}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 IMAGENS: ${registration.imagens.size}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 IDs das imagens: ${registration.imagens}")
+                android.util.Log.d("RegistroPlantaVM", "🔥 Tem imagens: $hasUploadedImages")
                 
+                // ✅ CORRIGIDO: Manter os IDs das imagens para não sobrescrever o nó com Base64
                 val result = databaseService.savePlant(registration)
                 
                 result.onSuccess { plantId ->
-                    // Criar postagem após salvar o registro
-                    criarPostagemDoRegistro(registration)
+                    android.util.Log.d("RegistroPlantaVM", "✅ PLANTA SALVA COM SUCESSO! ID: $plantId")
+                    
+                    // Criar postagem após salvar o registro (com try-catch)
+                    try {
+                        criarPostagemDoRegistro(registration, hasUploadedImages)
+                    } catch (e: Exception) {
+                        android.util.Log.e("RegistroPlantaVM", "⚠️ Erro ao criar postagem (não crítico): ${e.message}", e)
+                    }
                     
                     // Force refresh repository to load newly saved registration
-                    repository.getUserPlants(forceRefresh = true)
-                    _isLoading.value = false
-                    _saveSuccess.value = true
+                    android.util.Log.d("RegistroPlantaVM", "🔄 Forçando refresh do repositório...")
+                    try {
+                        repository.getUserPlants(forceRefresh = true)
+                    } catch (e: Exception) {
+                        android.util.Log.e("RegistroPlantaVM", "⚠️ Erro ao atualizar repositório: ${e.message}", e)
+                    }
+
+                    android.util.Log.d("RegistroPlantaVM", "✅ SALVAMENTO COMPLETO!")
+                    
+                    // IMPORTANTE: Garantir que o sucesso seja notificado
+                    withContext(Dispatchers.Main) {
+                        _isLoading.value = false
+                        _saveSuccess.value = true
+                    }
                     clearFormData()
                 }.onFailure { exception ->
-                    _isLoading.value = false
-                    _errorMessage.value = "Erro ao salvar registro: ${exception.message}"
+                    android.util.Log.e("RegistroPlantaVM", "❌ ERRO AO SALVAR: ${exception.message}", exception)
+                    exception.printStackTrace()
+                    
+                    // Garantir que erro seja exibido na UI thread
+                    withContext(Dispatchers.Main) {
+                        _isLoading.value = false
+                        
+                        val errorMsg = when {
+                            exception.message?.contains("auth") == true || 
+                            exception.message?.contains("authenticated") == true -> 
+                                "❌ Erro de autenticação: Faça login novamente"
+                            exception.message?.contains("permission") == true || 
+                            exception.message?.contains("denied") == true -> 
+                                "❌ Sem permissão: Verifique as regras do Firebase"
+                            exception.message?.contains("network") == true -> 
+                                "❌ Erro de conexão: Verifique sua internet"
+                            else -> 
+                                "❌ Erro ao salvar: ${exception.message}"
+                        }
+                        
+                        _errorMessage.value = errorMsg
+                    }
                 }
                 
             } catch (e: Exception) {
-                _isLoading.value = false
-                _errorMessage.value = "Erro inesperado: ${e.message}"
+                android.util.Log.e("RegistroPlantaVM", "❌ ERRO INESPERADO: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _errorMessage.value = "❌ Erro inesperado: ${e.message}"
+                }
             }
         }
     }
@@ -262,14 +418,59 @@ class RegistroPlantaViewModel : ViewModel() {
      * Cria uma PostagemFeed a partir de um registro de Planta
      * A postagem é automaticamente compartilhada no feed público
      */
-    private fun criarPostagemDoRegistro(registration: Planta) {
-        viewModelScope.launch {
+    private fun criarPostagemDoRegistro(registration: Planta, hasUploadedImages: Boolean = false) {
+        // Usar GlobalScope para não cancelar quando sair da tela
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
             try {
+                // Buscar foto do usuário do Firebase Auth
+                val currentUser = FirebaseConfig.getAuth().currentUser
+                val userPhotoUrl = currentUser?.photoUrl?.toString() ?: ""
+                
+                // Buscar a primeira imagem Base64 da planta (se houver)
+                var imageBase64 = ""
+                if (hasUploadedImages && registration.imagens.isNotEmpty()) {
+                    android.util.Log.d("RegistroPlantaVM", "🖼️ Planta tem ${registration.imagens.size} imagens")
+                    android.util.Log.d("RegistroPlantaVM", "🖼️ Primeira imagem ID: ${registration.imagens.firstOrNull()}")
+                    android.util.Log.d("RegistroPlantaVM", "🖼️ Buscando primeira imagem da planta no Firebase...")
+                    
+                    val realtimeManager = FirebaseConfig.getRealtimeDatabaseImageManager()
+                    
+                    // Tentar buscar a imagem com retry (máximo 3 tentativas)
+                    var tentativas = 0
+                    while (tentativas < 3 && imageBase64.isEmpty()) {
+                        if (tentativas > 0) {
+                            android.util.Log.d("RegistroPlantaVM", "⏳ Tentativa ${tentativas + 1}/3...")
+                            kotlinx.coroutines.delay(500)
+                        }
+                        
+                        android.util.Log.d("RegistroPlantaVM", "📞 CHAMANDO getFirstPlantImage(${registration.id})")
+                        val imageResult = realtimeManager.getFirstPlantImage(registration.id)
+                        android.util.Log.d("RegistroPlantaVM", "📦 Result recebido: success=${imageResult.isSuccess}, failure=${imageResult.isFailure}")
+                        
+                        imageResult.onSuccess { base64 ->
+                            android.util.Log.d("RegistroPlantaVM", "📦 onSuccess chamado: isEmpty=${base64.isEmpty()}, length=${base64.length}")
+                            if (base64.isNotEmpty()) {
+                                imageBase64 = base64
+                                android.util.Log.d("RegistroPlantaVM", "✅ Imagem Base64 recuperada (${base64.length} chars)")
+                            }
+                        }.onFailure { exception ->
+                            android.util.Log.e("RegistroPlantaVM", "⚠️ Erro na tentativa ${tentativas + 1}: ${exception.message}")
+                        }
+                        tentativas++
+                    }
+                    
+                    if (imageBase64.isEmpty()) {
+                        android.util.Log.e("RegistroPlantaVM", "❌ Não foi possível recuperar imagem após 3 tentativas")
+                    }
+                } else {
+                    android.util.Log.d("RegistroPlantaVM", "⚠️ Registro sem imagens (hasUploadedImages=$hasUploadedImages)")
+                }
+                
                 val usuario = UsuarioPostagem(
                     id = registration.userId,
                     nome = registration.userName,
                     nomeExibicao = registration.userName,
-                    avatarUrl = "", // TODO: Buscar avatar do usuário se disponível
+                    avatarUrl = userPhotoUrl,
                     isVerificado = false,
                     totalRegistros = 0,
                     totalCurtidas = 0
@@ -281,18 +482,18 @@ class RegistroPlantaViewModel : ViewModel() {
                     usuario = usuario,
                     titulo = registration.nome,
                     descricao = registration.observacao,
-                    imageUrl = registration.imagens.firstOrNull() ?: "",
-                    localizacao = registration.local,
+                    imageUrl = imageBase64, // Usar Base64 em vez de ID
+                    localizacao = "", // Localização removida para privacidade
                     dataPostagem = registration.timestamp
                 )
                 
-                // Salvar postagem no feed público
-                val result = databaseService.savePostagem(postagem)
+                // Salvar postagem no feed público usando serviço simplificado
+                val result = socialService.salvarPostagem(postagem)
                 
                 result.onSuccess {
-                    android.util.Log.d("RegistroPlantaVM", "Postagem criada com sucesso: ${postagem.id}")
+                    android.util.Log.d("RegistroPlantaVM", "✅ Postagem criada com sucesso: ${postagem.id}")
                 }.onFailure { exception ->
-                    android.util.Log.e("RegistroPlantaVM", "Erro ao criar postagem", exception)
+                    android.util.Log.e("RegistroPlantaVM", "❌ Erro ao criar postagem", exception)
                 }
                 
             } catch (e: Exception) {

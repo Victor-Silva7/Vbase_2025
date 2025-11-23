@@ -71,36 +71,56 @@ class RegistrosListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         try {
-            Log.d("RegistrosListFragment", "onViewCreated iniciado")
-            setupRecyclerView()
-            Log.d("RegistrosListFragment", "setupRecyclerView OK")
-            setupSwipeRefresh()
-            Log.d("RegistrosListFragment", "setupSwipeRefresh OK")
-            setupFilters()
-            Log.d("RegistrosListFragment", "setupFilters OK")
-            observeViewModel()
-            Log.d("RegistrosListFragment", "observeViewModel OK")
+            Log.d("RegistrosListFragment", "🔥 onViewCreated INICIADO")
             
+            // Verificar se binding está OK
+            if (_binding == null) {
+                Log.e("RegistrosListFragment", "❌ BINDING É NULL!")
+                return
+            }
+            
+            Log.d("RegistrosListFragment", "✅ Binding OK, configurando RecyclerView...")
+            setupRecyclerView()
+            
+            Log.d("RegistrosListFragment", "✅ RecyclerView OK, configurando SwipeRefresh...")
+            setupSwipeRefresh()
+            
+            Log.d("RegistrosListFragment", "✅ SwipeRefresh OK, configurando Filtros...")
+            setupFilters()
+            
+            Log.d("RegistrosListFragment", "✅ Filtros OK, configurando Observers...")
+            observeViewModel()
+            
+            Log.d("RegistrosListFragment", "✅ Observers OK, carregando dados...")
             // Load initial data
             try {
                 sharedViewModel.loadRegistrations()
-                Log.d("RegistrosListFragment", "loadRegistrations OK")
+                Log.d("RegistrosListFragment", "✅ TUDO OK! Dados carregados.")
             } catch (e: Exception) {
-                Log.e("RegistrosListFragment", "Erro ao carregar registros: ${e.message}", e)
+                Log.e("RegistrosListFragment", "❌ Erro ao carregar registros", e)
                 e.printStackTrace()
                 showError("Erro ao carregar registros: ${e.message}")
             }
         } catch (e: Exception) {
-            Log.e("RegistrosListFragment", "Erro em onViewCreated", e)
+            Log.e("RegistrosListFragment", "❌ ERRO FATAL em onViewCreated", e)
             e.printStackTrace()
             showError("Erro ao inicializar tela: ${e.message}")
+            
+            // Tentar voltar para tela anterior
+            try {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            } catch (backError: Exception) {
+                Log.e("RegistrosListFragment", "Não conseguiu voltar", backError)
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
+        Log.d("RegistrosListFragment", "📱 onResume - Recarregando registros...")
         // Recarrega dados toda vez que o fragment é exibido (ao voltar do Registro Activity)
         sharedViewModel.loadRegistrations()
+        Log.d("RegistrosListFragment", "📱 onResume - loadRegistrations() chamado")
     }
 
     /**
@@ -108,37 +128,58 @@ class RegistrosListFragment : Fragment() {
      */
     private fun setupRecyclerView() {
         try {
+            Log.d("RegistrosListFragment", "📋 Criando adapter...")
+            
             registrosAdapter = RegistrosAdapter(
                 onItemClick = { registration ->
-                    // Handle item click (open details)
-                    openRegistrationDetails(registration)
+                    try {
+                        openRegistrationDetails(registration)
+                    } catch (e: Exception) {
+                        Log.e("RegistrosListFragment", "Erro no clique", e)
+                    }
                 },
                 onEditClick = { registration ->
-                    // Handle edit click
-                    editRegistration(registration)
+                    try {
+                        editRegistration(registration)
+                    } catch (e: Exception) {
+                        Log.e("RegistrosListFragment", "Erro no edit", e)
+                    }
                 },
                 onShareClick = { registration ->
-                    // Handle share click
-                    shareRegistration(registration)
+                    try {
+                        shareRegistration(registration)
+                    } catch (e: Exception) {
+                        Log.e("RegistrosListFragment", "Erro no share", e)
+                    }
                 }
             )
+            
+            Log.d("RegistrosListFragment", "✅ Adapter criado")
 
             val recyclerView = binding?.recyclerView ?: run {
-                Log.w("RegistrosListFragment", "RecyclerView is null")
-                return
+                Log.e("RegistrosListFragment", "❌ RecyclerView is null!")
+                throw IllegalStateException("RecyclerView não encontrado no layout")
             }
+            
+            Log.d("RegistrosListFragment", "📋 Configurando RecyclerView...")
 
             // Use StaggeredGrid for better visual presentation
             recyclerView.apply {
-                layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-                adapter = registrosAdapter
-                setHasFixedSize(true)
+                try {
+                    layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+                    adapter = registrosAdapter
+                    setHasFixedSize(true)
+                    Log.d("RegistrosListFragment", "✅ RecyclerView configurado com sucesso")
+                } catch (e: Exception) {
+                    Log.e("RegistrosListFragment", "❌ Erro ao configurar RecyclerView", e)
+                    throw e
+                }
             }
             
-            Log.d("RegistrosListFragment", "setupRecyclerView - RecyclerView configured")
         } catch (e: Exception) {
-            Log.e("RegistrosListFragment", "setupRecyclerView error", e)
+            Log.e("RegistrosListFragment", "❌ ERRO FATAL em setupRecyclerView", e)
             e.printStackTrace()
+            throw e // Re-throw para que onViewCreated possa tratar
         }
     }
 

@@ -55,12 +55,12 @@
             app:exitAnim="@android:anim/fade_out" />
     </fragment>
 
-    <!-- NOTIFICAÇÕES -->
+    <!-- PERFIL -->
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
+        android:name="com.ifpr.androidapptemplate.ui.perfil.PerfilFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_perfil" />
 
     <!-- PERFIL DO USUÁRIO -->
     <fragment

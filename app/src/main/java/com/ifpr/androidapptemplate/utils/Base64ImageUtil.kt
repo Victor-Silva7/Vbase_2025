@@ -54,7 +54,8 @@ object Base64ImageUtil {
             resizedBitmap.compress(Bitmap.CompressFormat.JPEG, QUALITY, outputStream)
             val bytes = outputStream.toByteArray()
             
-            Base64.encodeToString(bytes, Base64.DEFAULT)
+            // Adiciona o prefixo data:image/jpeg;base64, para o Glide reconhecer
+            "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
 
         } catch (e: IOException) {
             Log.e(TAG, "Erro ao processar imagem: ${e.message}", e)

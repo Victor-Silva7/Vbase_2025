@@ -126,6 +126,14 @@ object FirebaseConfig {
     }
     
     /**
+     * Get Realtime Database Image Manager instance
+     */
+    fun getRealtimeDatabaseImageManager(): RealtimeDatabaseImageManager {
+        checkInitialization()
+        return RealtimeDatabaseImageManager.getInstance()
+    }
+    
+    /**
      * Database structure for V Group
      */
     object DatabasePaths {
@@ -193,6 +201,11 @@ object FirebaseConfig {
      * Get initialization status
      */
     fun isInitialized(): Boolean = isInitialized
+    
+    /**
+     * Get current authenticated user
+     */
+    fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
     
     /**
      * Get current authenticated user ID

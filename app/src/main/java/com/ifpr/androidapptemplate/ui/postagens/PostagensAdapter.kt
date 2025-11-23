@@ -52,11 +52,9 @@ class PostagensAdapter(
         fun bind(postagem: PostagemFeed) {
             // Header do usuário
             binding.textViewUserName.text = postagem.usuario.nome
-            binding.textViewUserLocation.text = postagem.usuario.localizacao.ifEmpty { "Localização não informada" }
+            // textViewUserLocation removido do layout
             
-            // Badge de verificação
-            binding.imageViewVerified.visibility = 
-                if (postagem.usuario.isVerificado) View.VISIBLE else View.GONE
+            // imageViewVerified removido do layout
 
             // Avatar do usuário
             if (postagem.usuario.avatarUrl.isNotEmpty()) {
@@ -100,17 +98,15 @@ class PostagensAdapter(
 
             // Interações - Atualizar estatísticas
             val stats = String.format(
-                "%d curtidas • %d comentários • %d compartilhamentos",
+                "%d curtidas • %d comentários",
                 postagem.interacoes.curtidas,
-                postagem.interacoes.comentarios,
-                postagem.interacoes.compartilhamentos
+                postagem.interacoes.comentarios
             )
             binding.textViewInteractionStats.text = stats
 
             // Botões de ação
             binding.buttonLike.setOnClickListener { onLikeClick(postagem) }
             binding.buttonComment.setOnClickListener { onCommentClick(postagem) }
-            binding.buttonShare.setOnClickListener { onShareClick(postagem) }
 
             // Click no card inteiro
             binding.root.setOnClickListener { onItemClick(postagem) }

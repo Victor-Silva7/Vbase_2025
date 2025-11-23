@@ -53,8 +53,9 @@ class RegistroFragment : Fragment() {
         }
         
         binding.buttonSeusRegistros.setOnClickListener {
-            // Navegar para lista de registros do usuário (fragment interno)
-            findNavController().navigate(R.id.navigation_registros_list)
+            // Abrir Activity de Meus Registros (solução mais estável)
+            val intent = Intent(requireContext(), MeusRegistrosActivity::class.java)
+            startActivity(intent)
         }
 
         // FAB para AI Logic

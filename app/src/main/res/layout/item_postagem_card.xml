@@ -57,21 +57,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="Maria Silva" />
-
-                    <!-- Selo de verificação -->
-                    <ImageView
-                        android:id="@+id/imageViewVerified"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginStart="4dp"
-                        android:src="@drawable/ic_verified_24dp"
-                        android:visibility="gone"
-                        app:tint="@color/primary_green"
-                        tools:visibility="visible" />
 
                 </LinearLayout>
 
@@ -82,28 +71,6 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:layout_marginTop="2dp">
-
-                    <!-- Nível do usuário -->
-                    <TextView
-                        android:id="@+id/textViewUserLevel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/primary_green"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        tools:text="Especialista"
-                        tools:ignore="SmallSp" />
-
-                    <!-- Localização do usuário -->
-                    <TextView
-                        android:id="@+id/textViewUserLocation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:textColor="@color/text_hint"
-                        android:textSize="10sp"
-                        tools:text="Curitiba, PR"
-                        tools:ignore="SmallSp" />
 
                 </LinearLayout>
 
@@ -138,14 +105,6 @@
                     android:textSize="12sp"
                     tools:text="2h" />
 
-                <!-- Tipo de postagem -->
-                <ImageView
-                    android:id="@+id/imageViewPostType"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_planta_24dp"
-                    app:tint="@color/healthy_color" />
-
             </LinearLayout>
 
             <!-- Título da postagem -->
@@ -153,7 +112,7 @@
                 android:id="@+id/textViewPostTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="4dp"
@@ -164,7 +123,7 @@
                 android:id="@+id/textViewPostDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
+                android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:lineSpacingExtra="2dp"
                 android:maxLines="3"
@@ -195,21 +154,6 @@
                 android:layout_marginTop="8dp"
                 android:visibility="gone"
                 tools:visibility="visible">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_location_24dp"
-                    app:tint="@color/text_hint" />
-
-                <TextView
-                    android:id="@+id/textViewPostLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="@color/text_hint"
-                    android:textSize="12sp"
-                    tools:text="Jardim Botânico, Curitiba, PR" />
 
             </LinearLayout>
 
@@ -245,7 +189,7 @@
                 android:textColor="@color/text_hint"
                 android:textSize="12sp"
                 android:layout_marginBottom="8dp"
-                tools:text="23 curtidas • 5 comentários • 2 compartilhamentos" />
+                tools:text="23 curtidas • 5 comentários" />
 
             <!-- Botões de ação -->
             <LinearLayout
@@ -308,66 +252,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:text="Comentar"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <!-- Botão compartilhar -->
-                <LinearLayout
-                    android:id="@+id/buttonShare"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_share_24dp"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Compartilhar"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-                <!-- Botão salvar -->
-                <LinearLayout
-                    android:id="@+id/buttonBookmark"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="8dp">
-
-                    <ImageView
-                        android:id="@+id/imageViewBookmark"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_bookmark_border_24dp"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:id="@+id/textViewBookmark"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="Salvar"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 

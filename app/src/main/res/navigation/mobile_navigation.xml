@@ -19,9 +19,9 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.ifpr.androidapptemplate.ui.notifications.NotificationsFragment"
+        android:name="com.ifpr.androidapptemplate.ui.perfil.PerfilFragment"
         android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_notificacoes" />
     
     <!-- Lista de registros do usuário (navegação interna da aba Registro) -->
     <fragment
@@ -29,16 +29,6 @@
         android:name="com.ifpr.androidapptemplate.ui.registro.RegistrosListFragment"
         android:label="@string/meus_registros_title"
         tools:layout="@layout/fragment_registros_list" />
-
-    <fragment
-        android:id="@+id/navigation_comentarios"
-        android:name="com.ifpr.androidapptemplate.ui.comentarios.ComentariosFragment"
-        android:label="Comentários"
-        tools:layout="@layout/fragment_comentarios">
-        <argument
-            android:name="postId"
-            app:argType="string" />
-    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"

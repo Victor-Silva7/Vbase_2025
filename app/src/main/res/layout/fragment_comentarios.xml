@@ -36,6 +36,8 @@
             android:layout_height="match_parent">
 
             <!-- RecyclerView para comentários -->
+
+            <!-- Indicador de carregamento -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewComments"
                 android:layout_width="match_parent"
@@ -45,7 +47,6 @@
                 android:paddingTop="8dp"
                 tools:listitem="@layout/item_comentario" />
 
-            <!-- Indicador de carregamento -->
             <LinearLayout
                 android:id="@+id/layoutLoading"
                 android:layout_width="match_parent"
@@ -92,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:text="Nenhum comentário ainda"
-                    android:textColor="@color/text_primary"
+                    android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:gravity="center" />
@@ -101,7 +102,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Seja o primeiro a comentar nesta postagem"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="#FFFFFF"
                     android:textSize="14sp"
                     android:gravity="center"
                     android:lineSpacingExtra="4dp" />
@@ -278,28 +279,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:orientation="vertical">
-
-                <!-- Botão de anexo -->
-                <ImageButton
-                    android:id="@+id/buttonAddAttachment"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginBottom="4dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_attachment_24dp"
-                    app:tint="@color/text_secondary" />
-
-                <!-- Botão de enviar -->
-                <ImageButton
-                    android:id="@+id/buttonSend"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="@drawable/ic_circle_background"
-                    android:src="@drawable/ic_send_24dp"
-                    app:tint="@android:color/white" />
-
-            </LinearLayout>
+                android:orientation="vertical"/>
 
         </LinearLayout>
 

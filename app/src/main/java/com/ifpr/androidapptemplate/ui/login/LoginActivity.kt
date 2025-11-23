@@ -31,12 +31,10 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleLoginButton: SignInButton
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 9001
-    private val TAG = "LoginActivity"
-
+    
     companion object {
-        private const val RC_SIGN_IN_COMPANION = 9001
-        private const val TAG_COMPANION = "signInWithEmail"
+        private const val RC_SIGN_IN = 9001
+        private const val TAG = "LoginActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,15 +98,8 @@ class LoginActivity : AppCompatActivity() {
             return
         }
         
-        // Implementar autenticação real aqui
-        // Por exemplo, chamar um serviço de autenticação
-        // Para este exemplo, vamos simular um login bem-sucedido
-        Toast.makeText(this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
-        
-        // Navegar para a MainActivity após login bem-sucedido
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
+        // Chama autenticação Firebase real
+        signIn(email, password)
     }
 
     private fun navigateToRegister() {

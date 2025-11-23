@@ -109,27 +109,30 @@ class PostagensFragment : Fragment() {
 
     private fun handleLikeClick(postagem: PostagemFeed) {
         viewModel.likePostagem(postagem.id)
-        Toast.makeText(
-            context,
-            if (postagem.interacoes.curtidoPeloUsuario) "Descurtido" else "Curtido",
-            Toast.LENGTH_SHORT
-        ).show()
+        // Removido Toast - feedback visual já existe no botão
     }
 
     private fun handleCommentClick(postagem: PostagemFeed) {
-        viewModel.commentOnPostagem(postagem.id, "")
-        // TODO: Abrir dialog/tela de comentários
-        Toast.makeText(context, "Comentários em desenvolvimento", Toast.LENGTH_SHORT).show()
+        // Abrir tela de comentários
+        openCommentsScreen(postagem)
     }
 
     private fun handleShareClick(postagem: PostagemFeed) {
-        viewModel.sharePostagem(postagem.id)
-        Toast.makeText(context, "Compartilhado", Toast.LENGTH_SHORT).show()
+        // Funcionalidade de compartilhar removida temporariamente
+        Toast.makeText(context, "Compartilhar em breve", Toast.LENGTH_SHORT).show()
     }
 
     private fun handleItemClick(postagem: PostagemFeed) {
         // TODO: Navegar para detalhes da postagem ou perfil do usuário
         Toast.makeText(context, "Postagem: ${postagem.titulo}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun openCommentsScreen(postagem: PostagemFeed) {
+        // Abrir ComentariosActivity
+        val intent = android.content.Intent(requireContext(), com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity::class.java)
+        intent.putExtra(com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity.EXTRA_POSTAGEM_ID, postagem.id)
+        intent.putExtra(com.ifpr.androidapptemplate.ui.comentarios.ComentariosActivity.EXTRA_POSTAGEM_TITULO, postagem.titulo)
+        startActivity(intent)
     }
 
     override fun onDestroyView() {
