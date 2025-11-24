@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:text="Descreva sua questão ou compartilhe uma imagem"
             android:textSize="14sp"
-            android:textColor="#999999"
+            android:textColor="#FFFFFF"
             android:gravity="center"
             android:layout_marginBottom="32dp" />
 
@@ -114,8 +114,8 @@
                     android:hint="Digite sua pergunta ou descrição..."
                     android:inputType="textMultiLine"
                     android:padding="12dp"
-                    android:textColor="#999999"
-                    android:textColorHint="#666666" />
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#AAAAAA" />
 
             </LinearLayout>
 
@@ -164,7 +164,7 @@
                     android:minHeight="150dp"
                     android:text="Aguardando resposta..."
                     android:textSize="14sp"
-                    android:textColor="#999999"
+                    android:textColor="#FFFFFF"
                     android:lineSpacingMultiplier="1.5" />
 
             </LinearLayout>

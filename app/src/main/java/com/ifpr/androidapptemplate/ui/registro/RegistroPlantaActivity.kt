@@ -99,11 +99,10 @@ class RegistroPlantaActivity : AppCompatActivity() {
             binding.recyclerViewImages.visibility = if (images.isNotEmpty()) 
                 android.view.View.VISIBLE else android.view.View.GONE
             
-            binding.textImageCounter.text = "${images.size}/5"
+            binding.textImageCounter.text = "${images.size}/1"
             
             val color = when {
-                images.size == 5 -> getColor(R.color.vgroup_green)
-                images.size >= 3 -> getColor(android.R.color.holo_orange_light)
+                images.size == 1 -> getColor(R.color.vgroup_green)
                 else -> getColor(R.color.vgroup_text_secondary)
             }
             binding.textImageCounter.setTextColor(color)

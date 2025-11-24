@@ -178,7 +178,7 @@ object FirebaseConfig {
      */
     object SecurityRules {
         const val MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
-        const val MAX_IMAGES_PER_REGISTRATION = 5
+        const val MAX_IMAGES_PER_REGISTRATION = 1
         const val ALLOWED_IMAGE_TYPES = "image/jpeg,image/png,image/webp"
         
         fun isValidImageType(contentType: String?): Boolean {

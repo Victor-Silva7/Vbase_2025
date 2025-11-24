@@ -29,7 +29,7 @@ object AppConfig {
     const val MAX_IMAGE_WIDTH = 1024
     const val MAX_IMAGE_HEIGHT = 1024
     const val IMAGE_QUALITY = 70
-    const val MAX_IMAGES_PER_REGISTRATION = 5
+    const val MAX_IMAGES_PER_REGISTRATION = 1
     
     // ===== FIREBASE =====
     object Firebase {

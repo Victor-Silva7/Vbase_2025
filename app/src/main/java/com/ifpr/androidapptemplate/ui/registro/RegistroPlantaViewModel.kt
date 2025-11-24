@@ -56,7 +56,7 @@ class RegistroPlantaViewModel : ViewModel() {
     private val socialService = com.ifpr.androidapptemplate.data.firebase.SimpleSocialService.getInstance()
     
     // Maximum number of images allowed
-    private val maxImages = 5
+    private val maxImages = 1
 
     init {
         _selectedImages.value = mutableListOf()

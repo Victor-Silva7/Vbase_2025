@@ -92,10 +92,10 @@ class RegistroInsetoViewModel : ViewModel() {
     
     fun addImagesFromGallery(uris: List<Uri>) {
         val currentList = _selectedImages.value ?: mutableListOf()
-        val availableSlots = 5 - currentList.size
+        val availableSlots = 1 - currentList.size
         
         if (availableSlots <= 0) {
-            _errorMessage.value = "Máximo de 5 imagens permitidas"
+            _errorMessage.value = "Apenas 1 imagem é permitida"
             return
         }
         
@@ -110,15 +110,15 @@ class RegistroInsetoViewModel : ViewModel() {
         _selectedImages.value = currentList
         
         if (uris.size > availableSlots) {
-            _errorMessage.value = "Apenas ${availableSlots} imagens foram adicionadas (limite de 5)"
+            _errorMessage.value = "Apenas 1 imagem pode ser adicionada"
         }
     }
     
     private fun addImageToList(uri: Uri) {
         val currentList = _selectedImages.value ?: mutableListOf()
         
-        if (currentList.size >= 5) {
-            _errorMessage.value = "Máximo de 5 imagens permitidas"
+        if (currentList.size >= 1) {
+            _errorMessage.value = "Apenas 1 imagem é permitida"
             return
         }
         

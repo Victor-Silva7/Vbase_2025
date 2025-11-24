@@ -104,16 +104,20 @@ class RegistroInsetoActivity : AppCompatActivity() {
         
         binding.inputLayoutObservacao.error = when (category) {
             InsectCategory.PEST -> {
-                if (trimmedObservacao.length < 10) 
-                    getString(R.string.error_observacao_required_pest) 
+                if (trimmedObservacao.isEmpty()) 
+                    "Descreva brevemente a praga observada" 
                 else null
             }
             InsectCategory.BENEFICIAL -> {
-                if (trimmedObservacao.length < 5) 
+                if (trimmedObservacao.isEmpty()) 
                     "Descreva brevemente o benefício observado" 
                 else null
             }
-            InsectCategory.NEUTRAL -> null
+            InsectCategory.NEUTRAL -> {
+                if (trimmedObservacao.isEmpty()) 
+                    "Adicione pelo menos uma observação" 
+                else null
+            }
             null -> null
         }
     }
@@ -130,11 +134,10 @@ class RegistroInsetoActivity : AppCompatActivity() {
             binding.recyclerViewImages.visibility = if (images.isNotEmpty()) 
                 android.view.View.VISIBLE else android.view.View.GONE
             
-            binding.textImageCounter.text = "${images.size}/5"
+            binding.textImageCounter.text = "${images.size}/1"
             
             val color = when {
-                images.size == 5 -> getColor(R.color.vgroup_green)
-                images.size >= 3 -> getColor(android.R.color.holo_orange_light)
+                images.size == 1 -> getColor(R.color.vgroup_green)
                 else -> getColor(R.color.vgroup_text_secondary)
             }
             binding.textImageCounter.setTextColor(color)
