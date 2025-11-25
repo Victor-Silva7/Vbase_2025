@@ -44,14 +44,12 @@
         },
         "plantas": {
           "$plantaId": {
-            ".write": "auth != null && auth.uid == $userId",
-            ".validate": "newData.hasChild('id') && newData.hasChild('nome') && newData.hasChild('userId') && newData.hasChild('timestamp')"
+            ".write": "auth != null && auth.uid == $userId"
           }
         },
         "insetos": {
           "$insetoId": {
-            ".write": "auth != null && auth.uid == $userId",
-            ".validate": "newData.hasChild('id') && newData.hasChild('nome') && newData.hasChild('userId') && newData.hasChild('timestamp')"
+            ".write": "auth != null && auth.uid == $userId"
           }
         }
       }
