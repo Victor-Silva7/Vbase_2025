@@ -1,0 +1,44 @@
+package com.victor.vgroup
+
+import android.os.Bundle
+import android.content.Intent
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
+import com.victor.vgroup.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navView: BottomNavigationView = binding.navView
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navView.setupWithNavController(navController)
+        
+        // Verificar se foi solicitada navegação para um fragmento específico
+        handleNavigationIntent(intent)
+    }
+    
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Lidar com intents recebidos quando a activity já está em execução
+        intent?.let { handleNavigationIntent(it) }
+    }
+    
+    private fun handleNavigationIntent(intent: Intent) {
+        val navigateTo = intent.getStringExtra("navigate_to")
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        
+        when (navigateTo) {
+            // Adicione casos de navegação conforme necessário
+            // Exemplo: "comentarios" -> navController.navigate(R.id.navigation_comentarios)
+        }
+    }
+}

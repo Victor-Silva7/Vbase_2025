@@ -10,6 +10,22 @@
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00000000</color>
     
+    <!-- Cor primária do tema -->
+    <color name="colorPrimary">#029e5a</color>
+    <color name="colorPrimaryVariant">#017a46</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    
+    <!-- Cores secundárias do tema -->
+    <color name="colorSecondary">#029e5a</color>
+    <color name="colorSecondaryVariant">#017a46</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    
+    <!-- Cores de fundo do tema -->
+    <color name="colorBackground">#FAFAFA</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnBackground">#212121</color>
+    <color name="colorOnSurface">#212121</color>
+    
     <!-- Cores do aplicativo V Group - Manejo Verde -->
     <color name="v_green">#029e5a</color>
     <color name="v_dark">#1a1a1a</color>

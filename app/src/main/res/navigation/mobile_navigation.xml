@@ -7,32 +7,32 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.ifpr.androidapptemplate.ui.registro.RegistroFragment"
+        android:name="com.victor.vgroup.ui.registro.RegistroFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_registro" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.ifpr.androidapptemplate.ui.postagens.PostagensFragment"
+        android:name="com.victor.vgroup.ui.postagens.PostagensFragment"
         android:label="@string/title_dashboard"
         tools:layout="@layout/fragment_postagens" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.ifpr.androidapptemplate.ui.perfil.PerfilFragment"
+        android:name="com.victor.vgroup.ui.perfil.PerfilFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notificacoes" />
     
     <!-- Lista de registros do usuário (navegação interna da aba Registro) -->
     <fragment
         android:id="@+id/navigation_registros_list"
-        android:name="com.ifpr.androidapptemplate.ui.registro.RegistrosListFragment"
+        android:name="com.victor.vgroup.ui.registro.RegistrosListFragment"
         android:label="@string/meus_registros_title"
         tools:layout="@layout/fragment_registros_list" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.ifpr.androidapptemplate.ui.usuario.PerfilUsuarioFragment"
+        android:name="com.victor.vgroup.ui.usuario.PerfilUsuarioFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_perfil_usuario" />
 </navigation>
