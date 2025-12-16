@@ -37,17 +37,19 @@ class ImagePickerManager(
             }
         }
     
+    // Photo Picker for single image (Android 13+ and backported via Google Play Services)
     private val galleryPickerLauncher: ActivityResultLauncher<PickVisualMediaRequest> = 
-        activity.registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(5)) { uris ->
-            if (uris.isNotEmpty()) {
-                onImagesSelected(uris)
+        activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                onImagesSelected(listOf(uri))
             }
         }
     
+    // Legacy gallery picker for older devices (single image)
     private val legacyGalleryLauncher: ActivityResultLauncher<String> = 
-        activity.registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-            if (uris.isNotEmpty()) {
-                onImagesSelected(uris)
+        activity.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                onImagesSelected(listOf(uri))
             }
         }
     
@@ -72,20 +74,21 @@ class ImagePickerManager(
     
     /**
      * Request to select images from gallery
+     * Photo Picker doesn't require permissions on Android 13+
      */
     fun selectFromGallery() {
-        if (!checkStoragePermission()) {
-            requestStoragePermission()
-            return
-        }
-        
         try {
+            // Try Photo Picker first (Android 13+ and backported to older versions via Google Play Services)
             galleryPickerLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         } catch (e: Exception) {
-            // Fallback for older devices
-            legacyGalleryLauncher.launch("image/*")
+            // Fallback to legacy gallery picker
+            if (checkStoragePermission()) {
+                legacyGalleryLauncher.launch("image/*")
+            } else {
+                requestStoragePermission()
+            }
         }
     }
     
@@ -122,17 +125,10 @@ class ImagePickerManager(
     }
     
     private fun checkStoragePermission(): Boolean {
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            ContextCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+        return ContextCompat.checkSelfPermission(
+            activity,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
     }
     
     private fun requestCameraPermission() {
@@ -144,15 +140,9 @@ class ImagePickerManager(
     }
     
     private fun requestStoragePermission() {
-        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        
         ActivityCompat.requestPermissions(
             activity,
-            arrayOf(permission),
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
             STORAGE_PERMISSION_REQUEST
         )
     }
